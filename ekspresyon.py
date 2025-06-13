@@ -16,7 +16,6 @@ from reportlab.pdfbase import pdfmetrics
 import plotly.io as pio
 import matplotlib.pyplot as plt
 
-# Unicode destekli fontu kaydet
 pdfmetrics.registerFont(TTFont('DejaVu', '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'))
 
 hide_streamlit_style = """
@@ -29,7 +28,6 @@ hide_streamlit_style = """
 
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
-# Dil seçim kutusu
 if 'language' not in st.session_state:
     st.session_state.language = "English" 
     
@@ -43,7 +41,6 @@ flags = {
     "العربية": "🇸🇦"
 }
 
-# Dil seçim kutusu oluşturuluyor ve bayraklar ile birlikte görüntüleniyor
 selected_language = st.selectbox(
     "Dil / Español / Language / Français/ Sprache / العربية",
     options=[
@@ -551,12 +548,10 @@ translations = {
     }
 }
 
-
-st.title(translations[language_code]["title"])
 st.markdown(f"<h3>{translations[language_code]['title']}</h3>", unsafe_allow_html=True)
 
-# Kullanıcıdan giriş alın
-st.header(translations[language_code]["patient_data_header"])
+st.markdown(f"<h4>{translations[language_code]['patient_data_header']}</h4>", unsafe_allow_html=True)
+
 num_target_genes = st.number_input(translations[language_code]["num_target_genes"], min_value=1, step=1, key="gene_count")
 num_patient_groups = st.number_input(translations[language_code]["num_patient_groups"], min_value=1, step=1, key="patient_count")
 
