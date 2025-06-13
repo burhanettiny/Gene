@@ -573,10 +573,9 @@ ct_value = translations[language_code]["ct_value"]
 patient_group = translations[language_code]["patient_group"]
 
     # Kontrol Grubu Verileri
-for i in range(num_target_genes):
-    st.subheader(f"{translations[language_code]['control_group']} {i+1} - {translations[language_code]['target_gene']} {i+1}")
+for i in range(num_target_genes):    
     st.markdown(
-    f"<h5>{translations[language_code]['control_group']} {i+1} - {translations[language_code]['target_gene']} {i+1}</h5>",
+    f"<h4>{translations[language_code]['control_group']} {i+1} - {translations[language_code]['target_gene']} {i+1}</h4>",
     unsafe_allow_html=True
 )
 
