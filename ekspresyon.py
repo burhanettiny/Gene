@@ -21,9 +21,9 @@ pdfmetrics.registerFont(TTFont('DejaVu', '/usr/share/fonts/truetype/dejavu/DejaV
 
 hide_streamlit_style = """
     <style>
-        #MainMenu {visibility: hidden;} /* Sağ üst köşedeki menüyü gizler */
-        footer {visibility: hidden !important;} /* Footer kısmını tamamen kaldırır */
-        header {visibility: hidden;} /* Üst header çubuğunu kaldırır */
+        #MainMenu {visibility: hidden;} 
+        footer {visibility: hidden !important;} 
+        header {visibility: hidden;} /
     </style>
 """
 
@@ -31,9 +31,9 @@ st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 # Dil seçim kutusu
 if 'language' not in st.session_state:
-    st.session_state.language = "Türkçe"  # Varsayılan dil 
+    st.session_state.language = "English" 
     
-# Bayrak simgelerini içeren bir harita
+
 flags = {
     "Türkçe": "🇹🇷",
     "English": "🇬🇧",
@@ -56,15 +56,14 @@ selected_language = st.selectbox(
     ]
 )
 
-# Seçilen dilin adını al ve doğru dil kodunu seçmek için bayraksız dil adını kullan
 try:
-    selected_language_name = selected_language.split(' ', 1)[1]  # Bayrağı ayır
+    selected_language_name = selected_language.split(' ', 1)[1]  
     selected_flag = flags[selected_language_name]
 except KeyError:
-    selected_language_name = selected_language  # Hata durumunda yalnızca dil ismini kullan
-    selected_flag = None  # Bayrak simgesini boş bırak
+    selected_language_name = selected_language 
+    selected_flag = None  
 
-# Dil kodlarını belirleyin
+
 language_map = {
     "Türkçe": "tr",
     "Español": "es",
@@ -75,11 +74,11 @@ language_map = {
 }
 
 # Seçilen dilin kodunu al
-language_code = language_map.get(selected_language_name, "tr")  # Varsayılan olarak Türkçe (tr) kullan
+language_code = language_map.get(selected_language_name, "en")  
 
 translations = {
     "tr": {
-        "title": "🧬 Gen Ekspresyon Analizi Uygulaması",
+        "title": "🧬 GeneQuantify: Gen Ekspresyonu ve Kopya Sayısı Varyasyonu (CNV) Analizi",
         "subtitle": "B. Yalçınkaya tarafından geliştirildi",
         "patient_data_header": "📊 Hasta ve Kontrol Grubu Verisi Girin",
         "num_target_genes": "🔹 Hedef Gen Sayısını Girin",
@@ -157,7 +156,7 @@ translations = {
     },
 
     "en": {
-        "title": "🧬 Gene Expression Analysis Application",
+        "title": "🧬 GeneQuantify: Expression & CNV Analysis",
         "subtitle": "Developed by B. Yalçınkaya",
         "patient_data_header": "📊 Enter Patient and Control Group Data",
         "num_target_genes": "🔹 Enter the Number of Target Genes",
@@ -234,7 +233,7 @@ translations = {
     },
 
     "de": {
-        "title": "🧬 Genexpression-Analyseanwendung",
+        "title": "🧬 GeneQuantify: Expressions- und CNV-Analyse",
         "subtitle": "Entwickelt von B. Yalçınkaya",
         "patient_data_header": "📊 Geben Sie Patientendaten und Kontrollgruppen ein",
         "num_target_genes": "🔹 Geben Sie die Anzahl der Zielgene ein",
@@ -312,7 +311,7 @@ translations = {
     },
     
     "fr": {
-        "title": "🧬 Application d'Analyse de l'Expression Génétique",
+        "title": "🧬 GeneQuantify : Analyse de l’expression génique et des variations du nombre de copies (CNV)",
         "subtitle": "Développé par B. Yalçınkaya",
         "patient_data_header": "📊 Entrez les données des groupes patients et témoins",
         "num_target_genes": "🔹 Entrez le nombre de gènes cibles",
@@ -392,7 +391,7 @@ translations = {
     },
 
     "es": {
-        "title": "🧬 Aplicación de Análisis de Expresión Génica",
+        "title": "🧬 GeneQuantify: Análisis de Expresión Génica y CNV",
         "subtitle": "Desarrollado por B. Yalçınkaya",
         "patient_data_header": "📊 Ingrese Datos de Grupos de Pacientes y de Control",
         "num_target_genes": "🔹 Ingrese el número de Genes Objetivo",
@@ -472,7 +471,7 @@ translations = {
     },
 
     "ar": {
-        "title": "🧬 تطبيق تحليل التعبير الجيني",
+        "title": "🧬 جين كوانتيفاي: تحليل التعبير الجيني وتغير عدد النسخ (CNV)",
         "subtitle": "تم تطويره بواسطة ب. يالجنكايا",
         "patient_data_header": "📊 إدخال بيانات مجموعة المرضى ومجموعة التحكم",
         "num_target_genes": "🔹 إدخال عدد الجينات المستهدفة",
@@ -552,8 +551,9 @@ translations = {
     }
 }
 
-# Translate text using the selected language
+
 st.title(translations[language_code]["title"])
+st.markdown(f"<h3>{translations[language_code]['title']}</h3>", unsafe_allow_html=True)
 
 # Kullanıcıdan giriş alın
 st.header(translations[language_code]["patient_data_header"])
