@@ -17,7 +17,6 @@ import plotly.io as pio
 import matplotlib.pyplot as plt
 from reportlab.lib import colors
 
-st.markdown(f"<h3>{translations[language_code]['title']}</h3>", unsafe_allow_html=True)
 pdfmetrics.registerFont(TTFont('DejaVu', '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'))
 
 hide_streamlit_style = """
@@ -542,7 +541,7 @@ translations = {
         )
     }
 }
-
+st.markdown(f"<h3>{translations[language_code]['title']}</h3>", unsafe_allow_html=True)
 st.markdown(f"<h4>{translations[language_code]['patient_data_header']}</h4>", unsafe_allow_html=True)
 
 num_target_genes = st.number_input(translations[language_code]["num_target_genes"], min_value=1, step=1, key="gene_count")
