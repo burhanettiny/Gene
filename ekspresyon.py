@@ -15,6 +15,7 @@ from reportlab import pdfbase
 from reportlab.pdfbase import pdfmetrics
 import plotly.io as pio
 import matplotlib.pyplot as plt
+from reportlab.lib import colors
 
 pdfmetrics.registerFont(TTFont('DejaVu', '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'))
 
@@ -70,7 +71,6 @@ language_map = {
     "العربية": "ar"
 }
 
-# Seçilen dilin kodunu al
 language_code = language_map.get(selected_language_name, "en")  
 
 translations = {
@@ -555,17 +555,14 @@ st.markdown(f"<h4>{translations[language_code]['patient_data_header']}</h4>", un
 num_target_genes = st.number_input(translations[language_code]["num_target_genes"], min_value=1, step=1, key="gene_count")
 num_patient_groups = st.number_input(translations[language_code]["num_patient_groups"], min_value=1, step=1, key="patient_count")
 
-# Veri işleme fonksiyonu
 def parse_input_data(input_data):
     values = [x.replace(",", ".").strip() for x in input_data.split() if x.strip()]
     return np.array([float(x) for x in values if x])
 
-# Veri listeleri
 input_values_table = []
 data = []
 stats_data = []
 
-# Grafik için son işlenen Hedef Genın kontrol verilerini saklamak amacıyla değişkenler
 last_control_delta_ct = None
 last_gene_index = None
 
@@ -578,6 +575,11 @@ patient_group = translations[language_code]["patient_group"]
     # Kontrol Grubu Verileri
 for i in range(num_target_genes):
     st.subheader(f"{translations[language_code]['control_group']} {i+1} - {translations[language_code]['target_gene']} {i+1}")
+    st.markdown(
+    f"<h5>{translations[language_code]['control_group']} {i+1} - {translations[language_code]['target_gene']} {i+1}</h5>",
+    unsafe_allow_html=True
+)
+
     control_target_ct = st.text_area(f"{translations[language_code]['control_group']} {i+1} - {translations[language_code]['target_gene']} {i+1} - {translations[language_code]['ct_value']}", key=f"control_target_ct_{i}")
     control_reference_ct = st.text_area(f"{translations[language_code]['control_group']} {i+1} - {translations[language_code]['reference_gene']} {i+1} - {translations[language_code]['ct_value']}", key=f"control_reference_ct_{i}")
    
@@ -606,8 +608,8 @@ for i in range(num_target_genes):
             translations[language_code]["delta_ct_control"]: control_delta_ct[idx]
         })
         sample_counter += 1
-    
-    
+ 
+   
     for j in range(num_patient_groups):
         st.subheader(f"{translations[language_code]['patient_group']} {j+1} - {translations[language_code]['target_gene']} {i+1}")        
         
@@ -706,8 +708,6 @@ if input_values_table:
         label=translations[language_code]['download_csv'],  # Dil koduna göre etiket
         data=csv, file_name="giris_verileri.csv", mime="text/csv") 
 
-
-
 # Sonuçlar Tablosunu Göster
 if data:
     st.subheader(f" {translations[language_code]['nil_mine']}")
@@ -728,19 +728,6 @@ if stats_data:
         data=csv_stats,
         file_name="istatistik_sonuclari.csv",
         mime="text/csv")
-
-
-import streamlit as st
-import plotly.graph_objects as go
-import numpy as np
-import pandas as pd
-from reportlab.lib.pagesizes import letter
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image as RLImage, PageBreak
-from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.lib import colors
-from io import BytesIO
-
-# --- Grafik oluşturma ---
 
 # Grafik oluşturma (her hedef gen için bir grafik oluşturulacak)
 for i in range(num_target_genes):
