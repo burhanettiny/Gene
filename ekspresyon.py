@@ -604,8 +604,11 @@ for i in range(num_target_genes):
  
    
     for j in range(num_patient_groups):
-        st.subheader(f"{translations[language_code]['patient_group']} {j+1} - {translations[language_code]['target_gene']} {i+1}")        
-        
+        st.markdown(
+            f"<h4>{translations[language_code]['patient_group']} {j+1} - {translations[language_code]['target_gene']} {i+1}}</h4>",
+            unsafe_allow_html=True
+        )
+
         sample_target_ct = st.text_area(f"{translations[language_code]['patient_group']} {j+1} - {translations[language_code]['target_gene']} {i+1} - {translations[language_code]['ct_value']}", key=f"sample_target_ct_{i}_{j}")
         sample_reference_ct = st.text_area(f"{translations[language_code]['patient_group']} {j+1} - {translations[language_code]['reference_gene']} {i+1} - {translations[language_code]['ct_value']}", key=f"sample_reference_ct_{i}_{j}")
         
