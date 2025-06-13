@@ -1,4 +1,3 @@
-# Genekspresyonu
-Gen ekspresyonu analizi
+Gene expression analysis
 Burhanettin Yalçınkaya
 mailtoburhanettin@gmail.com
