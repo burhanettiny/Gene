@@ -43,7 +43,7 @@ flags = {
 }
 default_index = list(flags.keys()).index(st.session_state.language)
 selected_language = st.selectbox(
-    "Dil / Español / Language / Français / Sprache / العربية",
+    "Language / Dil / Español / Français / Sprache / العربية",
     options=[f"{flags[lang]} {lang}" for lang in flags],
     index=default_index  # İngilizce varsayılan
 )
