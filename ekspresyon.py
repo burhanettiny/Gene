@@ -605,7 +605,7 @@ for i in range(num_target_genes):
    
     for j in range(num_patient_groups):
         st.markdown(
-            f"<h4>{translations[language_code]['patient_group']} {j+1} - {translations[language_code]['target_gene']} {i+1}}</h4>",
+            f"<h4>{translations[language_code]['patient_group']} {j+1} - {translations[language_code]['target_gene']} {i+1}</h4>",
             unsafe_allow_html=True
         )
 
