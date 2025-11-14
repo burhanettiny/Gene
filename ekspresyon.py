@@ -79,20 +79,24 @@ This guide explains how to properly format your qPCR data, perform ΔΔCt calcul
 """
 
 # -------------------------------
-# 3) Sidebar Buttons
+# 3) Sidebar: Logo + User Guide
 # -------------------------------
-st.sidebar.header("Actions")
+st.sidebar.image("https://upload.wikimedia.org/wikipedia/commons/1/12/User_icon_2.svg", width=100)
+st.sidebar.markdown("### Actions")
 
-# Örnek Sil / Delete butonu
-if st.sidebar.button("🗑 Delete"):
-    st.sidebar.write("Delete action triggered")  # placeholder
-
-# User Guide butonu Sil / Delete butonunun altında
 if st.sidebar.button("📘 User Guide"):
     st.session_state.show_guide = True
 
 # -------------------------------
-# 4) Fullscreen Modal User Guide
+# 4) Main Analysis Page Content (hidden when modal open)
+# -------------------------------
+if not st.session_state.show_guide:
+    st.header("Main Analysis Page")
+    st.write("Your main analysis UI goes here...")
+    st.write("Data inputs, buttons, plots, etc.")
+
+# -------------------------------
+# 5) Fullscreen Modal User Guide
 # -------------------------------
 if st.session_state.show_guide:
     st.markdown(
@@ -118,24 +122,19 @@ if st.session_state.show_guide:
                 padding: 30px;
                 border-radius: 15px;
                 box-shadow: 0 0 20px rgba(0,0,0,0.5);
+                position: relative;
             ">
                 {user_guide_en}
+                <div style='text-align:center; margin-top:20px;'>
+                </div>
             </div>
         </div>
         """, unsafe_allow_html=True
     )
 
-    # Back button (Streamlit)
+    # Streamlit button to close modal
     if st.button("⬅ Back to Analysis"):
         st.session_state.show_guide = False
-
-# -------------------------------
-# 5) Main Analysis Page Content
-# -------------------------------
-if not st.session_state.show_guide:
-    st.header("Main Analysis Page")
-    st.write("Your main analysis UI goes here...")
-    st.write("Data inputs, buttons, plots, etc.")
 
 
 
