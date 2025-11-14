@@ -662,19 +662,8 @@ if "show_guide" not in st.session_state:
 # -------------------------------
 # 3) Modal açma ve kapama
 # -------------------------------
-def open_modal():
-    st.session_state.show_guide = True
-
 def close_modal():
     st.session_state.show_guide = False
-# -------------------------------
-# Modal gösterimi
-# -------------------------------
-if st.session_state.show_guide:
-    # X butonunu modal üstünde göstermek için container
-    col1, col2 = st.columns([0.9, 0.1])
-    with col2:
-        st.button("✖", on_click=close_modal)
 
 if st.session_state.show_guide:
     st.markdown(
