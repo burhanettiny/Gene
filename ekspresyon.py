@@ -80,8 +80,6 @@ The application automatically performs:
 **Significance Threshold**
 - *p* < 0.05
 
-Statistical results are stored internally and displayed in tables and plots.
-
 ---
 
 ### 5️⃣ Output Files
@@ -100,27 +98,23 @@ Statistical results are stored internally and displayed in tables and plots.
 ---
 
 # ⚠️ DISCLAIMER
-
-This application is intended for **research** and **education** only — not clinical diagnosis.
-
-Users are responsible for verifying results and data accuracy.
+This application is for **research** and **education** only — not clinical diagnosis.
 
 Contact: **mailtoburhanettin@gmail.com**
 """
 
-
 # ---------------------------------------------------
-# STREAMLIT DIALOG – EN STABİL YÖNTEM
+# RESMİ STREAMLIT MODAL (HATASIZ)
 # ---------------------------------------------------
-
 @st.experimental_dialog("📘 User Guide")
-def open_user_guide():
+def show_user_guide():
     st.markdown(user_guide_md)
 
-
-# Sidebar Button → Modal aç
+# ---------------------------------------------------
+# SIDEBAR BUTTON
+# ---------------------------------------------------
 if st.sidebar.button("📘 User Guide"):
-    open_user_guide()
+    show_user_guide()
 
 pdfmetrics.registerFont(TTFont('DejaVu', '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'))
 st.sidebar.image("geneq.jpg", width=180)
