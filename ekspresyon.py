@@ -632,28 +632,6 @@ GeneQuantify application performs ΔCt, ΔΔCt, and 2^(-ΔΔCt)
 - Interpret Fold Change together with p-values.  
 - Always save your report and back up data.
 
-# 📄 DISCLAIMER 
-#
-# This application is designed for research, educational use, and
-# preliminary laboratory data analysis. It is NOT intended to serve as
-# a standalone tool for clinical diagnosis, patient management, or
-# treatment decisions.
-#
-# The developers provide no guarantees regarding:
-# - Accuracy or completeness of analysis results,
-# - Compliance with clinical laboratory standards,
-# - Compatibility with specific qPCR platforms, kits, or protocols,
-# - Correctness of user-entered data.
-#
-# Users are solely responsible for:
-# - Ensuring input data accuracy,
-# - Interpreting analysis results appropriately,
-# - Verifying all findings through approved laboratory procedures.
-#
-# The developers are not liable for any decision, loss, or damage arising
-# from use of this application. All clinical decisions must be made by
-# qualified professionals and supported by validated laboratory methods.
-#
 """
 """
 # State kontrolü
