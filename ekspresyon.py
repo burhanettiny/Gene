@@ -20,107 +20,94 @@ from reportlab.lib import colors
 import streamlit as st
 
 # -------------------------------
-# 1) Modal CSS + JS
-# -------------------------------
-modal_css = """
-<style>
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 9999;
-    padding-top: 100px;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0,0,0,0.6);
-}
-.modal-content {
-    background-color: #fefefe;
-    margin: auto;
-    padding: 25px;
-    border: 1px solid #888;
-    width: 60%;
-    border-radius: 10px;
-}
-.close {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-}
-.close:hover,
-.close:focus {
-    color: #000;
-    text-decoration: none;
-    cursor: pointer;
-}
-</style>
-"""
-st.markdown(modal_css, unsafe_allow_html=True)
-
-# -------------------------------
-# 2) User Guide Content (EN)
+# 1) User Guide Content (EN) - Enhanced
 # -------------------------------
 user_guide_en = """
 ## 📘 User Guide (EN)
 
+This guide explains how to properly format your qPCR data, perform ΔΔCt calculations, and interpret the results. Follow the instructions carefully to ensure accurate analysis.
+
+---
+
 ### 📌 Data Input Format
-- Replicates are entered on the **same line**, separated by **spaces**.
-- Next sample → new line.
-- Fully compatible with **Excel copy–paste**.
-- Commas convert automatically to dots.
+- Each replicate for a sample should be entered on the **same line**, separated by **spaces**.  
+- The next sample should start on a **new line**.  
+- Compatible with **Excel copy–paste**. Simply copy your table and paste it here.  
+- Commas in your data will automatically be converted to dots.  
 
-Example:
+**Example:**
 
-23.1 23.4 23.7
-22.9 23.5 23.8
-25.2 25.4 25.1
+23.1 23.4 23.7  
+22.9 23.5 23.8  
+25.2 25.4 25.1  
+
+> ✅ Each row represents one sample; each column represents a replicate.
+
+---
 
 ### 📊 Example Excel Table
-| Group | Rep1 | Rep2 | Rep3 |
-|-------|------|------|------|
+| Group     | Rep1 | Rep2 | Rep3 |
+|-----------|------|------|------|
 | Control 1 | 23.1 | 23.4 | 23.7 |
 | Control 2 | 22.9 | 23.5 | 23.8 |
 | Patient 1 | 25.2 | 25.4 | 25.1 |
 
+> 💡 The first column is the sample/group name; remaining columns are Ct replicates.
+
+---
+
 ### 🧮 Calculations
-- ΔCt = Ct(target) – Ct(reference)
-- ΔΔCt = ΔCt(test) – ΔCt(control)
-- Fold Change = 2^(-ΔΔCt)
+1. **ΔCt** = Ct(target) – Ct(reference)  
+   - Compares target gene expression to reference gene for normalization.  
+2. **ΔΔCt** = ΔCt(test) – ΔCt(control)  
+   - Compares test sample to control.  
+3. **Fold Change** = 2^(-ΔΔCt)  
+   - Represents relative expression levels.
+
+> ⚠️ Ensure that reference genes are stable across all samples.
+
+---
 
 ### 📈 Statistical Tests
-- Shapiro–Wilk  
-- Levene  
-- Student’s t-test  
-- Welch  
-- Mann–Whitney U  
+- **Shapiro–Wilk test** → checks normality of the data  
+- **Levene test** → checks homogeneity of variances  
+- **Student’s t-test / Welch t-test** → compare means between two groups  
+- **Mann–Whitney U test** → non-parametric comparison between two groups  
+
+> 💡 Choose the appropriate test based on data distribution and variance.
+
+---
+
+### 📄 Outputs
+- PDF Report with all results  
+- CSV file with raw and processed data  
+- Plots and graphs for visual representation of results
 """
 
 # -------------------------------
-# 3) Modal Open/Close Mechanism
+# 2) Sidebar Button
 # -------------------------------
-if "show_modal" not in st.session_state:
-    st.session_state.show_modal = False
+show_guide = st.sidebar.button("📘 User Guide")
 
-# Modal trigger button
-if st.button("📘 User Guide"):
-    st.session_state.show_modal = True
+# -------------------------------
+# 3) Show Guide in main page inside a styled container
+# -------------------------------
+if show_guide:
+    st.markdown(
+        f"""
+        <div style="
+            max-height: 600px;
+            overflow-y: auto;
+            padding: 20px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            background-color: #f9f9f9;
+        ">
+            {user_guide_en}
+        </div>
+        """, unsafe_allow_html=True
+    )
 
-# Show modal if triggered
-if st.session_state.get("show_modal", False):
-    st.markdown(f"""
-    <div id="myModal" class="modal" style="display:block;">
-      <div class="modal-content">
-        <span class="close" onclick="document.getElementById('myModal').style.display='none';">{chr(215)}</span>
-        <div id="modalText"></div>
-      </div>
-    </div>
-    <script>
-        document.getElementById('modalText').innerHTML = `{user_guide_en}`;
-    </script>
-    """, unsafe_allow_html=True)
 
 
 
