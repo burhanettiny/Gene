@@ -606,16 +606,16 @@ not require installation or programming knowledge.
 ---
 
 ### 4️⃣ Statistical Analysis
-# The application performs:
-# - Normality testing
+- **The application performs:
+- **Normality testing
 - **Shapiro-Wilk** → normality check  
-# - Variance homogeneity checks
+- **Variance homogeneity checks
 - **Levene** → variance homogeneity  
-# and automatically selects:
+- ** and automatically selects:
 - **Student’s t-test / Welch t-test** → parametric groups 
 - **Mann-Whitney U** → non-parametric groups  
-- Significance: **p < 0.05**
-# Results are stored in stats_data and displayed in tables and plots.
+- **Significance: **p < 0.05**
+- **Results are stored in stats_data and displayed in tables and plots.
 
 ---
 
@@ -634,26 +634,26 @@ not require installation or programming knowledge.
 
 # 📄 DISCLAIMER 
 #
-# This application is designed for research, educational use, and
-# preliminary laboratory data analysis. It is NOT intended to serve as
-# a standalone tool for clinical diagnosis, patient management, or
-# treatment decisions.
+This application is designed for research, educational use, and
+preliminary laboratory data analysis. It is NOT intended to serve as
+a standalone tool for clinical diagnosis, patient management, or
+treatment decisions.
+The developers provide no guarantees regarding:
+- Accuracy or completeness of analysis results,
+- Compliance with clinical laboratory standards,
+- Compatibility with specific qPCR platforms, kits, or protocols,
+- Correctness of user-entered data.
 #
-# The developers provide no guarantees regarding:
-# - Accuracy or completeness of analysis results,
-# - Compliance with clinical laboratory standards,
-# - Compatibility with specific qPCR platforms, kits, or protocols,
-# - Correctness of user-entered data.
-#
-# Users are solely responsible for:
-# - Ensuring input data accuracy,
-# - Interpreting analysis results appropriately,
-# - Verifying all findings through approved laboratory procedures.
-#
-# The developers are not liable for any decision, loss, or damage arising
-# from use of this application. All clinical decisions must be made by
-# qualified professionals and supported by validated laboratory methods.
-#
+Users are solely responsible for:
+- Ensuring input data accuracy,
+- Interpreting analysis results appropriately,
+- Verifying all findings through approved laboratory procedures.
+
+The developers are not liable for any decision, loss, or damage arising
+from use of this application. All clinical decisions must be made by
+qualified professionals and supported by validated laboratory methods.
+
+Contact: mailtoburhanettin@gmail.com
 """
 # State kontrolü
 if "show_guide" not in st.session_state:
