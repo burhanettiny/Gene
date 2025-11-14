@@ -656,7 +656,6 @@ GeneQuantify application performs ΔCt, ΔΔCt, and 2^(-ΔΔCt)
 #
 """
 """
-
 # State kontrolü
 if "show_guide" not in st.session_state:
     st.session_state.show_guide = False
