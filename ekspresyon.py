@@ -618,7 +618,7 @@ This guide explains how to properly format your qPCR data, perform ΔΔCt calcul
 if st.session_state.show_guide:
     st.markdown(
     f"""
-    <div style="
+    <div id="modal" style="
         position: fixed;
         top: 0;
         left: 0;
@@ -642,20 +642,15 @@ if st.session_state.show_guide:
             text-align: left;
             position: relative;
         ">
+            <div style="position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer;"
+                 onclick="document.getElementById('modal').style.display='none'">
+                 ✖
+            </div>
             {user_guide_en}
         </div>
     </div>
     """,
     unsafe_allow_html=True
-)
-
-# -------------------------------
-# 6) Main Analysis Page
-# -------------------------------
-if not st.session_state.show_guide:
-    st.header("Main Analysis Page")
-    st.write("Your main analysis UI goes here...")
-    st.write("Data inputs, buttons, plots, etc.")
     
 st.markdown(f"<h3>{translations[language_code]['title']}</h3>", unsafe_allow_html=True)
 st.markdown(f"<h4>{translations[language_code]['patient_data_header']}</h4>", unsafe_allow_html=True)
