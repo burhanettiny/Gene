@@ -567,10 +567,10 @@ user_guide_en = """
 
 ### 1️⃣ USER GUIDE
 GeneQuantify application performs ΔCt, ΔΔCt, and 2^(-ΔΔCt)
-# calculations for gene expression and CNV analysis using qPCR data.
-# Users enter Ct values for target and reference genes across multiple
-# patient groups. The application supports multilingual labels and does
-# not require installation or programming knowledge.
+Calculations for gene expression and CNV analysis using qPCR data.
+Users enter Ct values for target and reference genes across multiple
+patient groups. The application supports multilingual labels and does
+not require installation or programming knowledge.
 
 ---
 
