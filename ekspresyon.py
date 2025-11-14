@@ -18,10 +18,13 @@ import matplotlib.pyplot as plt
 from reportlab.lib import colors
 
 
+# Font register fix
 pdfmetrics.registerFont(TTFont('DejaVu', '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'))
+
+# Logo
 st.sidebar.image("geneq.jpg", width=180)
 
-# User Guide butonu logonun hemen altında
+# User Guide butonu
 if st.sidebar.button("📘 User Guide"):
     st.session_state.show_guide = True
 
@@ -29,7 +32,7 @@ hide_streamlit_style = """
     <style>
         #MainMenu {visibility: hidden;} 
         footer {visibility: hidden !important;} 
-        header {visibility: hidden;} /
+        header {visibility: hidden;}
     </style>
 """
 
