@@ -651,6 +651,7 @@ if st.session_state.show_guide:
     </div>
     """,
     unsafe_allow_html=True
+)
     
 st.markdown(f"<h3>{translations[language_code]['title']}</h3>", unsafe_allow_html=True)
 st.markdown(f"<h4>{translations[language_code]['patient_data_header']}</h4>", unsafe_allow_html=True)
