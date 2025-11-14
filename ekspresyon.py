@@ -557,7 +557,77 @@ translations = {
 # -------------------------------
 # 4) User Guide Content
 # -------------------------------
-user_guide_en = """
+
+
+# -------------------------------
+# User guide state
+# -------------------------------
+if "show_guide" not in st.session_state:
+    st.session_state.show_guide = False
+
+if st.sidebar.button("📘 User Guide"):
+    st.session_state.show_guide = True
+
+# ESC ile kapatma için JS
+st.markdown("""
+<script>
+document.addEventListener('keydown', function(e) {
+    if (e.key === "Escape") {
+        window.parent.postMessage({type: 'close_modal'}, '*')
+    }
+});
+</script>
+""", unsafe_allow_html=True)
+
+# -------------------------------
+# Modal gösterimi
+# -------------------------------
+if st.session_state.show_guide:
+
+    modal_html = """
+    <style>
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.6);
+        z-index: 999998;
+    }
+
+    .modal-box {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        padding: 30px;
+        width: 60%;
+        max-height: 80%;
+        overflow-y: auto;
+        border-radius: 12px;
+        box-shadow: 0 0 30px rgba(0,0,0,0.3);
+        z-index: 999999;
+        font-size: 18px;
+    }
+
+    .close-btn {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        cursor: pointer;
+        font-size: 25px;
+        color: #444;
+    }
+    </style>
+
+    <div class="modal-overlay"></div>
+
+    <div class="modal-box">
+        <span class="close-btn" onclick="window.parent.postMessage({type: 'close_modal'}, '*')">&times;</span>
+        <h2>User Guide</h2>
+        <p>user_guide_en = """
 ## 📘 GeneQuantify User Guide (EN)
 
 ### 1️⃣ Introduction
@@ -657,78 +727,7 @@ The developers are **not liable** for any decisions, losses, or damages arising 
 All clinical decisions must be made by qualified professionals.
 
 Contact: **mailtoburhanettin@gmail.com**
-"""
-
-# -------------------------------
-# User guide state
-# -------------------------------
-if "show_guide" not in st.session_state:
-    st.session_state.show_guide = False
-
-if st.sidebar.button("📘 User Guide"):
-    st.session_state.show_guide = True
-
-# ESC ile kapatma için JS
-st.markdown("""
-<script>
-document.addEventListener('keydown', function(e) {
-    if (e.key === "Escape") {
-        window.parent.postMessage({type: 'close_modal'}, '*')
-    }
-});
-</script>
-""", unsafe_allow_html=True)
-
-# -------------------------------
-# Modal gösterimi
-# -------------------------------
-if st.session_state.show_guide:
-
-    modal_html = """
-    <style>
-    .modal-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.6);
-        z-index: 999998;
-    }
-
-    .modal-box {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: white;
-        padding: 30px;
-        width: 60%;
-        max-height: 80%;
-        overflow-y: auto;
-        border-radius: 12px;
-        box-shadow: 0 0 30px rgba(0,0,0,0.3);
-        z-index: 999999;
-        font-size: 18px;
-    }
-
-    .close-btn {
-        position: absolute;
-        top: 10px;
-        right: 15px;
-        cursor: pointer;
-        font-size: 25px;
-        color: #444;
-    }
-    </style>
-
-    <div class="modal-overlay"></div>
-
-    <div class="modal-box">
-        <span class="close-btn" onclick="window.parent.postMessage({type: 'close_modal'}, '*')">&times;</span>
-        <h2>User Guide</h2>
-        <p>This is the full content of the user guide with text, explanations, steps, etc.</p>
-        <p>You can put anything here: markdown, instructions, tables, etc.</p>
+"""</p>
     </div>
 
     <script>
