@@ -19,13 +19,11 @@ from reportlab.lib import colors
 
 import streamlit as st
 
-import streamlit as st
-
 # -------------------------------
 # 1) Session State for page control
 # -------------------------------
-if "page" not in st.session_state:
-    st.session_state.page = "main"  # main analysis page by default
+if "show_guide" not in st.session_state:
+    st.session_state.show_guide = False
 
 # -------------------------------
 # 2) User Guide Content (EN)
@@ -33,23 +31,20 @@ if "page" not in st.session_state:
 user_guide_en = """
 ## 📘 User Guide (EN)
 
-This guide explains how to properly format your qPCR data, perform ΔΔCt calculations, and interpret the results. Follow the instructions carefully to ensure accurate analysis.
+This guide explains how to properly format your qPCR data, perform ΔΔCt calculations, and interpret the results.
 
 ---
 
 ### 📌 Data Input Format
 - Each replicate for a sample should be entered on the **same line**, separated by **spaces**.  
-- The next sample should start on a **new line**.  
-- Compatible with **Excel copy–paste**. Simply copy your table and paste it here.  
-- Commas in your data will automatically be converted to dots.  
+- Next sample should start on a **new line**.  
+- Compatible with **Excel copy–paste**. Commas are converted automatically to dots.  
 
 **Example:**
 
 23.1 23.4 23.7  
 22.9 23.5 23.8  
 25.2 25.4 25.1  
-
-> ✅ Each row represents one sample; each column represents a replicate.
 
 ---
 
@@ -60,8 +55,6 @@ This guide explains how to properly format your qPCR data, perform ΔΔCt calcul
 | Control 2 | 22.9 | 23.5 | 23.8 |
 | Patient 1 | 25.2 | 25.4 | 25.1 |
 
-> 💡 The first column is the sample/group name; remaining columns are Ct replicates.
-
 ---
 
 ### 🧮 Calculations
@@ -69,14 +62,12 @@ This guide explains how to properly format your qPCR data, perform ΔΔCt calcul
 2. **ΔΔCt** = ΔCt(test) – ΔCt(control)  
 3. **Fold Change** = 2^(-ΔΔCt)  
 
-> ⚠️ Ensure that reference genes are stable across all samples.
-
 ---
 
 ### 📈 Statistical Tests
 - Shapiro–Wilk → checks normality  
 - Levene → checks homogeneity of variances  
-- Student’s t-test / Welch t-test → compare means  
+- Student’s t-test / Welch → compare means  
 - Mann–Whitney U → non-parametric comparison  
 
 ---
@@ -88,47 +79,58 @@ This guide explains how to properly format your qPCR data, perform ΔΔCt calcul
 """
 
 # -------------------------------
-# 3) Main page / Analysis UI
+# 3) Sidebar Button
 # -------------------------------
-if st.session_state.page == "main":
-
-    # Language selection
-    language_code = st.selectbox("Select Language / Dil Seçimi", ["EN", "TR"], index=0)
-
-    # User Guide button below language selection
-    if st.button("📘 User Guide"):
-        st.session_state.page = "guide"  # Switch to guide page
-
-    # -------------------
-    # Analysis page content goes here
-    st.header("Main Analysis Page")
-    st.write("Your main analysis UI goes here...")
-    st.write("Data inputs, buttons, plots, etc.")
+if st.sidebar.button("📘 User Guide"):
+    st.session_state.show_guide = True
 
 # -------------------------------
-# 4) User Guide page
+# 4) Fullscreen Modal User Guide
 # -------------------------------
-elif st.session_state.page == "guide":
-    # Show user guide in full screen container
+if st.session_state.show_guide:
     st.markdown(
         f"""
         <div style="
-            width: 80%;
-            margin: 40px auto;
-            padding: 30px;
-            border: 2px solid #ddd;
-            border-radius: 15px;
-            background-color: #f9f9f9;
-            max-height: 90vh;
-            overflow-y: auto;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         ">
-            {user_guide_en}
+            <div style="
+                background-color: #f9f9f9;
+                width: 80%;
+                max-width: 900px;
+                max-height: 90vh;
+                overflow-y: auto;
+                padding: 30px;
+                border-radius: 15px;
+                box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            ">
+                {user_guide_en}
+                <div style='text-align:center; margin-top:20px;'>
+                    <button onclick="window.location.reload();" 
+                        style='padding: 10px 20px; font-size:16px; border-radius:8px; border:none; background-color:#4CAF50; color:white; cursor:pointer;'>
+                        ⬅ Back to Analysis
+                    </button>
+                </div>
+            </div>
         </div>
         """, unsafe_allow_html=True
     )
-    # Back button to return to main page
-    if st.button("⬅ Back to Analysis"):
-        st.session_state.page = "main"
+
+# -------------------------------
+# 5) Main Analysis Page Content
+# -------------------------------
+if not st.session_state.show_guide:
+    st.header("Main Analysis Page")
+    st.write("Your main analysis UI goes here...")
+    st.write("Data inputs, buttons, plots, etc.")
 
 
 
