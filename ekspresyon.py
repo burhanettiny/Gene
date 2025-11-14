@@ -662,6 +662,9 @@ if "show_guide" not in st.session_state:
 # -------------------------------
 # 3) Modal açma ve kapama
 # -------------------------------
+def open_modal():
+    st.session_state.show_guide = True
+
 def close_modal():
     st.session_state.show_guide = False
 
