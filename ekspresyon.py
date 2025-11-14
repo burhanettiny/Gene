@@ -25,10 +25,6 @@ pdfmetrics.registerFont(TTFont('DejaVu', '/usr/share/fonts/truetype/dejavu/DejaV
 # Logo
 st.sidebar.image("geneq.jpg", width=180)
 
-# User Guide butonu
-if st.sidebar.button("📘 User Guide"):
-    st.session_state.show_guide = True
-
 hide_streamlit_style = """
     <style>
         #MainMenu {visibility: hidden;} 
