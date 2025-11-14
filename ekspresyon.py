@@ -103,12 +103,18 @@ This application is for **research** and **education** only — not clinical dia
 Contact: **mailtoburhanettin@gmail.com**
 """
 
-# ---------------------------------------------------
-# RESMİ STREAMLIT MODAL (HATASIZ)
-# ---------------------------------------------------
-@st.experimental_dialog("📘 User Guide")
-def show_user_guide():
-    st.markdown(user_guide_md)
+# -------------------------------
+# Modal Benzeri Container
+# -------------------------------
+if st.session_state.show_guide:
+    with st.container():
+        st.markdown("---")
+        close_button = st.button("❌ Close User Guide")
+        st.markdown(user_guide_md)
+        st.markdown("---")
+
+        if close_button:
+            st.session_state.show_guide = False
 
 # ---------------------------------------------------
 # SIDEBAR BUTTON
