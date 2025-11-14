@@ -17,133 +17,12 @@ import plotly.io as pio
 import matplotlib.pyplot as plt
 from reportlab.lib import colors
 
-import streamlit as st
-
-# -------------------------------
-# Session state
-# -------------------------------
-if "show_guide" not in st.session_state:
-    st.session_state.show_guide = False
-
-# -------------------------------
-# User Guide content
-# -------------------------------
-user_guide_en = """
-## 📘 User Guide (EN)
-
-This guide explains how to properly format your qPCR data, perform ΔΔCt calculations, and interpret the results.
-
----
-
-### 📌 Data Input Format
-- Each replicate for a sample should be entered on the **same line**, separated by **spaces**.  
-- Next sample should start on a **new line**.  
-- Compatible with **Excel copy–paste**. Commas are converted automatically to dots.  
-
-**Example:**
-
-23.1 23.4 23.7  
-22.9 23.5 23.8  
-25.2 25.4 25.1  
-
----
-
-### 📊 Example Excel Table
-| Group     | Rep1 | Rep2 | Rep3 |
-|-----------|------|------|------|
-| Control 1 | 23.1 | 23.4 | 23.7 |
-| Control 2 | 22.9 | 23.5 | 23.8 |
-| Patient 1 | 25.2 | 25.4 | 25.1 |
-
----
-
-### 🧮 Calculations
-1. **ΔCt** = Ct(target) – Ct(reference)  
-2. **ΔΔCt** = ΔCt(test) – ΔCt(control)  
-3. **Fold Change** = 2^(-ΔΔCt)  
-
----
-
-### 📈 Statistical Tests
-- Shapiro–Wilk → checks normality  
-- Levene → checks homogeneity of variances  
-- Student’s t-test / Welch → compare means  
-- Mann–Whitney U → non-parametric comparison  
-
----
-
-### 📄 Outputs
-- PDF report  
-- CSV file  
-- Plots and graphs
-"""
-
-# -------------------------------
-# Sidebar: Logo + User Guide
-# -------------------------------
-st.sidebar.image("https://upload.wikimedia.org/wikipedia/commons/1/12/User_icon_2.svg", width=100)
-
-if st.sidebar.button("📘 User Guide"):
-    st.session_state.show_guide = True
-
-# -------------------------------
-# Fullscreen User Guide modal
-# -------------------------------
-if st.session_state.show_guide:
-    # Modal overlay
-    st.markdown(
-        f"""
-        <div style="
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            z-index: 9999;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        ">
-            <div style="
-                background-color: #f9f9f9;
-                width: 80%;
-                max-width: 900px;
-                max-height: 90vh;
-                overflow-y: auto;
-                padding: 30px;
-                border-radius: 15px;
-                box-shadow: 0 0 20px rgba(0,0,0,0.5);
-                text-align: left;
-            ">
-                {user_guide_en}
-                <div style='text-align:center; margin-top:20px;'>
-                </div>
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-    # Streamlit button outside HTML
-    if st.button("⬅ Back to Analysis"):
-        st.session_state.show_guide = False
-else:
-    # Main analysis content
-    st.header("Main Analysis Page")
-    st.write("Your main analysis UI goes here...")
-    st.write("Data inputs, buttons, plots, etc.")
-
-
-
-
-
-
-
-
-
 
 pdfmetrics.registerFont(TTFont('DejaVu', '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'))
 st.sidebar.image("geneq.jpg", width=180)
+# User Guide butonu logonun hemen altında
+if st.sidebar.button("📘 User Guide"):
+    st.session_state.show_guide = True
 
 hide_streamlit_style = """
     <style>
@@ -673,6 +552,56 @@ translations = {
         )
     }
 }
+
+# 4) Fullscreen Modal User Guide
+# -------------------------------
+if st.session_state.show_guide:
+    st.markdown(
+        f"""
+        <div style="
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        ">
+            <div style="
+                background-color: #f9f9f9;
+                width: 80%;
+                max-width: 900px;
+                max-height: 90vh;
+                overflow-y: auto;
+                padding: 30px;
+                border-radius: 15px;
+                box-shadow: 0 0 20px rgba(0,0,0,0.5);
+                text-align: left;
+                position: relative;
+            ">
+                {user_guide_en}
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    # Streamlit buton modalı kapatmak için
+    if st.button("⬅ Back to Analysis"):
+        st.session_state.show_guide = False
+
+# -------------------------------
+# 5) Main Analysis Page Content
+# -------------------------------
+if not st.session_state.show_guide:
+    st.header("Main Analysis Page")
+    st.write("Your main analysis UI goes here...")
+    st.write("Data inputs, buttons, plots, etc.")
+
+
 st.markdown(f"<h3>{translations[language_code]['title']}</h3>", unsafe_allow_html=True)
 st.markdown(f"<h4>{translations[language_code]['patient_data_header']}</h4>", unsafe_allow_html=True)
 
