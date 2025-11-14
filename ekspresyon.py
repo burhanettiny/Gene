@@ -43,7 +43,7 @@ flags = {
     "العربية": "🇸🇦"
 }
 default_index = list(flags.keys()).index(st.session_state.language)
-selected_language = st.selectbox(
+selected_language = st.sidebar.selectbox(
     "Language / Dil / Sprache / Français / Español / العربية",
     options=[f"{flags[lang]} {lang}" for lang in flags],
     index=default_index  # İngilizce varsayılan
