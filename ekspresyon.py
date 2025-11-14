@@ -563,16 +563,22 @@ translations = {
 # 4) User Guide Content
 # -------------------------------
 user_guide_en = """
-## 📘 User Guide (EN)
+## 📘 GeneQuantify User Guide (EN)
 
-This guide explains how to properly format your qPCR data, perform ΔΔCt calculations, and interpret the results.
+### 1️⃣ USER GUIDE
+GeneQuantify application performs ΔCt, ΔΔCt, and 2^(-ΔΔCt)
+# calculations for gene expression and CNV analysis using qPCR data.
+# Users enter Ct values for target and reference genes across multiple
+# patient groups. The application supports multilingual labels and does
+# not require installation or programming knowledge.
 
 ---
 
-### 📌 Data Input Format
-- Each replicate for a sample should be entered on the **same line**, separated by **spaces**.  
-- Next sample should start on a **new line**.  
-- Compatible with **Excel copy–paste**. Commas are converted automatically to dots.  
+### 2️⃣ Data Input
+- Enter each sample on a **new line**, with each replicate separated by **spaces**.  
+- Copy-paste from **Excel** works; commas are converted to dots automatically.  
+- Enter **reference gene** and **target gene** values separately.  
+- Avoid empty cells; they may cause errors.  
 
 **Example:**
 
@@ -582,7 +588,6 @@ This guide explains how to properly format your qPCR data, perform ΔΔCt calcul
 
 ---
 
-### 📊 Example Excel Table
 | Group     | Rep1 | Rep2 | Rep3 |
 |-----------|------|------|------|
 | Control 1 | 23.1 | 23.4 | 23.7 |
@@ -591,25 +596,65 @@ This guide explains how to properly format your qPCR data, perform ΔΔCt calcul
 
 ---
 
-### 🧮 Calculations
+### 3️⃣ Calculations
 1. **ΔCt** = Ct(target) – Ct(reference)  
 2. **ΔΔCt** = ΔCt(test) – ΔCt(control)  
 3. **Fold Change** = 2^(-ΔΔCt)  
 
----
-
-### 📈 Statistical Tests
-- Shapiro–Wilk → checks normality  
-- Levene → checks homogeneity of variances  
-- Student’s t-test / Welch → compare means  
-- Mann–Whitney U → non-parametric comparison  
+> Note: Fold Change >1 → upregulation, <1 → downregulation.
 
 ---
 
-### 📄 Outputs
-- PDF report  
-- CSV file  
-- Plots and graphs
+### 4️⃣ Statistical Analysis
+# The application performs:
+# - Normality testing
+- **Shapiro-Wilk** → normality check  
+# - Variance homogeneity checks
+- **Levene** → variance homogeneity  
+# and automatically selects:
+- **Student’s t-test / Welch t-test** → parametric groups 
+- **Mann-Whitney U** → non-parametric groups  
+- Significance: **p < 0.05**
+# Results are stored in stats_data and displayed in tables and plots.
+
+---
+
+### 5️⃣ Outputs
+- PDF report (detailed statistics and plots)  
+- CSV file (raw and calculated data)  
+- Distribution plots & boxplots
+
+---
+
+### 6️⃣ Tips
+- For multiple genes, enter each group in separate blocks.  
+- Use stable reference genes (low Ct variance).  
+- Interpret Fold Change together with p-values.  
+- Always save your report and back up data.
+
+# 📄 DISCLAIMER 
+#
+# This application is designed for research, educational use, and
+# preliminary laboratory data analysis. It is NOT intended to serve as
+# a standalone tool for clinical diagnosis, patient management, or
+# treatment decisions.
+#
+# The developers provide no guarantees regarding:
+# - Accuracy or completeness of analysis results,
+# - Compliance with clinical laboratory standards,
+# - Compatibility with specific qPCR platforms, kits, or protocols,
+# - Correctness of user-entered data.
+#
+# Users are solely responsible for:
+# - Ensuring input data accuracy,
+# - Interpreting analysis results appropriately,
+# - Verifying all findings through approved laboratory procedures.
+#
+# The developers are not liable for any decision, loss, or damage arising
+# from use of this application. All clinical decisions must be made by
+# qualified professionals and supported by validated laboratory methods.
+#
+"""
 """
 
 # State kontrolü
