@@ -617,40 +617,37 @@ This guide explains how to properly format your qPCR data, perform ΔΔCt calcul
 # -------------------------------
 if st.session_state.show_guide:
     st.markdown(
-        f"""
+    f"""
+    <div style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        z-index: 9999;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    ">
         <div style="
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            z-index: 9999;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            background-color: #f9f9f9;
+            width: 80%;
+            max-width: 900px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            text-align: left;
+            position: relative;
         ">
-            <div style="
-                background-color: #f9f9f9;
-                width: 80%;
-                max-width: 900px;
-                max-height: 90vh;
-                overflow-y: auto;
-                padding: 30px;
-                border-radius: 15px;
-                box-shadow: 0 0 20px rgba(0,0,0,0.5);
-                text-align: left;
-                position: relative;
-            ">
-                {user_guide_en}
-            </div>
+            {user_guide_en}
         </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-    if st.button("⬅ Back to Analysis"):
-        st.session_state.show_guide = False
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 # -------------------------------
 # 6) Main Analysis Page
