@@ -16,6 +16,7 @@ from reportlab.pdfbase import pdfmetrics
 import plotly.io as pio
 import matplotlib.pyplot as plt
 from reportlab.lib import colors
+import streamlit.components.v1 as components
 
 
 # Font register fix
@@ -563,28 +564,28 @@ translations = {
 user_guide_en = """
 ## 📘 GeneQuantify User Guide (EN)
 
-### 1️⃣ USER GUIDE
-GeneQuantify application performs ΔCt, ΔΔCt, and 2^(-ΔΔCt)
-Calculations for gene expression and CNV analysis using qPCR data.
-Users enter Ct values for target and reference genes across multiple
-patient groups. The application supports multilingual labels and does
-not require installation or programming knowledge.
+### 1️⃣ Introduction
+GeneQuantify performs **ΔCt, ΔΔCt**, and **2^(-ΔΔCt)** calculations for gene expression and CNV analysis using qPCR data.  
+Users input Ct values for target and reference genes across multiple patient groups.  
+The application supports multiple languages and requires no installation or programming knowledge.
 
 ---
 
-### 2️⃣ Data Input
-- Enter each sample on a **new line**, with each replicate separated by **spaces**.  
-- Copy-paste from **Excel** works; commas are converted to dots automatically.  
-- Enter **reference gene** and **target gene** values separately.  
-- Avoid empty cells; they may cause errors.  
+### 2️⃣ Data Input Instructions
+- Enter each sample on a **new line**.  
+- Separate technical replicates with **spaces**.  
+- Comma values are automatically converted to dots.  
+- Enter **reference gene** and **target gene** values into their respective fields.  
+- Do NOT leave empty lines or blank values.
 
-**Example:**
+**Example Input:**
 
 23.1 23.4 23.7  
 22.9 23.5 23.8  
 25.2 25.4 25.1  
 
 ---
+Example Data Table:
 
 | Group     | Rep1 | Rep2 | Rep3 |
 |-----------|------|------|------|
@@ -594,64 +595,72 @@ not require installation or programming knowledge.
 
 ---
 
-### 3️⃣ Calculations
+### 3️⃣ Calculations Performed
 1. **ΔCt** = Ct(target) – Ct(reference)  
 2. **ΔΔCt** = ΔCt(test) – ΔCt(control)  
-3. **Fold Change** = 2^(-ΔΔCt)  
+3. **Fold Change** = 2^(-ΔΔCt)
 
-> Note: Fold Change >1 → upregulation, <1 → downregulation.
+Interpretation:  
+- **Fold Change > 1** → Upregulation  
+- **Fold Change < 1** → Downregulation  
 
 ---
 
 ### 4️⃣ Statistical Analysis
-- **The application performs:
-- **Normality testing
-- **Shapiro-Wilk** → normality check  
-- **Variance homogeneity checks
-- **Levene** → variance homogeneity  
-- ** and automatically selects:
-- **Student’s t-test / Welch t-test** → parametric groups 
-- **Mann-Whitney U** → non-parametric groups  
-- **Significance: **p < 0.05**
-- **Results are stored in stats_data and displayed in tables and plots.
+The application automatically performs:
+
+**Normality Tests**
+- Shapiro–Wilk
+
+**Variance Homogeneity**
+- Levene test
+
+**Automated Test Selection**
+- Student’s *t*-test or Welch *t*-test (parametric)
+- Mann–Whitney U (non-parametric)
+
+**Significance Threshold**
+- *p* < 0.05
+
+Statistical results are stored internally and displayed in tables and plots.
 
 ---
 
-### 5️⃣ Outputs
-- PDF report (detailed statistics and plots)  
-- CSV file (raw and calculated data)  
-- Distribution plots & boxplots
+### 5️⃣ Output Files
+- **PDF Report** (includes plots, ΔCt, ΔΔCt, fold change, p-values)  
+- **CSV File** (raw + calculated data)  
+- **Interactive distribution plots & boxplots**
 
 ---
 
-### 6️⃣ Tips
-- For multiple genes, enter each group in separate blocks.  
-- Use stable reference genes (low Ct variance).  
-- Interpret Fold Change together with p-values.  
-- Always save your report and back up data.
+### 6️⃣ Tips for Best Results
+- Use stable reference genes with low Ct variability.  
+- Analyze each gene in a separate block for multi-gene studies.  
+- Interpret fold change **together** with p-values.  
+- Always save and back up your reports.
 
-# 📄 DISCLAIMER 
-#
-This application is designed for research, educational use, and
-preliminary laboratory data analysis. It is NOT intended to serve as
-a standalone tool for clinical diagnosis, patient management, or
-treatment decisions.
-The developers provide no guarantees regarding:
-- Accuracy or completeness of analysis results,
-- Compliance with clinical laboratory standards,
-- Compatibility with specific qPCR platforms, kits, or protocols,
-- Correctness of user-entered data.
-#
-Users are solely responsible for:
-- Ensuring input data accuracy,
-- Interpreting analysis results appropriately,
-- Verifying all findings through approved laboratory procedures.
+---
 
-The developers are not liable for any decision, loss, or damage arising
-from use of this application. All clinical decisions must be made by
-qualified professionals and supported by validated laboratory methods.
+# ⚠️ DISCLAIMER
 
-Contact: mailtoburhanettin@gmail.com
+This application is intended for **research**, **education**, and **preliminary laboratory analysis** only.  
+It is **NOT** designed or validated for clinical diagnosis, treatment decisions, or patient management.
+
+The developers do **not** guarantee:
+- Complete accuracy of calculations or statistical outputs  
+- Compatibility with specific qPCR assays, kits, or platforms  
+- Compliance with clinical laboratory standards  
+- Correctness or validity of user-entered data
+
+Users are fully responsible for:
+- Verifying the accuracy of entered Ct data  
+- Interpreting results appropriately  
+- Confirming findings using validated laboratory methods  
+
+The developers are **not liable** for any decisions, losses, or damages arising from application use.  
+All clinical decisions must be made by qualified professionals.
+
+Contact: **mailtoburhanettin@gmail.com**
 """
 
 # -------------------------------
