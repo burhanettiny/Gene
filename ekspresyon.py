@@ -24,9 +24,9 @@ import streamlit.components.v1 as components
 if "show_guide" not in st.session_state:
     st.session_state.show_guide = False
 
-# Sidebar button
 if st.sidebar.button("📘 User Guide"):
-    st.session_state.show_guide = True
+    with st.modal("📘 GeneQuantify User Guide"):
+        st.markdown(user_guide_md)
 
 # -------------------------------
 # USER GUIDE (Markdown)
