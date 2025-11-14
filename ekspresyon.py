@@ -625,7 +625,7 @@ if st.session_state.show_guide:
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0,0,0,0.7);
+            background-color: rgba(0,0,0,0.6);
             z-index: 9999;
             display: flex;
             justify-content: center;
@@ -633,23 +633,16 @@ if st.session_state.show_guide:
         ">
             <div style="
                 background-color: #f9f9f9;
-                width: 90%;
-                height: 90%;
-                overflow-y: scroll;
-                padding: 30px;
-                border-radius: 15px;
-                box-shadow: 0 0 20px rgba(0,0,0,0.5);
+                width: 70%;
+                height: 80vh;
+                overflow-y: auto;
+                padding: 20px 30px;
+                border-radius: 12px;
+                box-shadow: 0 0 15px rgba(0,0,0,0.5);
                 position: relative;
             ">
-                <div style='position: absolute; top: 10px; right: 20px;'>
-                    <form action="">
-                        <input type="submit" value="✖ Close" style="
-                            background: none;
-                            border: none;
-                            font-size: 24px;
-                            cursor: pointer;
-                        ">
-                    </form>
+                <div style='position: absolute; top: 10px; right: 15px; font-size: 22px; cursor: pointer;' onclick="window.location.reload();">
+                    ✖
                 </div>
                 {user_guide_en}
             </div>
@@ -657,7 +650,6 @@ if st.session_state.show_guide:
         """,
         unsafe_allow_html=True
     )
-
 
     
 st.markdown(f"<h3>{translations[language_code]['title']}</h3>", unsafe_allow_html=True)
