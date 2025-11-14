@@ -17,11 +17,6 @@ import plotly.io as pio
 import matplotlib.pyplot as plt
 from reportlab.lib import colors
 
-if "show_guide" not in st.session_state:
-    st.session_state.show_guide = False
-
-if "language" not in st.session_state:
-    st.session_state.language = "English"
 
 pdfmetrics.registerFont(TTFont('DejaVu', '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'))
 st.sidebar.image("geneq.jpg", width=180)
