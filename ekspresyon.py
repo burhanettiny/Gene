@@ -20,13 +20,13 @@ from reportlab.lib import colors
 import streamlit as st
 
 # -------------------------------
-# 1) Session State for modal
+# Session state
 # -------------------------------
 if "show_guide" not in st.session_state:
     st.session_state.show_guide = False
 
 # -------------------------------
-# 2) User Guide Content (EN)
+# User Guide content
 # -------------------------------
 user_guide_en = """
 ## 📘 User Guide (EN)
@@ -79,26 +79,18 @@ This guide explains how to properly format your qPCR data, perform ΔΔCt calcul
 """
 
 # -------------------------------
-# 3) Sidebar: Logo + User Guide
+# Sidebar: Logo + User Guide
 # -------------------------------
 st.sidebar.image("https://upload.wikimedia.org/wikipedia/commons/1/12/User_icon_2.svg", width=100)
-st.sidebar.markdown("### Actions")
 
 if st.sidebar.button("📘 User Guide"):
     st.session_state.show_guide = True
 
 # -------------------------------
-# 4) Main Analysis Page Content (hidden when modal open)
-# -------------------------------
-if not st.session_state.show_guide:
-    st.header("Main Analysis Page")
-    st.write("Your main analysis UI goes here...")
-    st.write("Data inputs, buttons, plots, etc.")
-
-# -------------------------------
-# 5) Fullscreen Modal User Guide
+# Fullscreen User Guide modal
 # -------------------------------
 if st.session_state.show_guide:
+    # Modal overlay
     st.markdown(
         f"""
         <div style="
@@ -122,19 +114,25 @@ if st.session_state.show_guide:
                 padding: 30px;
                 border-radius: 15px;
                 box-shadow: 0 0 20px rgba(0,0,0,0.5);
-                position: relative;
+                text-align: left;
             ">
                 {user_guide_en}
                 <div style='text-align:center; margin-top:20px;'>
                 </div>
             </div>
         </div>
-        """, unsafe_allow_html=True
+        """,
+        unsafe_allow_html=True
     )
-
-    # Streamlit button to close modal
+    # Streamlit button outside HTML
     if st.button("⬅ Back to Analysis"):
         st.session_state.show_guide = False
+else:
+    # Main analysis content
+    st.header("Main Analysis Page")
+    st.write("Your main analysis UI goes here...")
+    st.write("Data inputs, buttons, plots, etc.")
+
 
 
 
