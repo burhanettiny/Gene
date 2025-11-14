@@ -618,9 +618,7 @@ import streamlit as st
 if "show_guide" not in st.session_state:
     st.session_state.show_guide = False
 
-# User Guide modal gösterimi
 if st.session_state.show_guide:
-    # Modal HTML
     st.markdown(
         f"""
         <div style="
@@ -647,27 +645,18 @@ if st.session_state.show_guide:
                 text-align: left;
                 position: relative;
             ">
-                <!-- Çarpı butonu -->
-                <form action="/" method="get" style="position:absolute; top:10px; right:15px;">
-                    <button type="submit" name="close_modal" style="
-                        font-size: 24px;
-                        border:none;
-                        background:none;
-                        cursor:pointer;
-                    ">✖</button>
-                </form>
-
-                {user_guide_en}
-            </div>
-        </div>
         """,
         unsafe_allow_html=True
     )
 
-# Modal kapatma kontrolü
-if st.experimental_get_query_params().get("close_modal"):
-    st.session_state.show_guide = False
-    st.experimental_rerun()
+    # Streamlit butonunu modal içinde kullanıyoruz
+    close = st.button("✖ Close User Guide")
+    st.markdown(user_guide_en, unsafe_allow_html=True)
+
+    st.markdown("</div></div>", unsafe_allow_html=True)
+
+    if close:
+        st.session_state.show_guide = False
 
     
 st.markdown(f"<h3>{translations[language_code]['title']}</h3>", unsafe_allow_html=True)
