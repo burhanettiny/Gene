@@ -119,19 +119,21 @@ Contact: **mailtoburhanettin@gmail.com**
 modal_css = """
 <style>
 .modal-overlay {
-    position: fixed; top: 0; left: 0;
-    width: 100%; height: 100%;
+    position: fixed;
+    top:0; left:0;
+    width:100%; height:100%;
     background: rgba(0,0,0,0.6);
     z-index: 999998;
 }
 
 .modal-box {
-    position: fixed; top: 50%; left: 50%;
+    position: fixed;
+    top: 50%; left:50%;
     transform: translate(-50%, -50%);
-    background: white;
-    padding: 30px;
     width: 70%;
     max-height: 80%;
+    background: white;
+    padding: 30px;
     overflow-y: auto;
     border-radius: 12px;
     box-shadow: 0 0 30px rgba(0,0,0,0.3);
@@ -139,7 +141,9 @@ modal_css = """
     font-size: 18px;
 }
 .close-btn {
-    position: absolute; top: 10px; right: 15px;
+    position: absolute;
+    top: 10px;
+    right: 15px;
     font-size: 25px;
     cursor: pointer;
     background: none;
@@ -148,18 +152,25 @@ modal_css = """
 </style>
 """
 
+# -------------------------------
+# Modal Gösterimi
+# -------------------------------
 if st.session_state.show_guide:
     st.markdown(modal_css, unsafe_allow_html=True)
     st.markdown('<div class="modal-overlay"></div>', unsafe_allow_html=True)
 
-    # Modal Box with Python close button
-    with st.container():
-        col1, col2 = st.columns([0.95, 0.05])
-        with col2:
-            if st.button("❌ Close User Guide"):
-                st.session_state.show_guide = False
-        with col1:
-            st.markdown(user_guide_md)
+    st.markdown(f"""
+    <div class="modal-box">
+        <form method="post">
+            <button class="close-btn" name="close_modal">❌</button>
+        </form>
+        {user_guide_md}
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Kapatma kontrolü
+    if "close_modal" in st.experimental_get_query_params():
+        st.session_state.show_guide = False
 pdfmetrics.registerFont(TTFont('DejaVu', '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'))
 st.sidebar.image("geneq.jpg", width=180)
 
