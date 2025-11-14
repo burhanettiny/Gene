@@ -19,8 +19,16 @@ from reportlab.lib import colors
 
 import streamlit as st
 
+import streamlit as st
+
 # -------------------------------
-# 1) User Guide Content (EN) - Enhanced
+# 1) Session State for page control
+# -------------------------------
+if "page" not in st.session_state:
+    st.session_state.page = "main"  # main analysis page by default
+
+# -------------------------------
+# 2) User Guide Content (EN)
 # -------------------------------
 user_guide_en = """
 ## 📘 User Guide (EN)
@@ -58,57 +66,69 @@ This guide explains how to properly format your qPCR data, perform ΔΔCt calcul
 
 ### 🧮 Calculations
 1. **ΔCt** = Ct(target) – Ct(reference)  
-   - Compares target gene expression to reference gene for normalization.  
 2. **ΔΔCt** = ΔCt(test) – ΔCt(control)  
-   - Compares test sample to control.  
 3. **Fold Change** = 2^(-ΔΔCt)  
-   - Represents relative expression levels.
 
 > ⚠️ Ensure that reference genes are stable across all samples.
 
 ---
 
 ### 📈 Statistical Tests
-- **Shapiro–Wilk test** → checks normality of the data  
-- **Levene test** → checks homogeneity of variances  
-- **Student’s t-test / Welch t-test** → compare means between two groups  
-- **Mann–Whitney U test** → non-parametric comparison between two groups  
-
-> 💡 Choose the appropriate test based on data distribution and variance.
+- Shapiro–Wilk → checks normality  
+- Levene → checks homogeneity of variances  
+- Student’s t-test / Welch t-test → compare means  
+- Mann–Whitney U → non-parametric comparison  
 
 ---
 
 ### 📄 Outputs
-- PDF Report with all results  
-- CSV file with raw and processed data  
-- Plots and graphs for visual representation of results
+- PDF report  
+- CSV file  
+- Plots and graphs
 """
 
 # -------------------------------
-# 2) Sidebar Button
+# 3) Main page / Analysis UI
 # -------------------------------
-show_guide = st.sidebar.button("📘 User Guide")
+if st.session_state.page == "main":
+
+    # Language selection
+    language_code = st.selectbox("Select Language / Dil Seçimi", ["EN", "TR"], index=0)
+
+    # User Guide button below language selection
+    if st.button("📘 User Guide"):
+        st.session_state.page = "guide"  # Switch to guide page
+
+    # -------------------
+    # Analysis page content goes here
+    st.header("Main Analysis Page")
+    st.write("Your main analysis UI goes here...")
+    st.write("Data inputs, buttons, plots, etc.")
 
 # -------------------------------
-# 3) Show Guide in main page inside a styled container
+# 4) User Guide page
 # -------------------------------
-if show_guide:
+elif st.session_state.page == "guide":
+    # Show user guide in full screen container
     st.markdown(
         f"""
         <div style="
-            max-height: 600px;
-            overflow-y: auto;
-            padding: 20px;
+            width: 80%;
+            margin: 40px auto;
+            padding: 30px;
             border: 2px solid #ddd;
-            border-radius: 10px;
+            border-radius: 15px;
             background-color: #f9f9f9;
+            max-height: 90vh;
+            overflow-y: auto;
         ">
             {user_guide_en}
         </div>
         """, unsafe_allow_html=True
     )
-
-
+    # Back button to return to main page
+    if st.button("⬅ Back to Analysis"):
+        st.session_state.page = "main"
 
 
 
