@@ -20,7 +20,7 @@ from reportlab.lib import colors
 import streamlit as st
 
 # -------------------------------
-# 1) Session State for page control
+# 1) Session State for modal
 # -------------------------------
 if "show_guide" not in st.session_state:
     st.session_state.show_guide = False
@@ -79,8 +79,15 @@ This guide explains how to properly format your qPCR data, perform ΔΔCt calcul
 """
 
 # -------------------------------
-# 3) Sidebar Button
+# 3) Sidebar Buttons
 # -------------------------------
+st.sidebar.header("Actions")
+
+# Örnek Sil / Delete butonu
+if st.sidebar.button("🗑 Delete"):
+    st.sidebar.write("Delete action triggered")  # placeholder
+
+# User Guide butonu Sil / Delete butonunun altında
 if st.sidebar.button("📘 User Guide"):
     st.session_state.show_guide = True
 
@@ -113,16 +120,14 @@ if st.session_state.show_guide:
                 box-shadow: 0 0 20px rgba(0,0,0,0.5);
             ">
                 {user_guide_en}
-                <div style='text-align:center; margin-top:20px;'>
-                    <button onclick="window.location.reload();" 
-                        style='padding: 10px 20px; font-size:16px; border-radius:8px; border:none; background-color:#4CAF50; color:white; cursor:pointer;'>
-                        ⬅ Back to Analysis
-                    </button>
-                </div>
             </div>
         </div>
         """, unsafe_allow_html=True
     )
+
+    # Back button (Streamlit)
+    if st.button("⬅ Back to Analysis"):
+        st.session_state.show_guide = False
 
 # -------------------------------
 # 5) Main Analysis Page Content
@@ -131,6 +136,7 @@ if not st.session_state.show_guide:
     st.header("Main Analysis Page")
     st.write("Your main analysis UI goes here...")
     st.write("Data inputs, buttons, plots, etc.")
+
 
 
 
