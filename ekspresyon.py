@@ -138,7 +138,6 @@ modal_css = """
     z-index: 999999;
     font-size: 18px;
 }
-
 .close-btn {
     position: absolute; top: 10px; right: 15px;
     font-size: 25px;
@@ -149,39 +148,18 @@ modal_css = """
 </style>
 """
 
-# -------------------------------
-# Modal Gösterimi
-# -------------------------------
 if st.session_state.show_guide:
-    # CSS
     st.markdown(modal_css, unsafe_allow_html=True)
-
-    # Overlay
     st.markdown('<div class="modal-overlay"></div>', unsafe_allow_html=True)
 
-    # Modal Box
-    st.markdown(f"""
-    <div class="modal-box">
-        <button class="close-btn" onclick="window.parent.postMessage({{type:'close_modal'}}, '*')">❌</button>
-        {user_guide_md}
-    </div>
-
-    <script>
-    window.addEventListener("message", (event) => {{
-        if(event.data.type === "close_modal"){{
-            const streamlitEvent = new Event("close-modal")
-            document.dispatchEvent(streamlitEvent)
-        }}
-    }})
-    </script>
-    """, unsafe_allow_html=True)
-
-    # Streamlit event ile kapatma
-    def close_modal():
-        st.session_state.show_guide = False
-
-    st.session_state.close_modal_handler = close_modal
-
+    # Modal Box with Python close button
+    with st.container():
+        col1, col2 = st.columns([0.95, 0.05])
+        with col2:
+            if st.button("❌ Close User Guide"):
+                st.session_state.show_guide = False
+        with col1:
+            st.markdown(user_guide_md)
 pdfmetrics.registerFont(TTFont('DejaVu', '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'))
 st.sidebar.image("geneq.jpg", width=180)
 
