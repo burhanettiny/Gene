@@ -666,9 +666,11 @@ def close_modal():
     st.session_state.show_guide = False
 
 if st.session_state.show_guide:
+
+    # Modal container
     st.markdown(
-        f"""
-        <div style="
+        """
+        <div id="overlay" style="
             position: fixed;
             top: 0;
             left: 0;
@@ -680,29 +682,55 @@ if st.session_state.show_guide:
             justify-content: center;
             align-items: center;
         ">
-            <div style="
-                background-color: #f9f9f9;
-                width: 70%;
-                height: 80vh;
-                overflow-y: auto;
-                padding: 20px 30px;
-                border-radius: 12px;
-                box-shadow: 0 0 15px rgba(0,0,0,0.5);
-                position: relative;
-            ">
-                <div style='position: absolute; top: 10px; right: 20px;'>
-                    <!-- Streamlit button kullanıyoruz -->
-                    </div>
-                {user_guide_en}
-            </div>
         </div>
         """,
         unsafe_allow_html=True
     )
 
-# Streamlit “X” butonu
-if st.session_state.show_guide:
-    st.button("✖ Close", on_click=close_modal)
+    # Modal content
+    modal_container = st.container()
+
+    with modal_container:
+        st.markdown(
+            """
+            <div style="
+                background-color: #ffffff;
+                width: 70%;
+                height: 80vh;
+                overflow-y: auto;
+                padding: 25px;
+                border-radius: 12px;
+                box-shadow: 0 0 15px rgba(0,0,0,0.5);
+                position: relative;
+                margin: auto;
+                z-index: 10000;
+            ">
+            """,
+            unsafe_allow_html=True
+        )
+
+        # Modal içindeki X butonu (sağ üst köşede)
+        st.markdown(
+            """
+            <div style="
+                position: absolute;
+                top: 10px;
+                right: 20px;
+                z-index: 10001;
+            ">
+            """,
+            unsafe_allow_html=True
+        )
+        st.button("❌", on_click=close_modal)
+
+        st.markdown(
+            user_guide_en,
+            unsafe_allow_html=True
+        )
+
+        # Modal kapatma için div sonu
+        st.markdown("</div>", unsafe_allow_html=True)
+
                     
 st.markdown(f"<h3>{translations[language_code]['title']}</h3>", unsafe_allow_html=True)
 st.markdown(f"<h4>{translations[language_code]['patient_data_header']}</h4>", unsafe_allow_html=True)
