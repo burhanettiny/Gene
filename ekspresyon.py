@@ -54,6 +54,17 @@ modal_css = """
 </style>
 """
 st.markdown(modal_css, unsafe_allow_html=True)
+user_guides = {
+    "tr": """
+## 📘 Kullanım Kılavuzu (TR)
+
+### 📌 Veri Girişi Formatı
+- Aynı örneğe ait Ct tekrarları **aynı satıra**, aralarında **boşluk** olacak şekilde yazılır.
+- Bir sonraki örnek **bir alt satıra** yazılır.
+- Excel’den doğrudan **kopyala–yapıştır** yapılabilir.
+- Virgüller otomatik olarak noktaya çevrilir.
+
+**Örnek:**
 
 
 
