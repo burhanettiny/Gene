@@ -27,7 +27,8 @@ if "show_guide" not in st.session_state:
 if st.sidebar.button("📘 User Guide"):
     st.session_state.show_guide = True
 
-# ESC ile kapatma için JS
+
+# ESC ile kapatma JS
 st.markdown("""
 <script>
 document.addEventListener('keydown', function(e) {
@@ -40,24 +41,21 @@ document.addEventListener('keydown', function(e) {
 
 
 # ---------------------------------------------------
-# User Guide METNİ (AYRI STRING — HTML içine gömülmüyor)
+# USER GUIDE (Markdown)
 # ---------------------------------------------------
-user_guide_en = """
+user_guide_md = """
 ## 📘 GeneQuantify User Guide (EN)
 
 ### 1️⃣ Introduction
-GeneQuantify performs **ΔCt, ΔΔCt**, and **2^(-ΔΔCt)** calculations for gene expression and CNV analysis using qPCR data.  
-Users input Ct values for target and reference genes across multiple patient groups.  
-The application supports multiple languages and requires no installation or programming knowledge.
+GeneQuantify performs **ΔCt, ΔΔCt**, and **2^(-ΔΔCt)** calculations for qPCR gene expression and CNV analysis.
 
 ---
 
 ### 2️⃣ Data Input Instructions
-- Enter each sample on a **new line**.  
-- Separate technical replicates with **spaces**.  
-- Comma values are automatically converted to dots.  
-- Enter **reference gene** and **target gene** values into their respective fields.  
-- Do NOT leave empty lines or blank values.
+- One sample per **new line**
+- Replicates separated by **spaces**
+- Commas auto-converted to dots
+- No blank lines
 
 **Example Input:**
 
@@ -134,88 +132,75 @@ Contact: **mailtoburhanettin@gmail.com**
 
 
 # -------------------------------
-# Modal gösterimi
+# Modal Gösterimi
 # -------------------------------
 if st.session_state.show_guide:
 
-    modal_html = f"""
+    modal_html = """
     <style>
-    .modal-overlay {{
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
+    .modal-overlay {
+        position: fixed; top: 0; left: 0;
+        width: 100%; height: 100%;
         background: rgba(0,0,0,0.6);
         z-index: 999998;
-    }}
+    }
 
-    .modal-box {{
+    .modal-box {
         position: fixed;
-        top: 50%;
-        left: 50%;
+        top: 50%; left: 50%;
         transform: translate(-50%, -50%);
         background: white;
         padding: 30px;
-        width: 60%;
+        width: 65%;
         max-height: 80%;
         overflow-y: auto;
         border-radius: 12px;
         box-shadow: 0 0 30px rgba(0,0,0,0.3);
         z-index: 999999;
         font-size: 18px;
-    }}
+    }
 
-    .close-btn {{
+    .close-btn {
         position: absolute;
-        top: 10px;
-        right: 15px;
-        cursor: pointer;
+        top: 10px; right: 15px;
         font-size: 25px;
-        color: #444;
-    }}
+        cursor: pointer;
+    }
     </style>
 
     <div class="modal-overlay"></div>
-
     <div class="modal-box">
         <span class="close-btn"
-              onclick="window.parent.postMessage({{type: 'close_modal'}}, '*')">&times;</span>
-        <h2>User Guide</h2>
-        <div>{user_guide_en}</div>
+              onclick="window.parent.postMessage({type: 'close_modal'}, '*')">&times;</span>
+        <div id="guide-container"></div>
     </div>
 
     <script>
-    window.addEventListener("message", (event) => {{
-        if (event.data.type === "close_modal") {{
-            const streamlitEvent = new Event("close-modal");
-            document.dispatchEvent(streamlitEvent);
-        }}
-    }});
+    // Markdown içeriğini Streamlit'e göndermek için
+    const md = window.userGuideContent;
+
+    const guideDiv = document.getElementById("guide-container");
+    guideDiv.innerHTML = `<pre>${md}</pre>`;
     </script>
     """
 
+    # JS global değişkene markdown gönder
+    st.markdown(
+        f"""
+        <script>
+        window.userGuideContent = `{user_guide_md}`;
+        </script>
+        """,
+        unsafe_allow_html=True
+    )
+
+    # Modal HTML
     st.markdown(modal_html, unsafe_allow_html=True)
 
-    # ESC veya X ile kapatma
+    # ESC veya X kapatma
     def close_modal():
         st.session_state.show_guide = False
-
     st.session_state.close_modal_handler = close_modal
-# Font register fix
-pdfmetrics.registerFont(TTFont('DejaVu', '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'))
-
-# Logo
-st.sidebar.image("geneq.jpg", width=180)
-
-hide_streamlit_style = """
-    <style>
-        #MainMenu {visibility: hidden;} 
-        footer {visibility: hidden !important;} 
-        header {visibility: hidden;}
-    </style>
-"""
-
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 if 'language' not in st.session_state:
