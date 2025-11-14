@@ -667,6 +667,14 @@ def open_modal():
 
 def close_modal():
     st.session_state.show_guide = False
+# -------------------------------
+# Modal gösterimi
+# -------------------------------
+if st.session_state.show_guide:
+    # X butonunu modal üstünde göstermek için container
+    col1, col2 = st.columns([0.9, 0.1])
+    with col2:
+        st.button("✖", on_click=close_modal)
 
 if st.session_state.show_guide:
     st.markdown(
