@@ -641,8 +641,15 @@ if st.session_state.show_guide:
                 box-shadow: 0 0 15px rgba(0,0,0,0.5);
                 position: relative;
             ">
-                <div style='position: absolute; top: 10px; right: 15px; font-size: 22px; cursor: pointer;' onclick="window.location.reload();">
-                    ✖
+                <div style='position: absolute; top: 10px; right: 20px;'>
+                    <form action="">
+                        <input type="submit" value="✖ Close" style="
+                            background: none;
+                            border: none;
+                            font-size: 24px;
+                            cursor: pointer;
+                        ">
+                    </form>
                 </div>
                 {user_guide_en}
             </div>
