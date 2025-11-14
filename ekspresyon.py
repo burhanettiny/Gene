@@ -114,21 +114,19 @@ Contact: **mailtoburhanettin@gmail.com**
 """
 
 # -------------------------------
-# Modal CSS + HTML
+# Modal CSS
 # -------------------------------
 modal_css = """
 <style>
 .modal-overlay {
-    position: fixed;
-    top: 0; left: 0;
+    position: fixed; top: 0; left: 0;
     width: 100%; height: 100%;
     background: rgba(0,0,0,0.6);
     z-index: 999998;
 }
 
 .modal-box {
-    position: fixed;
-    top: 50%; left: 50%;
+    position: fixed; top: 50%; left: 50%;
     transform: translate(-50%, -50%);
     background: white;
     padding: 30px;
@@ -142,8 +140,7 @@ modal_css = """
 }
 
 .close-btn {
-    position: absolute;
-    top: 10px; right: 15px;
+    position: absolute; top: 10px; right: 15px;
     font-size: 25px;
     cursor: pointer;
     background: none;
@@ -162,14 +159,29 @@ if st.session_state.show_guide:
     # Overlay
     st.markdown('<div class="modal-overlay"></div>', unsafe_allow_html=True)
 
-    # Modal container
-    with st.container():
-        col1, col2 = st.columns([0.95, 0.05])
-        with col2:
-            if st.button("❌"):
-                st.session_state.show_guide = False
-        with col1:
-            st.markdown(user_guide_md)
+    # Modal Box
+    st.markdown(f"""
+    <div class="modal-box">
+        <button class="close-btn" onclick="window.parent.postMessage({{type:'close_modal'}}, '*')">❌</button>
+        {user_guide_md}
+    </div>
+
+    <script>
+    window.addEventListener("message", (event) => {{
+        if(event.data.type === "close_modal"){{
+            const streamlitEvent = new Event("close-modal")
+            document.dispatchEvent(streamlitEvent)
+        }}
+    }})
+    </script>
+    """, unsafe_allow_html=True)
+
+    # Streamlit event ile kapatma
+    def close_modal():
+        st.session_state.show_guide = False
+
+    st.session_state.close_modal_handler = close_modal
+
 pdfmetrics.registerFont(TTFont('DejaVu', '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'))
 st.sidebar.image("geneq.jpg", width=180)
 
