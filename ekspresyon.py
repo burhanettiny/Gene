@@ -650,81 +650,97 @@ qualified professionals and supported by validated laboratory methods.
 
 Contact: mailtoburhanettin@gmail.com
 """
-# State kontrolü
+
+# -------------------------------
+# User guide state
+# -------------------------------
 if "show_guide" not in st.session_state:
     st.session_state.show_guide = False
 
-# -------------------------------
-# 3) Modal açma ve kapama
-# -------------------------------
 def close_modal():
     st.session_state.show_guide = False
 
+# -------------------------------
+# ESC tuşu ile modal kapatma (JavaScript)
+# -------------------------------
+esc_close_js = """
+<script>
+document.addEventListener('keydown', function(event) {
+    if (event.key === "Escape") {
+        // Trigger Streamlit callback
+        window.parent.postMessage({type: 'streamlit:setState', value: {'show_guide': false}}, '*');
+    }
+});
+</script>
+"""
+
+# -------------------------------
+# Modal gösterimi
+# -------------------------------
 if st.session_state.show_guide:
 
-    # Modal container
+    # Arkaplan overlay
     st.markdown(
         """
-        <div id="overlay" style="
+        <div id="modal_overlay" style="
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             background-color: rgba(0,0,0,0.6);
-            z-index: 9999;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            z-index: 9998;
         ">
         </div>
         """,
         unsafe_allow_html=True
     )
 
-    # Modal content
-    modal_container = st.container()
+    # Modal kutusu
+    st.markdown(
+        """
+        <div id="modal_box" style="
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 70%;
+            height: 80vh;
+            padding: 25px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0px 0px 20px rgba(0,0,0,0.4);
+            overflow-y: auto;
+            z-index: 9999;
+        ">
+        """,
+        unsafe_allow_html=True
+    )
 
-    with modal_container:
-        st.markdown(
-            """
-            <div style="
-                background-color: #ffffff;
-                width: 70%;
-                height: 80vh;
-                overflow-y: auto;
-                padding: 25px;
-                border-radius: 12px;
-                box-shadow: 0 0 15px rgba(0,0,0,0.5);
-                position: relative;
-                margin: auto;
-                z-index: 10000;
-            ">
-            """,
-            unsafe_allow_html=True
-        )
+    # X butonu
+    st.markdown(
+        """
+        <div style="
+            position: absolute;
+            top: 15px;
+            right: 25px;
+            z-index: 10000;
+        ">
+        """,
+        unsafe_allow_html=True
+    )
 
-        # Modal içindeki X butonu (sağ üst köşede)
-        st.markdown(
-            """
-            <div style="
-                position: absolute;
-                top: 10px;
-                right: 20px;
-                z-index: 10001;
-            ">
-            """,
-            unsafe_allow_html=True
-        )
-        st.button("❌", on_click=close_modal)
+    st.button("❌ Close", on_click=close_modal)
 
-        st.markdown(
-            user_guide_en,
-            unsafe_allow_html=True
-        )
+    # Kullanım kılavuzu içeriği
+    st.markdown(user_guide_en, unsafe_allow_html=True)
 
-        # Modal kapatma için div sonu
-        st.markdown("</div>", unsafe_allow_html=True)
+    # Modal kutusu kapanış div'i
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    # ESC ile kapatma scripti
+    st.markdown(esc_close_js, unsafe_allow_html=True)
+
 
                     
 st.markdown(f"<h3>{translations[language_code]['title']}</h3>", unsafe_allow_html=True)
