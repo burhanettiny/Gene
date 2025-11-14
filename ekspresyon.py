@@ -18,6 +18,7 @@ import matplotlib.pyplot as plt
 from reportlab.lib import colors
 
 pdfmetrics.registerFont(TTFont('DejaVu', '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'))
+st.sidebar.image("geneq.jpg", width=180)
 
 hide_streamlit_style = """
     <style>
