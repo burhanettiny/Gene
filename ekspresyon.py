@@ -18,7 +18,190 @@ import matplotlib.pyplot as plt
 from reportlab.lib import colors
 import streamlit.components.v1 as components
 
+# -------------------------------
+# User guide state
+# -------------------------------
+if "show_guide" not in st.session_state:
+    st.session_state.show_guide = False
 
+if st.sidebar.button("📘 User Guide"):
+    st.session_state.show_guide = True
+
+# ESC ile kapatma için JS
+st.markdown("""
+<script>
+document.addEventListener('keydown', function(e) {
+    if (e.key === "Escape") {
+        window.parent.postMessage({type: 'close_modal'}, '*')
+    }
+});
+</script>
+""", unsafe_allow_html=True)
+
+
+# ---------------------------------------------------
+# User Guide METNİ (AYRI STRING — HTML içine gömülmüyor)
+# ---------------------------------------------------
+user_guide_en = """
+## 📘 GeneQuantify User Guide (EN)
+
+### 1️⃣ Introduction
+GeneQuantify performs **ΔCt, ΔΔCt**, and **2^(-ΔΔCt)** calculations for gene expression and CNV analysis using qPCR data.  
+Users input Ct values for target and reference genes across multiple patient groups.  
+The application supports multiple languages and requires no installation or programming knowledge.
+
+---
+
+### 2️⃣ Data Input Instructions
+- Enter each sample on a **new line**.  
+- Separate technical replicates with **spaces**.  
+- Comma values are automatically converted to dots.  
+- Enter **reference gene** and **target gene** values into their respective fields.  
+- Do NOT leave empty lines or blank values.
+
+**Example Input:**
+
+23.1 23.4 23.7  
+22.9 23.5 23.8  
+25.2 25.4 25.1  
+
+---
+
+Example Data Table:
+
+| Group     | Rep1 | Rep2 | Rep3 |
+|-----------|------|------|------|
+| Control 1 | 23.1 | 23.4 | 23.7 |
+| Control 2 | 22.9 | 23.5 | 23.8 |
+| Patient 1 | 25.2 | 25.4 | 25.1 |
+
+---
+
+### 3️⃣ Calculations Performed
+1. **ΔCt** = Ct(target) – Ct(reference)  
+2. **ΔΔCt** = ΔCt(test) – ΔCt(control)  
+3. **Fold Change** = 2^(-ΔΔCt)
+
+Interpretation:  
+- **Fold Change > 1** → Upregulation  
+- **Fold Change < 1** → Downregulation  
+
+---
+
+### 4️⃣ Statistical Analysis
+The application automatically performs:
+
+**Normality Tests**
+- Shapiro–Wilk
+
+**Variance Homogeneity**
+- Levene test
+
+**Automated Test Selection**
+- Student’s *t*-test or Welch *t*-test (parametric)
+- Mann–Whitney U (non-parametric)
+
+**Significance Threshold**
+- *p* < 0.05
+
+Statistical results are stored internally and displayed in tables and plots.
+
+---
+
+### 5️⃣ Output Files
+- **PDF Report**  
+- **CSV File**  
+- **Interactive plots & boxplots**
+
+---
+
+### 6️⃣ Tips for Best Results
+- Use stable reference genes with low Ct variability.  
+- Analyze each gene in a separate block for multi-gene studies.  
+- Interpret fold change **together** with p-values.  
+- Always save and back up your reports.
+
+---
+
+# ⚠️ DISCLAIMER
+
+This application is intended for **research** and **education** only — not clinical diagnosis.
+
+Users are responsible for verifying results and data accuracy.
+
+Contact: **mailtoburhanettin@gmail.com**
+"""
+
+
+# -------------------------------
+# Modal gösterimi
+# -------------------------------
+if st.session_state.show_guide:
+
+    modal_html = f"""
+    <style>
+    .modal-overlay {{
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.6);
+        z-index: 999998;
+    }}
+
+    .modal-box {{
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        padding: 30px;
+        width: 60%;
+        max-height: 80%;
+        overflow-y: auto;
+        border-radius: 12px;
+        box-shadow: 0 0 30px rgba(0,0,0,0.3);
+        z-index: 999999;
+        font-size: 18px;
+    }}
+
+    .close-btn {{
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        cursor: pointer;
+        font-size: 25px;
+        color: #444;
+    }}
+    </style>
+
+    <div class="modal-overlay"></div>
+
+    <div class="modal-box">
+        <span class="close-btn"
+              onclick="window.parent.postMessage({{type: 'close_modal'}}, '*')">&times;</span>
+        <h2>User Guide</h2>
+        <div>{user_guide_en}</div>
+    </div>
+
+    <script>
+    window.addEventListener("message", (event) => {{
+        if (event.data.type === "close_modal") {{
+            const streamlitEvent = new Event("close-modal");
+            document.dispatchEvent(streamlitEvent);
+        }}
+    }});
+    </script>
+    """
+
+    st.markdown(modal_html, unsafe_allow_html=True)
+
+    # ESC veya X ile kapatma
+    def close_modal():
+        st.session_state.show_guide = False
+
+    st.session_state.close_modal_handler = close_modal
 # Font register fix
 pdfmetrics.registerFont(TTFont('DejaVu', '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'))
 
