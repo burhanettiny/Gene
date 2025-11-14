@@ -159,18 +159,14 @@ if st.session_state.show_guide:
     st.markdown(modal_css, unsafe_allow_html=True)
     st.markdown('<div class="modal-overlay"></div>', unsafe_allow_html=True)
 
-    st.markdown(f"""
-    <div class="modal-box">
-        <form method="post">
-            <button class="close-btn" name="close_modal">❌</button>
-        </form>
-        {user_guide_md}
-    </div>
-    """, unsafe_allow_html=True)
-
-    # Kapatma kontrolü
-    if "close_modal" in st.experimental_get_query_params():
-        st.session_state.show_guide = False
+    # Modal box
+    # X butonu için st.button kullanıyoruz
+    col1, col2 = st.columns([0.95, 0.05])
+    with col2:
+        if st.button("❌"):
+            st.session_state.show_guide = False
+    with col1:
+        st.markdown(user_guide_md)
 pdfmetrics.registerFont(TTFont('DejaVu', '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'))
 st.sidebar.image("geneq.jpg", width=180)
 
