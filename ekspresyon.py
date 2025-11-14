@@ -612,46 +612,63 @@ This guide explains how to properly format your qPCR data, perform ΔΔCt calcul
 - Plots and graphs
 """
 
-# -------------------------------
-# 5) Modal Display
-# -------------------------------
+import streamlit as st
+
+# State kontrolü
+if "show_guide" not in st.session_state:
+    st.session_state.show_guide = False
+
+# User Guide modal gösterimi
 if st.session_state.show_guide:
+    # Modal HTML
     st.markdown(
-    f"""
-    <div id="modal" style="
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.7);
-        z-index: 9999;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    ">
+        f"""
         <div style="
-            background-color: #f9f9f9;
-            width: 80%;
-            max-width: 900px;
-            max-height: 90vh;
-            overflow-y: auto;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-            text-align: left;
-            position: relative;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         ">
-            <div style="position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer;"
-                 onclick="document.getElementById('modal').style.display='none'">
-                 ✖
+            <div style="
+                background-color: #f9f9f9;
+                width: 80%;
+                max-width: 900px;
+                max-height: 90vh;
+                overflow-y: auto;
+                padding: 30px;
+                border-radius: 15px;
+                box-shadow: 0 0 20px rgba(0,0,0,0.5);
+                text-align: left;
+                position: relative;
+            ">
+                <!-- Çarpı butonu -->
+                <form action="/" method="get" style="position:absolute; top:10px; right:15px;">
+                    <button type="submit" name="close_modal" style="
+                        font-size: 24px;
+                        border:none;
+                        background:none;
+                        cursor:pointer;
+                    ">✖</button>
+                </form>
+
+                {user_guide_en}
             </div>
-            {user_guide_en}
         </div>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+        """,
+        unsafe_allow_html=True
+    )
+
+# Modal kapatma kontrolü
+if st.experimental_get_query_params().get("close_modal"):
+    st.session_state.show_guide = False
+    st.experimental_rerun()
+
     
 st.markdown(f"<h3>{translations[language_code]['title']}</h3>", unsafe_allow_html=True)
 st.markdown(f"<h4>{translations[language_code]['patient_data_header']}</h4>", unsafe_allow_html=True)
