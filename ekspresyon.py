@@ -18,9 +18,19 @@ import matplotlib.pyplot as plt
 from reportlab.lib import colors
 import streamlit.components.v1 as components
 
-# ---------------------------------------------------
+# -------------------------------
+# User guide state
+# -------------------------------
+if "show_guide" not in st.session_state:
+    st.session_state.show_guide = False
+
+# Sidebar button
+if st.sidebar.button("📘 User Guide"):
+    st.session_state.show_guide = True
+
+# -------------------------------
 # USER GUIDE (Markdown)
-# ---------------------------------------------------
+# -------------------------------
 user_guide_md = """
 ## 📘 GeneQuantify User Guide (EN)
 
@@ -104,24 +114,62 @@ Contact: **mailtoburhanettin@gmail.com**
 """
 
 # -------------------------------
-# Modal Benzeri Container
+# Modal CSS + HTML
+# -------------------------------
+modal_css = """
+<style>
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6);
+    z-index: 999998;
+}
+
+.modal-box {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 30px;
+    width: 70%;
+    max-height: 80%;
+    overflow-y: auto;
+    border-radius: 12px;
+    box-shadow: 0 0 30px rgba(0,0,0,0.3);
+    z-index: 999999;
+    font-size: 18px;
+}
+
+.close-btn {
+    position: absolute;
+    top: 10px; right: 15px;
+    font-size: 25px;
+    cursor: pointer;
+    background: none;
+    border: none;
+}
+</style>
+"""
+
+# -------------------------------
+# Modal Gösterimi
 # -------------------------------
 if st.session_state.show_guide:
+    # CSS
+    st.markdown(modal_css, unsafe_allow_html=True)
+
+    # Overlay
+    st.markdown('<div class="modal-overlay"></div>', unsafe_allow_html=True)
+
+    # Modal container
     with st.container():
-        st.markdown("---")
-        close_button = st.button("❌ Close User Guide")
-        st.markdown(user_guide_md)
-        st.markdown("---")
-
-        if close_button:
-            st.session_state.show_guide = False
-
-# ---------------------------------------------------
-# SIDEBAR BUTTON
-# ---------------------------------------------------
-if st.sidebar.button("📘 User Guide"):
-    show_user_guide()
-
+        col1, col2 = st.columns([0.95, 0.05])
+        with col2:
+            if st.button("❌"):
+                st.session_state.show_guide = False
+        with col1:
+            st.markdown(user_guide_md)
 pdfmetrics.registerFont(TTFont('DejaVu', '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'))
 st.sidebar.image("geneq.jpg", width=180)
 
