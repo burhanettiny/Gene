@@ -612,8 +612,6 @@ This guide explains how to properly format your qPCR data, perform ΔΔCt calcul
 - Plots and graphs
 """
 
-import streamlit as st
-
 # State kontrolü
 if "show_guide" not in st.session_state:
     st.session_state.show_guide = False
@@ -627,7 +625,7 @@ if st.session_state.show_guide:
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
+            background-color: rgba(0,0,0,0.7);
             z-index: 9999;
             display: flex;
             justify-content: center;
@@ -635,28 +633,31 @@ if st.session_state.show_guide:
         ">
             <div style="
                 background-color: #f9f9f9;
-                width: 80%;
-                max-width: 900px;
-                max-height: 90vh;
-                overflow-y: auto;
+                width: 90%;
+                height: 90%;
+                overflow-y: scroll;
                 padding: 30px;
                 border-radius: 15px;
                 box-shadow: 0 0 20px rgba(0,0,0,0.5);
-                text-align: left;
                 position: relative;
             ">
+                <div style='position: absolute; top: 10px; right: 20px;'>
+                    <form action="">
+                        <input type="submit" value="✖ Close" style="
+                            background: none;
+                            border: none;
+                            font-size: 24px;
+                            cursor: pointer;
+                        ">
+                    </form>
+                </div>
+                {user_guide_en}
+            </div>
+        </div>
         """,
         unsafe_allow_html=True
     )
 
-    # Streamlit butonunu modal içinde kullanıyoruz
-    close = st.button("✖ Close User Guide")
-    st.markdown(user_guide_en, unsafe_allow_html=True)
-
-    st.markdown("</div></div>", unsafe_allow_html=True)
-
-    if close:
-        st.session_state.show_guide = False
 
     
 st.markdown(f"<h3>{translations[language_code]['title']}</h3>", unsafe_allow_html=True)
