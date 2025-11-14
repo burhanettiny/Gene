@@ -659,6 +659,12 @@ Contact: mailtoburhanettin@gmail.com
 if "show_guide" not in st.session_state:
     st.session_state.show_guide = False
 
+# -------------------------------
+# 3) Modal açma ve kapama
+# -------------------------------
+def close_modal():
+    st.session_state.show_guide = False
+
 if st.session_state.show_guide:
     st.markdown(
         f"""
@@ -685,17 +691,18 @@ if st.session_state.show_guide:
                 position: relative;
             ">
                 <div style='position: absolute; top: 10px; right: 20px;'>
-                    <button onclick="this.closest('div[style*=&quot;position: fixed&quot;]').style.display='none';"
-                            style="background: none; border: none; font-size: 24px; cursor: pointer;">
-                        ✖
-                    </button>
-                </div>
+                    <!-- Streamlit button kullanıyoruz -->
+                    </div>
                 {user_guide_en}
             </div>
         </div>
         """,
         unsafe_allow_html=True
     )
+
+# Streamlit “X” butonu
+if st.session_state.show_guide:
+    st.button("✖ Close", on_click=close_modal)
                     
 st.markdown(f"<h3>{translations[language_code]['title']}</h3>", unsafe_allow_html=True)
 st.markdown(f"<h4>{translations[language_code]['patient_data_header']}</h4>", unsafe_allow_html=True)
