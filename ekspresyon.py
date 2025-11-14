@@ -115,6 +115,9 @@ Contact: **mailtoburhanettin@gmail.com**
 # -------------------------------
 # Modal CSS
 # -------------------------------
+# -------------------------------
+# Modal Gösterimi
+# -------------------------------
 if st.session_state.show_guide:
     # CSS
     st.markdown(modal_css, unsafe_allow_html=True)
@@ -127,6 +130,28 @@ if st.session_state.show_guide:
         <button class="close-btn" onclick="document.querySelector('.modal-box').style.display='none';document.querySelector('.modal-overlay').style.display='none';window.parent.postMessage({{type:'close_modal'}}, '*')">❌</button>
         {user_guide_md}
     </div>
+
+    <script>
+    // ESC tuşuna basınca modal kapanır
+    document.addEventListener('keydown', function(e) {{
+        if(e.key === "Escape"){{
+            const modal = document.querySelector('.modal-box');
+            const overlay = document.querySelector('.modal-overlay');
+            if(modal) modal.style.display = 'none';
+            if(overlay) overlay.style.display = 'none';
+            window.parent.postMessage({{type:'close_modal'}}, '*')
+        }}
+    }});
+
+    // Streamlit event ile Python tarafını güncelle
+    window.addEventListener("message", (event) => {{
+        if(event.data.type === "close_modal"){{
+            const streamlitEvent = new Event("close-modal")
+            document.dispatchEvent(streamlitEvent)
+        }}
+    }})
+    </script>
+    """, unsafe_allow_html=True)
 
     # Python tarafında modal kapanışı
     def close_modal():
