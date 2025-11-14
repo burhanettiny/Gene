@@ -115,59 +115,24 @@ Contact: **mailtoburhanettin@gmail.com**
 # -------------------------------
 # Modal CSS
 # -------------------------------
-modal_css = """
-<style>
-.modal-overlay {
-    position: fixed;
-    top:0; left:0;
-    width:100%; height:100%;
-    background: rgba(0,0,0,0.6);
-    z-index: 999998;
-}
-
-.modal-box {
-    position: fixed;
-    top: 50%; left:50%;
-    transform: translate(-50%, -50%);
-    width: 70%;
-    max-height: 80%;
-    background: white;
-    padding: 30px;
-    overflow-y: auto;
-    border-radius: 12px;
-    box-shadow: 0 0 30px rgba(0,0,0,0.3);
-    z-index: 999999;
-    font-size: 18px;
-}
-.close-btn {
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    font-size: 25px;
-    cursor: pointer;
-    background: none;
-    border: none;
-}
-</style>
-"""
-
-# -------------------------------
-# Modal Gösterimi
-# -------------------------------
 if st.session_state.show_guide:
     # CSS
     st.markdown(modal_css, unsafe_allow_html=True)
-
     # Overlay
     st.markdown('<div class="modal-overlay"></div>', unsafe_allow_html=True)
 
-    # Modal Box
-    col1, col2 = st.columns([0.95, 0.05])
-    with col2:
-        if st.button("❌"):
-            st.session_state.show_guide = False
-    with col1:
-        st.markdown(user_guide_md)
+    # Modal box with scrollable content
+    st.markdown(f"""
+    <div class="modal-box">
+        <button class="close-btn" onclick="document.querySelector('.modal-box').style.display='none';document.querySelector('.modal-overlay').style.display='none';window.parent.postMessage({{type:'close_modal'}}, '*')">❌</button>
+        {user_guide_md}
+    </div>
+
+    # Python tarafında modal kapanışı
+    def close_modal():
+        st.session_state.show_guide = False
+
+    st.session_state.close_modal_handler = close_modal
 pdfmetrics.registerFont(TTFont('DejaVu', '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'))
 st.sidebar.image("geneq.jpg", width=180)
 
