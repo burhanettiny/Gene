@@ -17,6 +17,11 @@ import plotly.io as pio
 import matplotlib.pyplot as plt
 from reportlab.lib import colors
 
+import streamlit as st
+
+# -------------------------------
+# 1) Modal CSS + JS
+# -------------------------------
 modal_css = """
 <style>
 .modal {
@@ -54,19 +59,68 @@ modal_css = """
 </style>
 """
 st.markdown(modal_css, unsafe_allow_html=True)
-user_guides = {
-    "tr": """
-## 📘 Kullanım Kılavuzu (TR)
 
-### 📌 Veri Girişi Formatı
-- Aynı örneğe ait Ct tekrarları **aynı satıra**, aralarında **boşluk** olacak şekilde yazılır.
-- Bir sonraki örnek **bir alt satıra** yazılır.
-- Excel’den doğrudan **kopyala–yapıştır** yapılabilir.
-- Virgüller otomatik olarak noktaya çevrilir.
+# -------------------------------
+# 2) User Guide Content (EN)
+# -------------------------------
+user_guide_en = """
+## 📘 User Guide (EN)
 
-**Örnek:**
+### 📌 Data Input Format
+- Replicates are entered on the **same line**, separated by **spaces**.
+- Next sample → new line.
+- Fully compatible with **Excel copy–paste**.
+- Commas convert automatically to dots.
 
+Example:
 
+23.1 23.4 23.7
+22.9 23.5 23.8
+25.2 25.4 25.1
+
+### 📊 Example Excel Table
+| Group | Rep1 | Rep2 | Rep3 |
+|-------|------|------|------|
+| Control 1 | 23.1 | 23.4 | 23.7 |
+| Control 2 | 22.9 | 23.5 | 23.8 |
+| Patient 1 | 25.2 | 25.4 | 25.1 |
+
+### 🧮 Calculations
+- ΔCt = Ct(target) – Ct(reference)
+- ΔΔCt = ΔCt(test) – ΔCt(control)
+- Fold Change = 2^(-ΔΔCt)
+
+### 📈 Statistical Tests
+- Shapiro–Wilk  
+- Levene  
+- Student’s t-test  
+- Welch  
+- Mann–Whitney U  
+"""
+
+# -------------------------------
+# 3) Modal Open/Close Mechanism
+# -------------------------------
+if "show_modal" not in st.session_state:
+    st.session_state.show_modal = False
+
+# Modal trigger button
+if st.button("📘 User Guide"):
+    st.session_state.show_modal = True
+
+# Show modal if triggered
+if st.session_state.get("show_modal", False):
+    st.markdown(f"""
+    <div id="myModal" class="modal" style="display:block;">
+      <div class="modal-content">
+        <span class="close" onclick="document.getElementById('myModal').style.display='none';">{chr(215)}</span>
+        <div id="modalText"></div>
+      </div>
+    </div>
+    <script>
+        document.getElementById('modalText').innerHTML = `{user_guide_en}`;
+    </script>
+    """, unsafe_allow_html=True)
 
 
 
