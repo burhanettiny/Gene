@@ -669,91 +669,89 @@ Contact: **mailtoburhanettin@gmail.com**
 if "show_guide" not in st.session_state:
     st.session_state.show_guide = False
 
-def close_modal():
-    st.session_state.show_guide = False
+if st.sidebar.button("📘 User Guide"):
+    st.session_state.show_guide = True
 
-# -------------------------------
-# ESC tuşu ile modal kapatma (JavaScript)
-# -------------------------------
-esc_close_js = """
+# ESC ile kapatma için JS
+st.markdown("""
 <script>
-document.addEventListener('keydown', function(event) {
-    if (event.key === "Escape") {
-        // Trigger Streamlit callback
-        window.parent.postMessage({type: 'streamlit:setState', value: {'show_guide': false}}, '*');
+document.addEventListener('keydown', function(e) {
+    if (e.key === "Escape") {
+        window.parent.postMessage({type: 'close_modal'}, '*')
     }
 });
 </script>
-"""
+""", unsafe_allow_html=True)
 
 # -------------------------------
 # Modal gösterimi
 # -------------------------------
 if st.session_state.show_guide:
 
-    # Arkaplan overlay
-    st.markdown(
-        """
-        <div id="modal_overlay" style="
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.6);
-            z-index: 9998;
-        ">
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+    modal_html = """
+    <style>
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.6);
+        z-index: 999998;
+    }
 
-    # Modal kutusu
-    st.markdown(
-        """
-        <div id="modal_box" style="
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 70%;
-            height: 80vh;
-            padding: 25px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0px 0px 20px rgba(0,0,0,0.4);
-            overflow-y: auto;
-            z-index: 9999;
-        ">
-        """,
-        unsafe_allow_html=True
-    )
+    .modal-box {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        padding: 30px;
+        width: 60%;
+        max-height: 80%;
+        overflow-y: auto;
+        border-radius: 12px;
+        box-shadow: 0 0 30px rgba(0,0,0,0.3);
+        z-index: 999999;
+        font-size: 18px;
+    }
 
-    # X butonu
-    st.markdown(
-        """
-        <div style="
-            position: absolute;
-            top: 15px;
-            right: 25px;
-            z-index: 10000;
-        ">
-        """,
-        unsafe_allow_html=True
-    )
+    .close-btn {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        cursor: pointer;
+        font-size: 25px;
+        color: #444;
+    }
+    </style>
 
-    st.button("❌ Close", on_click=close_modal)
+    <div class="modal-overlay"></div>
 
-    # Kullanım kılavuzu içeriği
-    st.markdown(user_guide_en, unsafe_allow_html=True)
+    <div class="modal-box">
+        <span class="close-btn" onclick="window.parent.postMessage({type: 'close_modal'}, '*')">&times;</span>
+        <h2>User Guide</h2>
+        <p>This is the full content of the user guide with text, explanations, steps, etc.</p>
+        <p>You can put anything here: markdown, instructions, tables, etc.</p>
+    </div>
 
-    # Modal kutusu kapanış div'i
-    st.markdown("</div>", unsafe_allow_html=True)
+    <script>
+    window.addEventListener("message", (event) => {
+        if (event.data.type === "close_modal") {
+            const streamlitEvent = new Event("close-modal")
+            document.dispatchEvent(streamlitEvent)
+        }
+    })
+    </script>
+    """
 
-    # ESC ile kapatma scripti
-    st.markdown(esc_close_js, unsafe_allow_html=True)
+    st.markdown(modal_html, unsafe_allow_html=True)
 
+    # ESC veya X'e basınca kapat
+    def close_modal():
+        st.session_state.show_guide = False
 
+    st.session_state.close_modal_handler = close_modal
                     
 st.markdown(f"<h3>{translations[language_code]['title']}</h3>", unsafe_allow_html=True)
 st.markdown(f"<h4>{translations[language_code]['patient_data_header']}</h4>", unsafe_allow_html=True)
