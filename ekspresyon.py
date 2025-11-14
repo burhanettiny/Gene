@@ -18,6 +18,109 @@ import matplotlib.pyplot as plt
 from reportlab.lib import colors
 import streamlit.components.v1 as components
 
+# ---------------------------------------------------
+# USER GUIDE (Markdown)
+# ---------------------------------------------------
+user_guide_md = """
+## 📘 GeneQuantify User Guide (EN)
+
+### 1️⃣ Introduction
+GeneQuantify performs **ΔCt, ΔΔCt**, and **2^(-ΔΔCt)** calculations for qPCR gene expression and CNV analysis.
+
+---
+
+### 2️⃣ Data Input Instructions
+- One sample per **new line**
+- Replicates separated by **spaces**
+- Commas auto-converted to dots
+- No blank lines
+
+**Example Input:**
+
+23.1 23.4 23.7  
+22.9 23.5 23.8  
+25.2 25.4 25.1  
+
+---
+
+Example Data Table:
+
+| Group     | Rep1 | Rep2 | Rep3 |
+|-----------|------|------|------|
+| Control 1 | 23.1 | 23.4 | 23.7 |
+| Control 2 | 22.9 | 23.5 | 23.8 |
+| Patient 1 | 25.2 | 25.4 | 25.1 |
+
+---
+
+### 3️⃣ Calculations Performed
+1. **ΔCt** = Ct(target) – Ct(reference)  
+2. **ΔΔCt** = ΔCt(test) – ΔCt(control)  
+3. **Fold Change** = 2^(-ΔΔCt)
+
+Interpretation:  
+- **Fold Change > 1** → Upregulation  
+- **Fold Change < 1** → Downregulation  
+
+---
+
+### 4️⃣ Statistical Analysis
+The application automatically performs:
+
+**Normality Tests**
+- Shapiro–Wilk
+
+**Variance Homogeneity**
+- Levene test
+
+**Automated Test Selection**
+- Student’s *t*-test or Welch *t*-test (parametric)
+- Mann–Whitney U (non-parametric)
+
+**Significance Threshold**
+- *p* < 0.05
+
+Statistical results are stored internally and displayed in tables and plots.
+
+---
+
+### 5️⃣ Output Files
+- **PDF Report**  
+- **CSV File**  
+- **Interactive plots & boxplots**
+
+---
+
+### 6️⃣ Tips for Best Results
+- Use stable reference genes with low Ct variability.  
+- Analyze each gene in a separate block for multi-gene studies.  
+- Interpret fold change **together** with p-values.  
+- Always save and back up your reports.
+
+---
+
+# ⚠️ DISCLAIMER
+
+This application is intended for **research** and **education** only — not clinical diagnosis.
+
+Users are responsible for verifying results and data accuracy.
+
+Contact: **mailtoburhanettin@gmail.com**
+"""
+
+
+# ---------------------------------------------------
+# STREAMLIT DIALOG – EN STABİL YÖNTEM
+# ---------------------------------------------------
+
+@st.experimental_dialog("📘 User Guide")
+def open_user_guide():
+    st.markdown(user_guide_md)
+
+
+# Sidebar Button → Modal aç
+if st.sidebar.button("📘 User Guide"):
+    open_user_guide()
 
 pdfmetrics.registerFont(TTFont('DejaVu', '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'))
 st.sidebar.image("geneq.jpg", width=180)
