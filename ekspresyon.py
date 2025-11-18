@@ -84,24 +84,23 @@ This guide explains how to properly format your qPCR data, perform ΔΔCt calcul
 ---
 
 ### 📌 Data Input Format
-- Each replicate for a sample should be entered on the **same line**, separated by **spaces**.  
-- Next sample should start on a **new line**.  
+ 
 - Compatible with **Excel copy–paste**. Commas are converted automatically to dots.  
 
 **Example:**
 
-23.1 23.4 23.7  
-22.9 23.5 23.8  
-25.2 25.4 25.1  
+23.1   
+22.9   
+25.2 
 
 ---
 
 ### 📊 Example Excel Table
-| Group     | Rep1 | Rep2 | Rep3 |
-|-----------|------|------|------|
-| Control 1 | 23.1 | 23.4 | 23.7 |
-| Control 2 | 22.9 | 23.5 | 23.8 |
-| Patient 1 | 25.2 | 25.4 | 25.1 |
+| Group     | Cq | 
+|-----------|------|
+| Control 1 | 23.1 | 
+| Control 2 | 22.9 | 
+| Control 3 | 25.2 | 
 
 ---
 
