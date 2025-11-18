@@ -933,7 +933,4 @@ toggle_sidebar = st.button("☰ Göster/Gizle Sidebar")
 if toggle_sidebar:
     st.session_state.show_sidebar = not st.session_state.show_sidebar
 
-if st.session_state.show_sidebar:
-    with st.sidebar:
-        st.number_input("Target Genes", min_value=1, step=1)
-        st.number_input("Patient Groups", min_value=1, step=1)
+
