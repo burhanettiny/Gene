@@ -19,6 +19,7 @@ from reportlab.lib import colors
 import streamlit.components.v1 as components
 
 pdfmetrics.registerFont(TTFont('DejaVu', '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'))
+st.set_page_config(page_title="Uncertainty Tool", layout="wide")
 st.sidebar.image("geneq.jpg", use_container_width=True)
 
 hide_streamlit_style = """
