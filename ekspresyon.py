@@ -77,18 +77,53 @@ if instruction_clicked or selected_language_name == "Instruction":
     @st.dialog("📘 GeneQuantify User Guide")
     def show_guide():
         st.markdown("""
-### How to Use GeneQuantify
+## 📘 User Guide (EN)
 
-**1) Enter your qPCR Ct values**  
-Paste directly from Excel.  
-Same-sample replicates must be side-by-side (space-separated).
+This guide explains how to properly format your qPCR data, perform ΔΔCt calculations, and interpret the results.
 
-**2) Choose analysis mode**  
-- ΔΔCt gene expression  
-- CNV (Copy Number Variation)
+---
 
-**3) Export results**  
-Excel & PDF export available.
+### 📌 Data Input Format
+- Each replicate for a sample should be entered on the **same line**, separated by **spaces**.  
+- Next sample should start on a **new line**.  
+- Compatible with **Excel copy–paste**. Commas are converted automatically to dots.  
+
+**Example:**
+
+23.1 23.4 23.7  
+22.9 23.5 23.8  
+25.2 25.4 25.1  
+
+---
+
+### 📊 Example Excel Table
+| Group     | Rep1 | Rep2 | Rep3 |
+|-----------|------|------|------|
+| Control 1 | 23.1 | 23.4 | 23.7 |
+| Control 2 | 22.9 | 23.5 | 23.8 |
+| Patient 1 | 25.2 | 25.4 | 25.1 |
+
+---
+
+### 🧮 Calculations
+1. **ΔCt** = Ct(target) – Ct(reference)  
+2. **ΔΔCt** = ΔCt(test) – ΔCt(control)  
+3. **Fold Change** = 2^(-ΔΔCt)  
+
+---
+
+### 📈 Statistical Tests
+- Shapiro–Wilk → checks normality  
+- Levene → checks homogeneity of variances  
+- Student’s t-test / Welch → compare means  
+- Mann–Whitney U → non-parametric comparison  
+
+---
+
+### 📄 Outputs
+- PDF report  
+- CSV file  
+- Plots and graphs
 """)
         st.button("Close")
 
