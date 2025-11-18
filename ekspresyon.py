@@ -69,7 +69,7 @@ st.markdown("""
 #   📘 Selectbox ALTINDA INSTRUCTION LINKİ
 # --------------------------------------------
 st.sidebar.markdown("---")
-instruction_clicked = st.sidebar.button("📘 Instruction / Kullanım Kılavuzu")
+instruction_clicked = st.sidebar.button("📘 Instruction ")
 
 # Instruction’a tıklanınca modal açılır
 if instruction_clicked or selected_language_name == "Instruction":
