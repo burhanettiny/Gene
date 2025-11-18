@@ -18,22 +18,7 @@ import matplotlib.pyplot as plt
 from reportlab.lib import colors
 import streamlit.components.v1 as components
 
-st.set_page_config(
-    page_title="GeneQuantify",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
 
-st.sidebar.image("geneq.jpg", use_container_width=True)
-
-hide_streamlit_style = """
-    <style>
-        #MainMenu {visibility: hidden;} 
-        footer {visibility: hidden !important;} 
-        header {visibility: hidden;}
-    </style>
-"""
-st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 
 if 'language' not in st.session_state:
