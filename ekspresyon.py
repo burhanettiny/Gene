@@ -37,15 +37,31 @@ flags = {
     "Español": "🇪🇸",
     "العربية": "🇸🇦"
 }
-flags_with_instruction = {"Instruction": "ℹ️"}
-flags_with_instruction.update(flags)
-
+default_index = list(flags.keys()).index(st.session_state.language)
+st.sidebar.image("geneq.jpg", use_container_width=True)
 selected_language = st.sidebar.selectbox(
-    "Language / Dil",
-    options=[f"{flags_with_instruction[lang]} {lang}" for lang in flags_with_instruction]
+    "Language / Dil / Sprache / Français / Español / العربية",
+    options=[f"{flags[lang]} {lang}" for lang in flags],
+    index=default_index  # İngilizce varsayılan
 )
 
-selected_language_name = selected_language.split(" ", 1)[1]
+try:
+    selected_language_name = selected_language.split(' ', 1)[1]  
+    selected_flag = flags[selected_language_name]
+except KeyError:
+    selected_language_name = selected_language 
+    selected_flag = None  
+st.markdown("""
+<style>
+[data-testid="stSidebarCollapseButton"] {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+</style>
+
+""", unsafe_allow_html=True)
+
 
 # Instruction seçildiyse modal aç
 if selected_language_name == "Instruction":
