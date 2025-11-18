@@ -77,7 +77,6 @@ if instruction_clicked or selected_language_name == "Instruction":
     @st.dialog("📘 GeneQuantify User Guide")
     def show_guide():
         st.markdown("""
-## 📘 User Guide (EN)
 
 This guide explains how to properly format your qPCR data, perform ΔΔCt calculations, and interpret the results.
 
