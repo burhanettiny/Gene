@@ -125,7 +125,6 @@ This guide explains how to properly format your qPCR data, perform ΔΔCt calcul
 - CSV file  
 - Plots and graphs
 """)
-        st.button("Close")
 
     show_guide()
     
