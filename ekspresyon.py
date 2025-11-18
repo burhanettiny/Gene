@@ -20,6 +20,7 @@ import streamlit.components.v1 as components
 
 
 
+st.set_page_config(page_title="GeneQuantify", layout="wide")
 
 if 'language' not in st.session_state:
     st.session_state.language = "English" 
