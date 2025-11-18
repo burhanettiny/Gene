@@ -18,7 +18,6 @@ import matplotlib.pyplot as plt
 from reportlab.lib import colors
 import streamlit.components.v1 as components
 
-pdfmetrics.registerFont(TTFont('DejaVu', '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'))
 st.set_page_config(
     page_title="GeneQuantify",
     layout="wide",
@@ -856,6 +855,7 @@ for i in range(num_target_genes):
     )
     st.plotly_chart(fig)
 # PDF rapor oluşturma kısmı
+pdfmetrics.registerFont(TTFont('DejaVu', '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'))
 def create_pdf(results, stats, input_df, language_code):
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=letter)
