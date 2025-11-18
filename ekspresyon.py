@@ -38,6 +38,7 @@ flags = {
     "العربية": "🇸🇦"
 }
 default_index = list(flags.keys()).index(st.session_state.language)
+st.sidebar.image("geneq.jpg", use_container_width=True)
 selected_language = st.sidebar.selectbox(
     "Language / Dil / Sprache / Français / Español / العربية",
     options=[f"{flags[lang]} {lang}" for lang in flags],
