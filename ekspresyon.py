@@ -124,6 +124,14 @@ This guide explains how to properly format your qPCR data, perform ΔΔCt calcul
 - PDF report  
 - CSV file  
 - Plots and graphs
+
+---
+
+### 📄 Disclaimer
+This application is intended for **research**, **education**, and **preliminary laboratory analysis** only. It is **NOT** designed or validated for clinical diagnosis, treatment decisions, or patient management. The developers do **not** guarantee: - Complete accuracy of calculations or statistical outputs - Compatibility with specific qPCR assays, kits, or platforms - Compliance with clinical laboratory standards - Correctness or validity of user-entered data Users are fully responsible for: - Verifying the accuracy of entered Ct data - Interpreting results appropriately - Confirming findings using validated laboratory methods The developers are **not liable** for any decisions, losses, or damages arising from application use. All clinical decisions must be made by qualified professionals. Contact: **mailtoburhanettin@gmail.com**
+
+
+
 """)
 
     show_guide()
