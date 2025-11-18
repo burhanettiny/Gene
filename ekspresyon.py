@@ -39,10 +39,11 @@ flags = {
 }
 default_index = list(flags.keys()).index(st.session_state.language)
 st.sidebar.image("geneq.jpg", use_container_width=True)
+
 selected_language = st.sidebar.selectbox(
     "Language / Dil / Sprache / Français / Español / العربية",
     options=[f"{flags[lang]} {lang}" for lang in flags],
-    index=default_index  # İngilizce varsayılan
+    index=default_index
 )
 
 try:
@@ -51,6 +52,8 @@ try:
 except KeyError:
     selected_language_name = selected_language 
     selected_flag = None  
+
+# Sidebar collapse görünür olması için CSS
 st.markdown("""
 <style>
 [data-testid="stSidebarCollapseButton"] {
@@ -59,32 +62,38 @@ st.markdown("""
     opacity: 1 !important;
 }
 </style>
-
 """, unsafe_allow_html=True)
 
 
-# Instruction seçildiyse modal aç
-if selected_language_name == "Instruction":
+# --------------------------------------------
+#   📘 Selectbox ALTINDA INSTRUCTION LINKİ
+# --------------------------------------------
+st.sidebar.markdown("---")
+instruction_clicked = st.sidebar.button("📘 Instruction / Kullanım Kılavuzu")
+
+# Instruction’a tıklanınca modal açılır
+if instruction_clicked or selected_language_name == "Instruction":
+
     @st.dialog("📘 GeneQuantify User Guide")
     def show_guide():
         st.markdown("""
-### How to Use the App
+### How to Use GeneQuantify
 
-**1. Enter Ct values:**  
-Paste rows directly from Excel.  
+**1) Enter your qPCR Ct values**  
+Paste directly from Excel.  
 Same-sample replicates must be side-by-side (space-separated).
 
-**2. Select method:**  
+**2) Choose analysis mode**  
 - ΔΔCt gene expression  
 - CNV (Copy Number Variation)
 
-**3. Export results:**  
-Excel & PDF available.  
+**3) Export results**  
+Excel & PDF export available.
 """)
         st.button("Close")
 
     show_guide()
-
+    
 language_map = {
     "Türkçe": "tr",
     "Español": "es",
