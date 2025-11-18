@@ -67,12 +67,13 @@ except KeyError:
     selected_flag = None  
 st.markdown("""
 <style>
-[data-testid="collapsedControl"] {
+[data-testid="stSidebarCollapseButton"] {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
 }
 </style>
+
 """, unsafe_allow_html=True)
 
 language_map = {
