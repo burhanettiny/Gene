@@ -917,27 +917,37 @@ for i in range(num_target_genes):
     )
     st.plotly_chart(fig)
 # PDF rapor oluşturma kısmı
-# PDF rapor oluşturma kısmı
-FONT_PATH_SYSTEM = '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'
-FONT_URL = 'https://github.com/dejavu-fonts/dejavu-fonts/raw/master/ttf/DejaVuSans.ttf'
-LOCAL_FONT_PATH = 'DejaVuSans.ttf'
+import os
+import glob
 
 def get_font_path():
-    if os.path.exists(FONT_PATH_SYSTEM):
-        return FONT_PATH_SYSTEM
-    if os.path.exists(LOCAL_FONT_PATH):
-        return LOCAL_FONT_PATH
-    try:
-        urllib.request.urlretrieve(FONT_URL, LOCAL_FONT_PATH)
-        return LOCAL_FONT_PATH
-    except Exception as e:
-        st.warning(f"Font download failed: {e}. Using default font.")
-        return None
+    # 1. Bilinen sistem yolları
+    candidates = [
+        '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
+        '/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',
+        '/usr/share/fonts/truetype/freefont/FreeSans.ttf',
+        '/usr/share/fonts/truetype/ubuntu/Ubuntu-R.ttf',
+        '/usr/share/fonts/truetype/noto/NotoSans-Regular.ttf',
+    ]
+    for path in candidates:
+        if os.path.exists(path):
+            return path
+
+    # 2. Sistemde .ttf ara
+    results = glob.glob('/usr/share/fonts/**/*.ttf', recursive=True)
+    if results:
+        return results[0]
+
+    return None  # Bulunamazsa Helvetica fallback
 
 font_path = get_font_path()
 if font_path:
-    pdfmetrics.registerFont(TTFont('DejaVu', font_path))
-    REGISTERED_FONT = 'DejaVu'
+    try:
+        pdfmetrics.registerFont(TTFont('CustomFont', font_path))
+        REGISTERED_FONT = 'CustomFont'
+    except Exception as e:
+        st.warning(f"Font yüklenemedi: {e}. Varsayılan font kullanılıyor.")
+        REGISTERED_FONT = 'Helvetica'
 else:
     REGISTERED_FONT = 'Helvetica'
 
