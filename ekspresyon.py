@@ -17,6 +17,8 @@ import plotly.io as pio
 import matplotlib.pyplot as plt
 from reportlab.lib import colors
 import streamlit.components.v1 as components
+import os
+import urllib.request
 
 
 
@@ -915,14 +917,37 @@ for i in range(num_target_genes):
     )
     st.plotly_chart(fig)
 # PDF rapor oluşturma kısmı
-pdfmetrics.registerFont(TTFont('DejaVu', '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'))
+# PDF rapor oluşturma kısmı
+FONT_PATH_SYSTEM = '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'
+FONT_URL = 'https://github.com/dejavu-fonts/dejavu-fonts/raw/master/ttf/DejaVuSans.ttf'
+LOCAL_FONT_PATH = 'DejaVuSans.ttf'
+
+def get_font_path():
+    if os.path.exists(FONT_PATH_SYSTEM):
+        return FONT_PATH_SYSTEM
+    if os.path.exists(LOCAL_FONT_PATH):
+        return LOCAL_FONT_PATH
+    try:
+        urllib.request.urlretrieve(FONT_URL, LOCAL_FONT_PATH)
+        return LOCAL_FONT_PATH
+    except Exception as e:
+        st.warning(f"Font download failed: {e}. Using default font.")
+        return None
+
+font_path = get_font_path()
+if font_path:
+    pdfmetrics.registerFont(TTFont('DejaVu', font_path))
+    REGISTERED_FONT = 'DejaVu'
+else:
+    REGISTERED_FONT = 'Helvetica'
+
 def create_pdf(results, stats, input_df, language_code):
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=letter)
     elements = []
     
     styles = getSampleStyleSheet()
-    font_name = 'DejaVu'
+    font_name = REGISTERED_FONT  # ← sabit 'DejaVu' yerine dinamik
     styles['Normal'].fontName = font_name
     styles['Title'].fontName = font_name
     styles['Heading2'].fontName = font_name
@@ -957,7 +982,7 @@ def create_pdf(results, stats, input_df, language_code):
     
     for result in results:
         text = (f"{result[translations[language_code]['target_gene']]} - {result[translations[language_code]['patient_group']]} | "
-                f"ΔΔCt: {result['ΔΔCt']:.2f} | 2^(-ΔΔCt): {result[translations[language_code]['gene_expression_change']]:.2f} | "
+                f"ΔΔCt: {result[translations[language_code]['delta_delta_ct']]:.2f} | 2^(-ΔΔCt): {result[translations[language_code]['gene_expression_change']]:.2f} | "
                 f"{result[translations[language_code]['regulation_status']]}")
         elements.append(Paragraph(text, styles['Normal']))
         elements.append(Spacer(1, 6))
