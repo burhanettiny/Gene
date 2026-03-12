@@ -1052,6 +1052,93 @@ def geometric_mean_ct(ct_arrays):
     """
     stacked = np.vstack(ct_arrays)   # shape (n_refs, n_samples)
     return np.mean(stacked, axis=0)  # arithmetic mean in Ct = geometric mean of expression
+
+# ─── OUTLIER DETECTION FUNCTIONS ─────────────────────────────────────────────
+def detect_outliers_grubbs(data, alpha=0.05):
+    """
+    Grubbs test for a single outlier (two-sided).
+    Returns list of outlier indices. Requires n >= 3.
+    Grubbs 1969; commonly used in qPCR Ct data QC.
+    """
+    data = np.array(data, dtype=float)
+    n = len(data)
+    if n < 3:
+        return []
+    outlier_indices = []
+    working = data.copy()
+    original_indices = list(range(n))
+    while len(working) >= 3:
+        mean_w = np.mean(working)
+        std_w  = np.std(working, ddof=1)
+        if std_w == 0:
+            break
+        g_vals = np.abs(working - mean_w) / std_w
+        max_idx = np.argmax(g_vals)
+        G = g_vals[max_idx]
+        # Critical value (two-sided, approximate)
+        t_crit = stats.t.ppf(1 - alpha / (2 * len(working)), df=len(working) - 2)
+        G_crit = ((len(working) - 1) / np.sqrt(len(working))) * \
+                 np.sqrt(t_crit**2 / (len(working) - 2 + t_crit**2))
+        if G > G_crit:
+            outlier_indices.append(original_indices[max_idx])
+            original_indices.pop(max_idx)
+            working = np.delete(working, max_idx)
+        else:
+            break
+    return outlier_indices
+
+def detect_outliers_iqr(data, multiplier=1.5):
+    """
+    IQR-based outlier detection (Tukey fences).
+    Returns list of outlier indices.
+    """
+    data = np.array(data, dtype=float)
+    q1, q3 = np.percentile(data, [25, 75])
+    iqr = q3 - q1
+    lower = q1 - multiplier * iqr
+    upper = q3 + multiplier * iqr
+    return [i for i, v in enumerate(data) if v < lower or v > upper]
+
+def render_outlier_ui(data, label, key_prefix, method):
+    """
+    Show detected outliers, let user confirm exclusion via checkboxes.
+    Returns cleaned array (with confirmed outliers removed) and list of excluded indices.
+    """
+    data = np.array(data, dtype=float)
+    if method == "Grubbs":
+        detected = detect_outliers_grubbs(data)
+    else:
+        detected = detect_outliers_iqr(data)
+
+    if not detected:
+        return data, []
+
+    st.warning(
+        f"⚠️ **Potential outlier(s) detected in {label}** "
+        f"({method} test): Sample(s) **{[i+1 for i in detected]}** "
+        f"— values: **{[round(data[i], 3) for i in detected]}**\n\n"
+        f"Select which samples to exclude from analysis:"
+    )
+
+    excluded = []
+    for idx in detected:
+        confirm = st.checkbox(
+            f"Exclude Sample {idx+1}  (Ct = {data[idx]:.3f}) from {label}",
+            value=False,
+            key=f"{key_prefix}_excl_{idx}"
+        )
+        if confirm:
+            excluded.append(idx)
+
+    if excluded:
+        cleaned = np.delete(data, excluded)
+        st.info(
+            f"ℹ️ {len(excluded)} sample(s) excluded from {label}. "
+            f"Remaining n = {len(cleaned)}. "
+            f"Excluded values will be flagged in the results table and PDF report."
+        )
+        return cleaned, excluded
+    return data, []
 # ─────────────────────────────────────────────────────────────────────────────
 
 # ─── MULTI-REFERENCE GENE SETTINGS ───────────────────────────────────────────
@@ -1104,7 +1191,79 @@ Lower CV indicates less variation and better stability as a reference.
 st.markdown("---")
 # ─────────────────────────────────────────────────────────────────────────────
 
-input_values_table = []
+# ─── OUTLIER DETECTION SETTINGS ──────────────────────────────────────────────
+st.markdown("### 🔍 Outlier Detection Settings")
+
+out_col1, out_col2, out_col3 = st.columns([2, 2, 3])
+with out_col1:
+    outlier_enabled = st.checkbox(
+        "Enable outlier detection",
+        value=True,
+        key="outlier_enabled",
+        help="Detects statistically extreme Ct values that may reflect technical errors."
+    )
+with out_col2:
+    outlier_method = st.radio(
+        "Detection method",
+        options=["Grubbs", "IQR"],
+        key="outlier_method",
+        horizontal=True,
+        help="Grubbs: best for normally distributed data, detects one outlier at a time. "
+             "IQR: non-parametric, robust for skewed distributions."
+    )
+with out_col3:
+    if outlier_method == "Grubbs":
+        grubbs_alpha = st.number_input(
+            "Significance level (α)",
+            min_value=0.01, max_value=0.10, value=0.05, step=0.01, format="%.2f",
+            key="grubbs_alpha",
+            help="α = 0.05 is standard. Lower α = more conservative (fewer outliers flagged)."
+        )
+        iqr_multiplier = 1.5
+    else:
+        iqr_multiplier = st.number_input(
+            "IQR multiplier (k)",
+            min_value=1.0, max_value=3.0, value=1.5, step=0.25, format="%.2f",
+            key="iqr_mult",
+            help="k=1.5 = standard Tukey fences. k=3.0 = extreme outliers only."
+        )
+        grubbs_alpha = 0.05
+
+with st.expander("ℹ️ About outlier detection in qPCR", expanded=False):
+    st.markdown("""
+**Why outlier detection matters in qPCR**
+
+Technical variability is inherent to qPCR: pipetting errors, bubble formation, 
+inhibitor carry-over, or RNA quality variation can produce Ct values that are 
+statistically inconsistent with the rest of a replicate group. 
+Including such values inflates variance, biases means, and can lead to false 
+conclusions — particularly in clinical datasets with small sample sizes.
+
+**When this limitation becomes critical:**
+- Small groups (n < 5): a single erroneous Ct shifts the mean substantially
+- High biological variability (e.g. tumour heterogeneity, clinical cohorts)
+- Technical triplicates where one replicate diverges > 0.5 Ct from the others
+- Low-abundance targets with Ct > 35, where noise dominates
+
+**Grubbs test** *(Grubbs 1969)*  
+Assumes normality. Tests whether the most extreme value is a statistically 
+significant outlier (p < α). Iterates until no further outliers are found.  
+Best for: replicate Ct values from a single experimental group.
+
+**IQR method** *(Tukey 1977)*  
+Non-parametric. Flags values outside Q1 − k×IQR or Q3 + k×IQR.  
+Best for: larger groups or non-normal distributions.
+
+**Important:** Outlier exclusion requires **biological or technical justification**. 
+This tool flags candidates — the final decision always rests with the researcher.  
+All exclusions are logged and reported in the PDF output.
+
+**References:** Grubbs FE. *Technometrics* 1969; Tukey JW. *Exploratory Data Analysis* 1977;  
+Bustin SA et al. *Clin Chem* 2009 (MIQE guidelines).
+""")
+
+st.markdown("---")
+# ─────────────────────────────────────────────────────────────────────────────
 data = []
 stats_data = []
 
@@ -1157,6 +1316,29 @@ for i in range(num_target_genes):
     min_control_len = min(len(control_target_ct_values), *[len(a) for a in ctrl_ref_arrays])
     control_target_ct_values = control_target_ct_values[:min_control_len]
     ctrl_ref_arrays = [a[:min_control_len] for a in ctrl_ref_arrays]
+
+    # ── Outlier detection — Control Target Ct ────────────────────────────────
+    ctrl_excluded_target = []
+    if outlier_enabled and len(control_target_ct_values) >= 3:
+        def _grubbs_ctrl(d): return detect_outliers_grubbs(d, alpha=grubbs_alpha)
+        def _iqr_ctrl(d):    return detect_outliers_iqr(d, multiplier=iqr_multiplier)
+        _detect_fn = _grubbs_ctrl if outlier_method == "Grubbs" else _iqr_ctrl
+
+        detected_ctrl_tgt = _detect_fn(control_target_ct_values)
+        if detected_ctrl_tgt:
+            control_target_ct_values, ctrl_excluded_target = render_outlier_ui(
+                control_target_ct_values,
+                f"Control Group {i+1} — Target Gene {i+1}",
+                f"ctrl_tgt_{i}",
+                outlier_method
+            )
+            # Align ref arrays to same length after exclusion
+            if ctrl_excluded_target:
+                keep_mask = np.ones(min_control_len, dtype=bool)
+                for ex in ctrl_excluded_target:
+                    keep_mask[ex] = False
+                ctrl_ref_arrays = [a[keep_mask] for a in ctrl_ref_arrays]
+                min_control_len = len(control_target_ct_values)
 
     # ── geNorm + CV stability (shown when ≥2 ref genes) ──────────────────────
     if num_ref_genes >= 2:
@@ -1251,13 +1433,26 @@ for i in range(num_target_genes):
             "Grup": translations[language_code]["control_group"],
             translations[language_code]["target_ct"]: control_target_ct_values[idx],
             translations[language_code]["reference_ct"]: round(ctrl_norm_factor[idx], 4),
-            translations[language_code]["delta_ct_control"]: round(control_delta_ct[idx], 4)
+            translations[language_code]["delta_ct_control"]: round(control_delta_ct[idx], 4),
+            "Outlier Excluded": "No"
         }
         if num_ref_genes > 1:
             for r, arr in enumerate(ctrl_ref_arrays):
                 row[f"Ref Gene {r+1} Ct"] = arr[idx]
         input_values_table.append(row)
         sample_counter += 1
+
+    # Log excluded outliers as separate flagged rows
+    for ex_idx in ctrl_excluded_target:
+        input_values_table.append({
+            translations[language_code]["sample_number"]: ex_idx + 1,
+            translations[language_code]["target_gene"]: f"{target_gene} {i+1}",
+            "Grup": translations[language_code]["control_group"],
+            translations[language_code]["target_ct"]: "EXCLUDED",
+            translations[language_code]["reference_ct"]: "EXCLUDED",
+            translations[language_code]["delta_ct_control"]: "EXCLUDED",
+            "Outlier Excluded": f"Yes ({outlier_method})"
+        })
 
     for j in range(num_patient_groups):
         st.markdown(
@@ -1295,6 +1490,28 @@ for i in range(num_target_genes):
         min_sample_len = min(len(sample_target_ct_values), *[len(a) for a in smp_ref_arrays])
         sample_target_ct_values = sample_target_ct_values[:min_sample_len]
         smp_ref_arrays = [a[:min_sample_len] for a in smp_ref_arrays]
+
+        # ── Outlier detection — Patient Target Ct ─────────────────────────────
+        smp_excluded_target = []
+        if outlier_enabled and len(sample_target_ct_values) >= 3:
+            _detect_fn_smp = (lambda d: detect_outliers_grubbs(d, alpha=grubbs_alpha)) \
+                             if outlier_method == "Grubbs" \
+                             else (lambda d: detect_outliers_iqr(d, multiplier=iqr_multiplier))
+
+            detected_smp_tgt = _detect_fn_smp(sample_target_ct_values)
+            if detected_smp_tgt:
+                sample_target_ct_values, smp_excluded_target = render_outlier_ui(
+                    sample_target_ct_values,
+                    f"{translations[language_code]['patient_group']} {j+1} — Target Gene {i+1}",
+                    f"smp_tgt_{i}_{j}",
+                    outlier_method
+                )
+                if smp_excluded_target:
+                    keep_mask_smp = np.ones(min_sample_len, dtype=bool)
+                    for ex in smp_excluded_target:
+                        keep_mask_smp[ex] = False
+                    smp_ref_arrays = [a[keep_mask_smp] for a in smp_ref_arrays]
+                    min_sample_len = len(sample_target_ct_values)
 
         # ── geNorm + CV stability (Patient, shown when ≥2 ref genes) ─────────
         if num_ref_genes >= 2:
@@ -1390,13 +1607,26 @@ for i in range(num_target_genes):
                 "Grup": f"{translations[language_code]['patient_group']} {j+1}",
                 translations[language_code]["target_ct"]: sample_target_ct_values[idx],
                 translations[language_code]["reference_ct"]: round(smp_norm_factor[idx], 4),
-                translations[language_code]["delta_ct_patient"]: round(sample_delta_ct[idx], 4)
+                translations[language_code]["delta_ct_patient"]: round(sample_delta_ct[idx], 4),
+                "Outlier Excluded": "No"
             }
             if num_ref_genes > 1:
                 for r, arr in enumerate(smp_ref_arrays):
                     row[f"Ref Gene {r+1} Ct"] = arr[idx]
             input_values_table.append(row)
             sample_counter += 1
+
+        # Log excluded outliers as flagged rows
+        for ex_idx in smp_excluded_target:
+            input_values_table.append({
+                translations[language_code]["sample_number"]: ex_idx + 1,
+                translations[language_code]["target_gene"]: f"{translations[language_code]['target_gene']} {i+1}",
+                "Grup": f"{translations[language_code]['patient_group']} {j+1}",
+                translations[language_code]["target_ct"]: "EXCLUDED",
+                translations[language_code]["reference_ct"]: "EXCLUDED",
+                translations[language_code]["delta_ct_patient"]: "EXCLUDED",
+                "Outlier Excluded": f"Yes ({outlier_method})"
+            })
 
         # ΔΔCt ve Gen Ekspresyon Değişimi Hesaplama
         if average_control_delta_ct is not None and average_sample_delta_ct is not None:
