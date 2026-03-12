@@ -109,11 +109,57 @@ This guide explains how to properly format your qPCR data, perform ΔΔCt calcul
 
 ---
 
-### 🔬 Amplification Efficiency
-- Enter E value directly (e.g. 2.0 = 100%) or slope from standard curve  
-- E = 10^(-1/slope)  
-- Acceptable range: 90–110% (E between 1.8–2.2)  
-- **Pfaffl method**: Ratio = (E_target^ΔCt_target) / (E_ref^ΔCt_ref)  
+### 🔬 Amplification Efficiency — How to Obtain Your E Value
+
+The amplification efficiency (E) tells you how well your PCR reaction doubles the template each cycle.  
+**E = 2.0** means perfect doubling (100% efficiency).
+
+---
+
+#### 📌 Method 1 — Standard Curve (Most Common)
+Run qPCR on a serial dilution series (e.g. 5 points, 10× dilutions) for each primer pair.  
+Your qPCR software (Bio-Rad CFX Manager, Applied Biosystems QuantStudio, Roche LightCycler, etc.) will automatically report the **slope** and **E value** in the standard curve results tab.
+
+| Dilution | log(Concentration) | Ct    |
+|----------|--------------------|-------|
+| 1:1      | 0                  | 18.2  |
+| 1:10     | -1                 | 21.5  |
+| 1:100    | -2                 | 24.8  |
+| 1:1000   | -3                 | 28.1  |
+| 1:10000  | -4                 | 31.4  |
+
+→ The software fits a regression line: **slope ≈ −3.32** → **E = 10^(−1/−3.32) ≈ 2.0 (100%)**  
+→ You can also use the **built-in Standard Curve Calculator** in this app (below the efficiency section).
+
+---
+
+#### 📌 Method 2 — Software Tools
+- **LinRegPCR** (free): calculates E from raw fluorescence data  
+- **qBase+**: multi-reference normalisation with efficiency correction  
+- **Bio-Rad CFX Maestro / QuantStudio Design & Analysis**: report E directly
+
+---
+
+#### 📌 Method 3 — Primer/Kit Datasheet
+Commercial primer sets often specify validated efficiency values.  
+Check the product datasheet or manufacturer's website.
+
+---
+
+#### ✅ Acceptable Range
+| E Value | Efficiency | Status     |
+|---------|------------|------------|
+| 1.8–2.2 | 90–110%    | ✅ Accepted |
+| < 1.8   | < 90%      | ⚠️ Low      |
+| > 2.2   | > 110%     | ⚠️ High     |
+
+If target and reference efficiencies differ by **> 10%**, the classic ΔΔCt method is unreliable → use **Pfaffl method** instead.
+
+---
+
+#### 🧮 Pfaffl Formula
+**Ratio = (E_target ^ ΔCt_target) / (E_ref ^ ΔCt_ref)**  
+where ΔCt = Ct_control − Ct_sample for each gene.
 
 ---
 
@@ -746,8 +792,123 @@ num_patient_groups = st.number_input(translations[language_code]["num_patient_gr
 
 # ─── EFFICIENCY VALIDATION SECTION ───────────────────────────────────────────
 st.markdown("---")
-st.markdown(f"<h4>{translations[language_code]['efficiency_header']}</h4>", unsafe_allow_html=True)
+
+# Header + ℹ️ tooltip side by side
+eff_col_title, eff_col_help = st.columns([8, 1])
+with eff_col_title:
+    st.markdown(f"<h4>{translations[language_code]['efficiency_header']}</h4>", unsafe_allow_html=True)
+with eff_col_help:
+    with st.popover("ℹ️"):
+        st.markdown("""
+**How to obtain your Efficiency (E) value:**
+
+**Method 1 — Standard Curve** *(recommended)*  
+Run qPCR on 4–5 serial dilutions (e.g. 10× each) for each primer.  
+Your qPCR software will report a **slope** → enter it below, or use the **Standard Curve Calculator** in the expander below.  
+`E = 10^(−1 / slope)`
+
+**Method 2 — Software tools**  
+- LinRegPCR (free download)  
+- qBase+, Bio-Rad CFX Maestro, QuantStudio
+
+**Method 3 — Primer/Kit datasheet**  
+Manufacturer often validates and publishes E for commercial primer sets.
+
+**Acceptable range:** E = 1.8–2.2 (90–110%)  
+**If |E_target − E_ref| > 10% → use Pfaffl method**
+""")
+
 st.info(translations[language_code]["efficiency_note"])
+
+# ─── STANDARD CURVE CALCULATOR ───────────────────────────────────────────────
+with st.expander("📐 Standard Curve Calculator — Calculate E from dilution series", expanded=False):
+    st.markdown("""
+Enter your serial dilution Ct values below. The calculator will fit a linear regression,
+compute the slope, R², and amplification efficiency automatically.
+
+**How to use:**  
+1. Run qPCR on serial dilutions (e.g. undiluted, 1:10, 1:100, 1:1000, 1:10000)  
+2. Enter the mean Ct for each dilution below  
+3. Read off slope, E, and R²  
+""")
+
+    sc_col1, sc_col2 = st.columns(2)
+    with sc_col1:
+        sc_gene_label = st.text_input("Gene / Primer label", value="Target Gene 1", key="sc_label")
+        sc_num_points = st.number_input("Number of dilution points", min_value=3, max_value=10, value=5, step=1, key="sc_npts")
+
+    with sc_col2:
+        st.markdown("**Dilution factor** (e.g. 10 for 10-fold dilutions)")
+        sc_dilution_factor = st.number_input("Dilution factor", min_value=2, max_value=100, value=10, step=1, key="sc_dilfactor")
+        st.markdown("**Starting concentration** (arbitrary units, e.g. 1)")
+        sc_start_conc = st.number_input("Starting concentration", min_value=0.0001, value=1.0, format="%.4f", key="sc_startconc")
+
+    st.markdown("**Enter mean Ct for each dilution:**")
+    sc_ct_cols = st.columns(min(sc_num_points, 5))
+    sc_ct_values = []
+    sc_log_concs = []
+    for pt in range(sc_num_points):
+        conc = sc_start_conc / (sc_dilution_factor ** pt)
+        log_c = np.log10(conc)
+        col_idx = pt % 5
+        with sc_ct_cols[col_idx]:
+            ct_val = st.number_input(
+                f"Dil. {pt+1}\n(log={log_c:.2f})",
+                value=18.0 + pt * 3.32,
+                step=0.01, format="%.2f",
+                key=f"sc_ct_{pt}"
+            )
+            sc_ct_values.append(ct_val)
+            sc_log_concs.append(log_c)
+
+    if st.button("📊 Calculate Efficiency", key="sc_calc"):
+        sc_log_concs_arr = np.array(sc_log_concs)
+        sc_ct_arr = np.array(sc_ct_values)
+
+        # Linear regression: Ct = slope * log(conc) + intercept
+        slope_val, intercept_val, r_val, p_val, se_val = stats.linregress(sc_log_concs_arr, sc_ct_arr)
+        r2 = r_val ** 2
+        E_calc = 10 ** (-1.0 / slope_val) if slope_val != 0 else float('nan')
+        E_pct = (E_calc - 1) * 100
+
+        res_col1, res_col2, res_col3, res_col4 = st.columns(4)
+        res_col1.metric("Slope", f"{slope_val:.4f}")
+        res_col2.metric("E value", f"{E_calc:.4f}")
+        res_col3.metric("Efficiency %", f"{E_pct:.1f}%")
+        res_col4.metric("R²", f"{r2:.4f}")
+
+        if 1.8 <= E_calc <= 2.2 and r2 >= 0.99:
+            st.success(f"✅ Excellent! E={E_calc:.4f} ({E_pct:.1f}%), R²={r2:.4f} — Use this E value in the efficiency section below.")
+        elif 1.8 <= E_calc <= 2.2:
+            st.warning(f"⚠️ E is acceptable ({E_pct:.1f}%) but R²={r2:.4f} is below 0.99 — check your dilution series.")
+        else:
+            st.error(f"❌ E={E_calc:.4f} ({E_pct:.1f}%) is outside acceptable range (90–110%). Review your primer design or dilution series.")
+
+        # Plot standard curve
+        x_fit = np.linspace(min(sc_log_concs_arr), max(sc_log_concs_arr), 100)
+        y_fit = slope_val * x_fit + intercept_val
+
+        fig_sc = go.Figure()
+        fig_sc.add_trace(go.Scatter(
+            x=sc_log_concs_arr, y=sc_ct_arr,
+            mode='markers', name='Data points',
+            marker=dict(size=10, color='#4C72B0')
+        ))
+        fig_sc.add_trace(go.Scatter(
+            x=x_fit, y=y_fit,
+            mode='lines', name=f'Fit (slope={slope_val:.4f})',
+            line=dict(color='red', dash='dash')
+        ))
+        fig_sc.update_layout(
+            title=f"Standard Curve — {sc_gene_label} | E={E_calc:.4f} ({E_pct:.1f}%), R²={r2:.4f}",
+            xaxis_title="log₁₀(Concentration)",
+            yaxis_title="Ct",
+            height=350
+        )
+        st.plotly_chart(fig_sc, use_container_width=True)
+        st.info(f"💡 Copy slope **{slope_val:.4f}** or E value **{E_calc:.4f}** into the efficiency inputs below.")
+
+# ─────────────────────────────────────────────────────────────────────────────
 
 efficiency_method = st.radio(
     translations[language_code]["efficiency_method"],
@@ -765,7 +926,8 @@ efficiency_threshold = st.number_input(
     max_value=50.0,
     value=10.0,
     step=0.5,
-    key="eff_threshold"
+    key="eff_threshold",
+    help="Recommended: 10% (MIQE guidelines). If |E_target − E_ref| > this value, ΔΔCt may be unreliable."
 )
 
 # Store efficiency values per gene
@@ -782,7 +944,8 @@ for i in range(num_target_genes):
                 target_slope = st.number_input(
                     translations[language_code]["efficiency_target_slope_label"].format(i=i+1),
                     value=-3.32, step=0.01, format="%.4f",
-                    key=f"target_slope_{i}"
+                    key=f"target_slope_{i}",
+                    help="Enter slope from your qPCR software standard curve output. Typical range: −3.1 to −3.6"
                 )
                 target_E = 10 ** (-1.0 / target_slope) if target_slope != 0 else 2.0
                 st.markdown(f"**E (target) = {target_E:.4f}** ({(target_E - 1) * 100:.1f}%)")
@@ -790,7 +953,8 @@ for i in range(num_target_genes):
                 target_E = st.number_input(
                     translations[language_code]["efficiency_target_label"].format(i=i+1),
                     min_value=1.0, max_value=3.0, value=2.0, step=0.01, format="%.4f",
-                    key=f"target_E_{i}"
+                    key=f"target_E_{i}",
+                    help="E=2.0 = 100% (perfect). Acceptable range: 1.8–2.2. Obtain from standard curve or primer datasheet."
                 )
                 st.markdown(f"**{(target_E - 1) * 100:.1f}%**")
 
@@ -799,7 +963,8 @@ for i in range(num_target_genes):
                 ref_slope = st.number_input(
                     translations[language_code]["efficiency_ref_slope_label"].format(i=i+1),
                     value=-3.32, step=0.01, format="%.4f",
-                    key=f"ref_slope_{i}"
+                    key=f"ref_slope_{i}",
+                    help="Enter slope from your qPCR software standard curve output for the reference gene."
                 )
                 ref_E = 10 ** (-1.0 / ref_slope) if ref_slope != 0 else 2.0
                 st.markdown(f"**E (ref) = {ref_E:.4f}** ({(ref_E - 1) * 100:.1f}%)")
@@ -807,7 +972,8 @@ for i in range(num_target_genes):
                 ref_E = st.number_input(
                     translations[language_code]["efficiency_ref_label"].format(i=i+1),
                     min_value=1.0, max_value=3.0, value=2.0, step=0.01, format="%.4f",
-                    key=f"ref_E_{i}"
+                    key=f"ref_E_{i}",
+                    help="E=2.0 = 100% (perfect). Obtain from standard curve or primer datasheet for the reference gene."
                 )
                 st.markdown(f"**{(ref_E - 1) * 100:.1f}%**")
 
