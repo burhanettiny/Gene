@@ -294,7 +294,65 @@ translations = {
             "Normal dağılım sağlanmazsa, parametrik olmayan Mann-Whitney U testi kullanılmıştır. "
             "Sonuçların anlamlılığı p < 0.05 kriterine göre belirlenmiştir. "
             "<b>Öneri ve destekleriniz için:</b> Burhanettin Yalçınkaya - mail: mailtoburhanettin@gmail.com"
-        )
+        ),
+        # Outlier section
+        "outlier_section_title": "### 🔍 Aykırı Değer Tespiti Ayarları",
+        "outlier_enable": "Aykırı değer tespitini etkinleştir",
+        "outlier_enable_help": "İstatistiksel olarak aşırı Ct değerlerini tespit eder.",
+        "outlier_method_label": "Tespit yöntemi",
+        "outlier_method_help": "Grubbs: normal dağılım için, tek aykırı değer. IQR: parametrik olmayan, çarpık dağılımlar için.",
+        "outlier_alpha_label": "Anlamlılık düzeyi (α)",
+        "outlier_alpha_help": "α = 0.05 standart değerdir. Düşük α = daha muhafazakâr.",
+        "outlier_iqr_label": "IQR çarpanı (k)",
+        "outlier_iqr_help": "k=1.5 = standart Tukey sınırları. k=3.0 = yalnızca aşırı aykırı değerler.",
+        "outlier_expander": "ℹ️ qPCR'de aykırı değer tespiti hakkında",
+        "outlier_excluded_no": "Hayır",
+        "outlier_excluded_yes": "Evet",
+        # Statistical decision
+        "stat_decision_title": "🔬 İstatistiksel karar",
+        "stat_decision_steps": "**Adım adım test seçimi:**",
+        "stat_shapiro_title": "**1. Shapiro-Wilk normallik testi**",
+        "stat_normal": "Normal",
+        "stat_nonnormal": "Normal değil",
+        "stat_levene_title": "**2. Levene varyans homojenliği testi**",
+        "stat_levene_skipped": "**2. Levene testi** — *atlandı* (normallik sağlanmadı; parametrik olmayan test kullanılacak)",
+        "stat_equal_var": "Eşit varyans",
+        "stat_unequal_var": "Eşitsiz varyans",
+        "stat_selected_test": "**3. Seçilen test:**",
+        "stat_reason": "**Gerekçe:**",
+        "stat_result": "**Sonuç:**",
+        "stat_reason_nonnormal": "Bir veya her iki grupta normal dağılım sağlanmadı",
+        "stat_reason_normal_equal": "Her iki grup normal + eşit varyans",
+        "stat_reason_normal_unequal": "Her iki grup normal + eşitsiz varyans (Levene p < 0.05)",
+        "stat_multigroup_note": "⚠️ Not: ≥ 3 grup varsa, ANOVA / Kruskal-Wallis testi için aşağıdaki **Çoklu Grup Karşılaştırması** bölümüne bakın.",
+        # Multi-group
+        "multigroup_title": "## 📊 Çoklu Grup Karşılaştırma Analizi",
+        "multigroup_expander": "ℹ️ Çoklu grup istatistiksel analizi hakkında",
+        "multigroup_omnibus_test": "Omnibus Testi",
+        "multigroup_pvalue": "p-değeri",
+        "multigroup_result": "Sonuç",
+        "multigroup_significant": "Anlamlı",
+        "multigroup_not_significant": "Anlamlı değil",
+        "multigroup_omnibus_ns": "ℹ️ Omnibus testi **anlamlı değil** (p ≥ 0.05). Post-hoc karşılaştırmalar bilgi amaçlı gösterilmektedir — genel grup etkisi tespit edilmedi.",
+        "multigroup_posthoc_label": "**Post-hoc:**",
+        "multigroup_dl_button": "📥 Post-hoc sonuçlarını indir —",
+        "multigroup_2group_note": "ℹ️ **Çoklu grup analizi uygulanamaz:** Yalnızca 2 grup tespit edildi (Kontrol + 1 hasta grubu). İkili istatistikler yukarıda raporlanmıştır.",
+        "multigroup_decision_normal_equal": "✅ Normal dağılım + eşit varyans → **Tek yönlü ANOVA + Tukey HSD**",
+        "multigroup_decision_normal_unequal": "⚠️ Normal dağılım + **eşitsiz varyans** → **Welch ANOVA + Games-Howell**",
+        "multigroup_decision_nonnormal": "⚠️ **Normal dağılım sağlanmadı** → **Kruskal-Wallis + Dunn post-hoc**",
+        # Multi-gene correction
+        "multigene_title": "### 🧬 Çoklu Gen Çoklu Karşılaştırma Düzeltmesi",
+        "multigene_expander": "ℹ️ Bu neden gereklidir?",
+        "multigene_sig_raw": "Anlamlı (ham)",
+        "multigene_sig_bonf": "Anlamlı (Bonferroni)",
+        "multigene_sig_fdr": "Anlamlı (FDR B-H)",
+        "multigene_warning": "⚠️ Düzeltme sonrası, ham p < 0.05 eşiğinde anlamlı görünen {lost} sonuç FDR düzeltmesi sonrası anlamlılığını yitirdi. Çoklu gen analizlerinde düzeltilmiş p-değerlerini birincil sonuç olarak raporlayın.",
+        "multigene_success": "✅ {n} anlamlı sonucun tamamı FDR düzeltmesi sonrasında da anlamlı kalmaktadır — bulgular çoklu karşılaştırmaya karşı güçlüdür.",
+        "multigene_no_sig": "Ham p < 0.05 eşiğinde anlamlı ikili sonuç tespit edilmedi.",
+        "multigene_dl_button": "📥 Düzeltilmiş p-değerlerini indir (CSV)",
+        "multigene_chart_title": "Çoklu Gen p-değeri Düzeltmesi: Ham / Bonferroni / FDR",
+        "multigene_1gene_note": "ℹ️ **Çoklu gen düzeltmesi:** Yalnızca 1 hedef gen analiz edildi — genler arası çoklu karşılaştırma düzeltmesi uygulanamaz.",
+        "multigene_no_data": "Henüz p-değeri yok — hesaplama için yukarıya veri girin.",
     },
 
     "en": {
@@ -391,10 +449,62 @@ translations = {
             "If normal distribution was not achieved, the non-parametric Mann-Whitney U test was applied. "
             "Significance was determined using the p < 0.05 criterion. "
             "For suggestions and support, Burhanettin Yalçinkaya - email: mailtoburhanettin@gmail.com"
-        )
+        ),
+        "outlier_section_title": "### 🔍 Outlier Detection Settings",
+        "outlier_enable": "Enable outlier detection",
+        "outlier_enable_help": "Detects statistically extreme Ct values that may reflect technical errors.",
+        "outlier_method_label": "Detection method",
+        "outlier_method_help": "Grubbs: best for normally distributed data, detects one outlier at a time. IQR: non-parametric, robust for skewed distributions.",
+        "outlier_alpha_label": "Significance level (α)",
+        "outlier_alpha_help": "α = 0.05 is standard. Lower α = more conservative (fewer outliers flagged).",
+        "outlier_iqr_label": "IQR multiplier (k)",
+        "outlier_iqr_help": "k=1.5 = standard Tukey fences. k=3.0 = extreme outliers only.",
+        "outlier_expander": "ℹ️ About outlier detection in qPCR",
+        "outlier_excluded_no": "No",
+        "outlier_excluded_yes": "Yes",
+        "stat_decision_title": "🔬 Statistical decision",
+        "stat_decision_steps": "**Step-by-step test selection:**",
+        "stat_shapiro_title": "**1. Shapiro-Wilk normality test**",
+        "stat_normal": "Normal",
+        "stat_nonnormal": "Non-normal",
+        "stat_levene_title": "**2. Levene variance homogeneity test**",
+        "stat_levene_skipped": "**2. Levene test** — *skipped* (normality not met; non-parametric test will be used)",
+        "stat_equal_var": "Equal variances",
+        "stat_unequal_var": "Unequal variances",
+        "stat_selected_test": "**3. Selected test:**",
+        "stat_reason": "**Reason:**",
+        "stat_result": "**Result:**",
+        "stat_reason_nonnormal": "Non-normal distribution in one or both groups",
+        "stat_reason_normal_equal": "Both groups normal + equal variances",
+        "stat_reason_normal_unequal": "Both groups normal + unequal variances (Levene p < 0.05)",
+        "stat_multigroup_note": "⚠️ Note: When ≥ 3 groups are present, see the **Multi-Group Comparison** section below for ANOVA / Kruskal-Wallis testing with post-hoc correction.",
+        "multigroup_title": "## 📊 Multi-Group Comparison Analysis",
+        "multigroup_expander": "ℹ️ About multi-group statistical analysis",
+        "multigroup_omnibus_test": "Omnibus Test",
+        "multigroup_pvalue": "p-value",
+        "multigroup_result": "Result",
+        "multigroup_significant": "Significant",
+        "multigroup_not_significant": "Not significant",
+        "multigroup_omnibus_ns": "ℹ️ Omnibus test is **not significant** (p ≥ 0.05). Post-hoc comparisons are shown for completeness but should be interpreted with caution — no overall group effect was detected.",
+        "multigroup_posthoc_label": "**Post-hoc:**",
+        "multigroup_dl_button": "📥 Download post-hoc results —",
+        "multigroup_2group_note": "ℹ️ **Multi-group analysis not applicable:** Only 2 groups detected (Control + 1 patient group). Pairwise statistics are reported above.",
+        "multigroup_decision_normal_equal": "✅ Normal distribution + equal variances → **One-way ANOVA + Tukey HSD**",
+        "multigroup_decision_normal_unequal": "⚠️ Normal distribution + **unequal variances** → **Welch ANOVA + Games-Howell**",
+        "multigroup_decision_nonnormal": "⚠️ **Non-normal distribution** → **Kruskal-Wallis + Dunn post-hoc**",
+        "multigene_title": "### 🧬 Multi-Gene Multiple Comparison Correction",
+        "multigene_expander": "ℹ️ Why is this needed?",
+        "multigene_sig_raw": "Significant (raw)",
+        "multigene_sig_bonf": "Significant (Bonferroni)",
+        "multigene_sig_fdr": "Significant (FDR B-H)",
+        "multigene_warning": "⚠️ After correction, {lost} result(s) that appeared significant at raw p < 0.05 are no longer significant after FDR adjustment. Report corrected p-values as primary results in multi-gene analyses.",
+        "multigene_success": "✅ All {n} significant result(s) remain significant after FDR correction — findings are robust to multiple testing.",
+        "multigene_no_sig": "No significant pairwise results detected (raw p < 0.05).",
+        "multigene_dl_button": "📥 Download corrected p-values (CSV)",
+        "multigene_chart_title": "Multi-Gene p-value Correction: Raw vs Bonferroni vs FDR",
+        "multigene_1gene_note": "ℹ️ **Multi-gene correction:** Only 1 target gene analysed — multiple comparison correction across genes is not applicable.",
+        "multigene_no_data": "No p-values available yet — enter data above to calculate corrections.",
     },
-
-    "de": {
         "title": "🧬 GeneQuantify: Expressions- und CNV-Analyse",
         "subtitle": "Entwickelt von B. Yalçınkaya",
         "patient_data_header": "📊 Geben Sie Patientendaten und Kontrollgruppen ein",
@@ -488,10 +598,62 @@ translations = {
             "Wenn keine normale Verteilung vorlag, wurde der nicht-parametrische Mann-Whitney-U-Test angewendet. "
             "Die Signifikanz wurde anhand des Kriteriums p < 0,05 bestimmt. "
             "Für Vorschläge und Unterstützung, Burhanettin Yalçinkaya - E-Mail: mailtoburhanettin@gmail.com"
-        )
+        ),
+        "outlier_section_title": "### 🔍 Ausreißer-Erkennungseinstellungen",
+        "outlier_enable": "Ausreißererkennung aktivieren",
+        "outlier_enable_help": "Erkennt statistisch extreme Ct-Werte, die auf technische Fehler hinweisen können.",
+        "outlier_method_label": "Erkennungsmethode",
+        "outlier_method_help": "Grubbs: für normalverteilte Daten. IQR: nicht-parametrisch, robust bei schiefen Verteilungen.",
+        "outlier_alpha_label": "Signifikanzniveau (α)",
+        "outlier_alpha_help": "α = 0,05 ist Standard. Niedrigeres α = konservativer.",
+        "outlier_iqr_label": "IQR-Multiplikator (k)",
+        "outlier_iqr_help": "k=1,5 = Standard Tukey-Grenzen. k=3,0 = nur extreme Ausreißer.",
+        "outlier_expander": "ℹ️ Über Ausreißererkennung in qPCR",
+        "outlier_excluded_no": "Nein",
+        "outlier_excluded_yes": "Ja",
+        "stat_decision_title": "🔬 Statistische Entscheidung",
+        "stat_decision_steps": "**Schrittweise Testauswahl:**",
+        "stat_shapiro_title": "**1. Shapiro-Wilk-Normalitätstest**",
+        "stat_normal": "Normal",
+        "stat_nonnormal": "Nicht normal",
+        "stat_levene_title": "**2. Levene-Varianzhomogeintätstest**",
+        "stat_levene_skipped": "**2. Levene-Test** — *übersprungen* (Normalität nicht erfüllt; nicht-parametrischer Test wird verwendet)",
+        "stat_equal_var": "Gleiche Varianzen",
+        "stat_unequal_var": "Ungleiche Varianzen",
+        "stat_selected_test": "**3. Ausgewählter Test:**",
+        "stat_reason": "**Grund:**",
+        "stat_result": "**Ergebnis:**",
+        "stat_reason_nonnormal": "Nicht-normale Verteilung in einer oder beiden Gruppen",
+        "stat_reason_normal_equal": "Beide Gruppen normal + gleiche Varianzen",
+        "stat_reason_normal_unequal": "Beide Gruppen normal + ungleiche Varianzen (Levene p < 0,05)",
+        "stat_multigroup_note": "⚠️ Hinweis: Bei ≥ 3 Gruppen siehe Abschnitt **Mehrgruppen-Vergleich** unten für ANOVA / Kruskal-Wallis.",
+        "multigroup_title": "## 📊 Mehrgruppen-Vergleichsanalyse",
+        "multigroup_expander": "ℹ️ Über die Mehrgruppen-Statistikanalyse",
+        "multigroup_omnibus_test": "Omnibus-Test",
+        "multigroup_pvalue": "p-Wert",
+        "multigroup_result": "Ergebnis",
+        "multigroup_significant": "Signifikant",
+        "multigroup_not_significant": "Nicht signifikant",
+        "multigroup_omnibus_ns": "ℹ️ Omnibus-Test ist **nicht signifikant** (p ≥ 0,05). Post-hoc-Vergleiche werden zur Information angezeigt.",
+        "multigroup_posthoc_label": "**Post-hoc:**",
+        "multigroup_dl_button": "📥 Post-hoc-Ergebnisse herunterladen —",
+        "multigroup_2group_note": "ℹ️ **Mehrgruppen-Analyse nicht anwendbar:** Nur 2 Gruppen erkannt (Kontrolle + 1 Patientengruppe).",
+        "multigroup_decision_normal_equal": "✅ Normalverteilung + gleiche Varianzen → **Einfaktorielle ANOVA + Tukey HSD**",
+        "multigroup_decision_normal_unequal": "⚠️ Normalverteilung + **ungleiche Varianzen** → **Welch-ANOVA + Games-Howell**",
+        "multigroup_decision_nonnormal": "⚠️ **Keine Normalverteilung** → **Kruskal-Wallis + Dunn post-hoc**",
+        "multigene_title": "### 🧬 Mehrgen-Mehrfachvergleichskorrektur",
+        "multigene_expander": "ℹ️ Warum ist das notwendig?",
+        "multigene_sig_raw": "Signifikant (roh)",
+        "multigene_sig_bonf": "Signifikant (Bonferroni)",
+        "multigene_sig_fdr": "Signifikant (FDR B-H)",
+        "multigene_warning": "⚠️ Nach Korrektur sind {lost} Ergebnis(se) nach FDR-Anpassung nicht mehr signifikant. Korrigierte p-Werte als Hauptergebnisse berichten.",
+        "multigene_success": "✅ Alle {n} signifikanten Ergebnis(se) bleiben nach FDR-Korrektur signifikant.",
+        "multigene_no_sig": "Keine signifikanten paarweisen Ergebnisse erkannt (roh p < 0,05).",
+        "multigene_dl_button": "📥 Korrigierte p-Werte herunterladen (CSV)",
+        "multigene_chart_title": "Mehrgen p-Wert-Korrektur: Roh / Bonferroni / FDR",
+        "multigene_1gene_note": "ℹ️ **Mehrgen-Korrektur:** Nur 1 Zielgen analysiert — Mehrfachvergleichskorrektur nicht anwendbar.",
+        "multigene_no_data": "Noch keine p-Werte — oben Daten eingeben.",
     },
-    
-    "fr": {
         "title": "🧬 GeneQuantify : Analyse de l'expression génique et des variations du nombre de copies (CNV)",
         "subtitle": "Développé par B. Yalçınkaya",
         "patient_data_header": "📊 Entrez les données des groupes patients et témoins",
@@ -585,10 +747,62 @@ translations = {
             "Si aucune distribution normale n'était atteinte, le test non paramétrique de Mann-Whitney U a été appliqué. "
             "La signification a été déterminée en utilisant le critère p < 0,05. "
             "Pour des suggestions et un soutien, Burhanettin Yalçınkaya - e-mail : mailtoburhanettin@gmail.com"
-        )
+        ),
+        "outlier_section_title": "### 🔍 Paramètres de détection des valeurs aberrantes",
+        "outlier_enable": "Activer la détection des valeurs aberrantes",
+        "outlier_enable_help": "Détecte les valeurs Ct statistiquement extrêmes pouvant indiquer des erreurs techniques.",
+        "outlier_method_label": "Méthode de détection",
+        "outlier_method_help": "Grubbs : pour les données normalement distribuées. IQR : non paramétrique, robuste pour les distributions asymétriques.",
+        "outlier_alpha_label": "Niveau de signification (α)",
+        "outlier_alpha_help": "α = 0,05 est standard. α plus bas = plus conservateur.",
+        "outlier_iqr_label": "Multiplicateur IQR (k)",
+        "outlier_iqr_help": "k=1,5 = clôtures de Tukey standard. k=3,0 = uniquement les valeurs extrêmes.",
+        "outlier_expander": "ℹ️ À propos de la détection des valeurs aberrantes en qPCR",
+        "outlier_excluded_no": "Non",
+        "outlier_excluded_yes": "Oui",
+        "stat_decision_title": "🔬 Décision statistique",
+        "stat_decision_steps": "**Sélection du test étape par étape :**",
+        "stat_shapiro_title": "**1. Test de normalité de Shapiro-Wilk**",
+        "stat_normal": "Normal",
+        "stat_nonnormal": "Non normal",
+        "stat_levene_title": "**2. Test d'homogénéité des variances de Levene**",
+        "stat_levene_skipped": "**2. Test de Levene** — *ignoré* (normalité non satisfaite ; test non paramétrique utilisé)",
+        "stat_equal_var": "Variances égales",
+        "stat_unequal_var": "Variances inégales",
+        "stat_selected_test": "**3. Test sélectionné :**",
+        "stat_reason": "**Raison :**",
+        "stat_result": "**Résultat :**",
+        "stat_reason_nonnormal": "Distribution non normale dans un ou les deux groupes",
+        "stat_reason_normal_equal": "Les deux groupes normaux + variances égales",
+        "stat_reason_normal_unequal": "Les deux groupes normaux + variances inégales (Levene p < 0,05)",
+        "stat_multigroup_note": "⚠️ Remarque : Avec ≥ 3 groupes, voir la section **Comparaison multi-groupes** ci-dessous pour ANOVA / Kruskal-Wallis.",
+        "multigroup_title": "## 📊 Analyse de comparaison multi-groupes",
+        "multigroup_expander": "ℹ️ À propos de l'analyse statistique multi-groupes",
+        "multigroup_omnibus_test": "Test omnibus",
+        "multigroup_pvalue": "p-valeur",
+        "multigroup_result": "Résultat",
+        "multigroup_significant": "Significatif",
+        "multigroup_not_significant": "Non significatif",
+        "multigroup_omnibus_ns": "ℹ️ Le test omnibus est **non significatif** (p ≥ 0,05). Les comparaisons post-hoc sont affichées à titre indicatif.",
+        "multigroup_posthoc_label": "**Post-hoc :**",
+        "multigroup_dl_button": "📥 Télécharger les résultats post-hoc —",
+        "multigroup_2group_note": "ℹ️ **Analyse multi-groupes non applicable :** Seulement 2 groupes détectés (Contrôle + 1 groupe patient).",
+        "multigroup_decision_normal_equal": "✅ Distribution normale + variances égales → **ANOVA à un facteur + Tukey HSD**",
+        "multigroup_decision_normal_unequal": "⚠️ Distribution normale + **variances inégales** → **ANOVA de Welch + Games-Howell**",
+        "multigroup_decision_nonnormal": "⚠️ **Distribution non normale** → **Kruskal-Wallis + post-hoc Dunn**",
+        "multigene_title": "### 🧬 Correction des comparaisons multiples multi-gènes",
+        "multigene_expander": "ℹ️ Pourquoi est-ce nécessaire ?",
+        "multigene_sig_raw": "Significatif (brut)",
+        "multigene_sig_bonf": "Significatif (Bonferroni)",
+        "multigene_sig_fdr": "Significatif (FDR B-H)",
+        "multigene_warning": "⚠️ Après correction, {lost} résultat(s) ne sont plus significatifs après ajustement FDR. Rapportez les p-valeurs corrigées comme résultats principaux.",
+        "multigene_success": "✅ Tous les {n} résultats significatifs restent significatifs après correction FDR.",
+        "multigene_no_sig": "Aucun résultat pairwise significatif détecté (p brut < 0,05).",
+        "multigene_dl_button": "📥 Télécharger les p-valeurs corrigées (CSV)",
+        "multigene_chart_title": "Correction p-valeur multi-gènes : Brut / Bonferroni / FDR",
+        "multigene_1gene_note": "ℹ️ **Correction multi-gènes :** Seulement 1 gène cible analysé — correction non applicable.",
+        "multigene_no_data": "Pas encore de p-valeurs — entrez des données ci-dessus.",
     },
-
-    "es": {
         "title": "🧬 GeneQuantify: Análisis de Expresión Génica y CNV",
         "subtitle": "Desarrollado por B. Yalçınkaya",
         "patient_data_header": "📊 Ingrese Datos de Grupos de Pacientes y de Control",
@@ -682,10 +896,62 @@ translations = {
             "Si no se alcanzó una distribución normal, se aplicó la prueba no paramétrica Mann-Whitney U. "
             "La significancia se determinó utilizando el criterio p < 0.05. "
             "Para sugerencias y soporte, Burhanettin Yalçınkaya - correo electrónico: mailtoburhanettin@gmail.com"
-        )
+        ),
+        "outlier_section_title": "### 🔍 Configuración de detección de valores atípicos",
+        "outlier_enable": "Activar detección de valores atípicos",
+        "outlier_enable_help": "Detecta valores Ct estadísticamente extremos que pueden reflejar errores técnicos.",
+        "outlier_method_label": "Método de detección",
+        "outlier_method_help": "Grubbs: para datos normalmente distribuidos. IQR: no paramétrico, robusto para distribuciones asimétricas.",
+        "outlier_alpha_label": "Nivel de significancia (α)",
+        "outlier_alpha_help": "α = 0,05 es estándar. α más bajo = más conservador.",
+        "outlier_iqr_label": "Multiplicador IQR (k)",
+        "outlier_iqr_help": "k=1,5 = cercas de Tukey estándar. k=3,0 = solo valores extremos.",
+        "outlier_expander": "ℹ️ Sobre la detección de valores atípicos en qPCR",
+        "outlier_excluded_no": "No",
+        "outlier_excluded_yes": "Sí",
+        "stat_decision_title": "🔬 Decisión estadística",
+        "stat_decision_steps": "**Selección de prueba paso a paso:**",
+        "stat_shapiro_title": "**1. Prueba de normalidad de Shapiro-Wilk**",
+        "stat_normal": "Normal",
+        "stat_nonnormal": "No normal",
+        "stat_levene_title": "**2. Prueba de homogeneidad de varianzas de Levene**",
+        "stat_levene_skipped": "**2. Prueba de Levene** — *omitida* (normalidad no cumplida; se usará prueba no paramétrica)",
+        "stat_equal_var": "Varianzas iguales",
+        "stat_unequal_var": "Varianzas desiguales",
+        "stat_selected_test": "**3. Prueba seleccionada:**",
+        "stat_reason": "**Razón:**",
+        "stat_result": "**Resultado:**",
+        "stat_reason_nonnormal": "Distribución no normal en uno o ambos grupos",
+        "stat_reason_normal_equal": "Ambos grupos normales + varianzas iguales",
+        "stat_reason_normal_unequal": "Ambos grupos normales + varianzas desiguales (Levene p < 0,05)",
+        "stat_multigroup_note": "⚠️ Nota: Con ≥ 3 grupos, consulte la sección **Comparación multigrupo** para ANOVA / Kruskal-Wallis.",
+        "multigroup_title": "## 📊 Análisis de comparación multigrupo",
+        "multigroup_expander": "ℹ️ Sobre el análisis estadístico multigrupo",
+        "multigroup_omnibus_test": "Prueba ómnibus",
+        "multigroup_pvalue": "p-valor",
+        "multigroup_result": "Resultado",
+        "multigroup_significant": "Significativo",
+        "multigroup_not_significant": "No significativo",
+        "multigroup_omnibus_ns": "ℹ️ La prueba ómnibus es **no significativa** (p ≥ 0,05). Las comparaciones post-hoc se muestran a título informativo.",
+        "multigroup_posthoc_label": "**Post-hoc:**",
+        "multigroup_dl_button": "📥 Descargar resultados post-hoc —",
+        "multigroup_2group_note": "ℹ️ **Análisis multigrupo no aplicable:** Solo 2 grupos detectados (Control + 1 grupo paciente).",
+        "multigroup_decision_normal_equal": "✅ Distribución normal + varianzas iguales → **ANOVA de un factor + Tukey HSD**",
+        "multigroup_decision_normal_unequal": "⚠️ Distribución normal + **varianzas desiguales** → **ANOVA de Welch + Games-Howell**",
+        "multigroup_decision_nonnormal": "⚠️ **Distribución no normal** → **Kruskal-Wallis + post-hoc Dunn**",
+        "multigene_title": "### 🧬 Corrección de comparaciones múltiples multigénicas",
+        "multigene_expander": "ℹ️ ¿Por qué es necesario?",
+        "multigene_sig_raw": "Significativo (bruto)",
+        "multigene_sig_bonf": "Significativo (Bonferroni)",
+        "multigene_sig_fdr": "Significativo (FDR B-H)",
+        "multigene_warning": "⚠️ Tras la corrección, {lost} resultado(s) ya no son significativos tras el ajuste FDR. Reporte los p-valores corregidos como resultados principales.",
+        "multigene_success": "✅ Todos los {n} resultados significativos permanecen significativos tras la corrección FDR.",
+        "multigene_no_sig": "No se detectaron resultados pairwise significativos (p bruto < 0,05).",
+        "multigene_dl_button": "📥 Descargar p-valores corregidos (CSV)",
+        "multigene_chart_title": "Corrección p-valor multigénica: Bruto / Bonferroni / FDR",
+        "multigene_1gene_note": "ℹ️ **Corrección multigénica:** Solo 1 gen objetivo analizado — corrección no aplicable.",
+        "multigene_no_data": "Aún no hay p-valores — ingrese datos arriba.",
     },
-
-    "ar": {
         "title": "🧬 جين كوانتيفاي: تحليل التعبير الجيني وتغير عدد النسخ (CNV)",
         "subtitle": "تم تطويره بواسطة ب. يالجنكايا",
         "patient_data_header": "📊 إدخال بيانات مجموعة المرضى ومجموعة التحكم",
@@ -779,7 +1045,61 @@ translations = {
             "إذا لم يتم تحقيق التوزيع الطبيعي، تم تطبيق اختبار مان-ويتني U غير المعلمي. "
             "تم تحديد الدلالة باستخدام المعيار p < 0.05. "
             "للاقتراحات والدعم، بورهانيتين يالجنكايا - البريد الإلكتروني: mailtoburhanettin@gmail.com"
-        )
+        ),
+        "outlier_section_title": "### 🔍 إعدادات اكتشاف القيم الشاذة",
+        "outlier_enable": "تفعيل اكتشاف القيم الشاذة",
+        "outlier_enable_help": "يكتشف قيم Ct المتطرفة إحصائياً التي قد تعكس أخطاء تقنية.",
+        "outlier_method_label": "طريقة الاكتشاف",
+        "outlier_method_help": "Grubbs: للبيانات الموزعة طبيعياً. IQR: غير معلمي، قوي للتوزيعات غير المتماثلة.",
+        "outlier_alpha_label": "مستوى الدلالة (α)",
+        "outlier_alpha_help": "α = 0.05 هو المعيار. α أقل = أكثر تحفظاً.",
+        "outlier_iqr_label": "مُضاعف IQR (k)",
+        "outlier_iqr_help": "k=1.5 = حدود Tukey القياسية. k=3.0 = القيم الشاذة الشديدة فقط.",
+        "outlier_expander": "ℹ️ حول اكتشاف القيم الشاذة في qPCR",
+        "outlier_excluded_no": "لا",
+        "outlier_excluded_yes": "نعم",
+        "stat_decision_title": "🔬 القرار الإحصائي",
+        "stat_decision_steps": "**اختيار الاختبار خطوة بخطوة:**",
+        "stat_shapiro_title": "**1. اختبار شابيرو-ويلك للتوزيع الطبيعي**",
+        "stat_normal": "طبيعي",
+        "stat_nonnormal": "غير طبيعي",
+        "stat_levene_title": "**2. اختبار ليفين لتجانس التباين**",
+        "stat_levene_skipped": "**2. اختبار ليفين** — *تم تخطيه* (لم يتحقق التوزيع الطبيعي؛ سيُستخدم اختبار غير معلمي)",
+        "stat_equal_var": "تبايانات متساوية",
+        "stat_unequal_var": "تبايانات غير متساوية",
+        "stat_selected_test": "**3. الاختبار المختار:**",
+        "stat_reason": "**السبب:**",
+        "stat_result": "**النتيجة:**",
+        "stat_reason_nonnormal": "توزيع غير طبيعي في مجموعة واحدة أو كلتيهما",
+        "stat_reason_normal_equal": "كلا المجموعتين طبيعيتان + تبايانات متساوية",
+        "stat_reason_normal_unequal": "كلا المجموعتين طبيعيتان + تبايانات غير متساوية (Levene p < 0.05)",
+        "stat_multigroup_note": "⚠️ ملاحظة: مع ≥ 3 مجموعات، راجع قسم **المقارنة متعددة المجموعات** أدناه لاختبار ANOVA / كروسكال-واليس.",
+        "multigroup_title": "## 📊 تحليل مقارنة متعددة المجموعات",
+        "multigroup_expander": "ℹ️ حول التحليل الإحصائي متعدد المجموعات",
+        "multigroup_omnibus_test": "اختبار شامل",
+        "multigroup_pvalue": "قيمة p",
+        "multigroup_result": "النتيجة",
+        "multigroup_significant": "دال",
+        "multigroup_not_significant": "غير دال",
+        "multigroup_omnibus_ns": "ℹ️ الاختبار الشامل **غير دال** (p ≥ 0.05). المقارنات البعدية معروضة للاطلاع فقط.",
+        "multigroup_posthoc_label": "**ما بعد الاختبار:**",
+        "multigroup_dl_button": "📥 تحميل نتائج ما بعد الاختبار —",
+        "multigroup_2group_note": "ℹ️ **تحليل متعدد المجموعات غير قابل للتطبيق:** تم الكشف عن مجموعتين فقط (مجموعة التحكم + مجموعة مرضى واحدة).",
+        "multigroup_decision_normal_equal": "✅ توزيع طبيعي + تبايانات متساوية → **ANOVA أحادي الاتجاه + Tukey HSD**",
+        "multigroup_decision_normal_unequal": "⚠️ توزيع طبيعي + **تبايانات غير متساوية** → **Welch ANOVA + Games-Howell**",
+        "multigroup_decision_nonnormal": "⚠️ **توزيع غير طبيعي** → **كروسكال-واليس + Dunn**",
+        "multigene_title": "### 🧬 تصحيح المقارنات المتعددة متعدد الجينات",
+        "multigene_expander": "ℹ️ لماذا هذا ضروري؟",
+        "multigene_sig_raw": "دال (خام)",
+        "multigene_sig_bonf": "دال (بونفيروني)",
+        "multigene_sig_fdr": "دال (FDR B-H)",
+        "multigene_warning": "⚠️ بعد التصحيح، {lost} نتيجة لم تعد دالة بعد تعديل FDR. أبلغ عن قيم p المصححة كنتائج رئيسية.",
+        "multigene_success": "✅ جميع {n} النتائج الدالة لا تزال دالة بعد تصحيح FDR.",
+        "multigene_no_sig": "لم يتم اكتشاف نتائج زوجية دالة (p خام < 0.05).",
+        "multigene_dl_button": "📥 تحميل قيم p المصححة (CSV)",
+        "multigene_chart_title": "تصحيح قيمة p متعدد الجينات: خام / بونفيروني / FDR",
+        "multigene_1gene_note": "ℹ️ **تصحيح متعدد الجينات:** تم تحليل جين مستهدف واحد فقط — التصحيح غير قابل للتطبيق.",
+        "multigene_no_data": "لا توجد قيم p بعد — أدخل البيانات أعلاه.",
     }
 }
 
@@ -1192,44 +1512,43 @@ st.markdown("---")
 # ─────────────────────────────────────────────────────────────────────────────
 
 # ─── OUTLIER DETECTION SETTINGS ──────────────────────────────────────────────
-st.markdown("### 🔍 Outlier Detection Settings")
+st.markdown(translations[language_code]["outlier_section_title"])
 
 out_col1, out_col2, out_col3 = st.columns([2, 2, 3])
 with out_col1:
     outlier_enabled = st.checkbox(
-        "Enable outlier detection",
+        translations[language_code]["outlier_enable"],
         value=True,
         key="outlier_enabled",
-        help="Detects statistically extreme Ct values that may reflect technical errors."
+        help=translations[language_code]["outlier_enable_help"]
     )
 with out_col2:
     outlier_method = st.radio(
-        "Detection method",
+        translations[language_code]["outlier_method_label"],
         options=["Grubbs", "IQR"],
         key="outlier_method",
         horizontal=True,
-        help="Grubbs: best for normally distributed data, detects one outlier at a time. "
-             "IQR: non-parametric, robust for skewed distributions."
+        help=translations[language_code]["outlier_method_help"]
     )
 with out_col3:
     if outlier_method == "Grubbs":
         grubbs_alpha = st.number_input(
-            "Significance level (α)",
+            translations[language_code]["outlier_alpha_label"],
             min_value=0.01, max_value=0.10, value=0.05, step=0.01, format="%.2f",
             key="grubbs_alpha",
-            help="α = 0.05 is standard. Lower α = more conservative (fewer outliers flagged)."
+            help=translations[language_code]["outlier_alpha_help"]
         )
         iqr_multiplier = 1.5
     else:
         iqr_multiplier = st.number_input(
-            "IQR multiplier (k)",
+            translations[language_code]["outlier_iqr_label"],
             min_value=1.0, max_value=3.0, value=1.5, step=0.25, format="%.2f",
             key="iqr_mult",
-            help="k=1.5 = standard Tukey fences. k=3.0 = extreme outliers only."
+            help=translations[language_code]["outlier_iqr_help"]
         )
         grubbs_alpha = 0.05
 
-with st.expander("ℹ️ About outlier detection in qPCR", expanded=False):
+with st.expander(translations[language_code]["outlier_expander"], expanded=False):
     st.markdown("""
 **Why outlier detection matters in qPCR**
 
@@ -1710,63 +2029,51 @@ for i in range(num_target_genes):
 
             # ── Decision pathway display ──────────────────────────────────
             with st.expander(
-                f"🔬 Statistical decision — {translations[language_code]['target_gene']} {i+1} / "
+                f"{translations[language_code]['stat_decision_title']} — "
+                f"{translations[language_code]['target_gene']} {i+1} / "
                 f"{translations[language_code]['patient_group']} {j+1}",
                 expanded=False
             ):
-                st.markdown("**Step-by-step test selection:**")
+                st.markdown(translations[language_code]["stat_decision_steps"])
 
-                # Step 1 — Shapiro-Wilk
                 sw_ctrl_sym = "✅" if control_normal else "❌"
                 sw_smp_sym  = "✅" if sample_normal  else "❌"
                 st.markdown(
-                    f"**1. Shapiro-Wilk normality test**  \n"
-                    f"- Control group: W={shapiro_control.statistic:.4f}, "
+                    f"{translations[language_code]['stat_shapiro_title']}  \n"
+                    f"- {translations[language_code]['control_group']}: W={shapiro_control.statistic:.4f}, "
                     f"p={shapiro_control.pvalue:.4f} {sw_ctrl_sym} "
-                    f"{'Normal' if control_normal else 'Non-normal'}  \n"
+                    f"{translations[language_code]['stat_normal'] if control_normal else translations[language_code]['stat_nonnormal']}  \n"
                     f"- {translations[language_code]['patient_group']} {j+1}: "
                     f"W={shapiro_sample.statistic:.4f}, "
                     f"p={shapiro_sample.pvalue:.4f} {sw_smp_sym} "
-                    f"{'Normal' if sample_normal else 'Non-normal'}"
+                    f"{translations[language_code]['stat_normal'] if sample_normal else translations[language_code]['stat_nonnormal']}"
                 )
 
-                # Step 2 — Levene (only if both normal)
                 if control_normal and sample_normal:
                     lev_sym = "✅" if equal_variance else "⚠️"
                     st.markdown(
-                        f"**2. Levene variance homogeneity test**  \n"
+                        f"{translations[language_code]['stat_levene_title']}  \n"
                         f"- F={levene_test.statistic:.4f}, p={levene_test.pvalue:.4f} "
-                        f"{lev_sym} {'Equal variances' if equal_variance else 'Unequal variances'}"
+                        f"{lev_sym} {translations[language_code]['stat_equal_var'] if equal_variance else translations[language_code]['stat_unequal_var']}"
                     )
                 else:
-                    st.markdown(
-                        "**2. Levene test** — *skipped* "
-                        "(normality not met; non-parametric test will be used)"
-                    )
+                    st.markdown(translations[language_code]["stat_levene_skipped"])
 
-                # Step 3 — Selected test
                 if not control_normal or not sample_normal:
-                    reason = "Non-normal distribution in one or both groups"
-                    recommendation = "Mann-Whitney U test (non-parametric)"
+                    reason = translations[language_code]["stat_reason_nonnormal"]
                 elif equal_variance:
-                    reason = "Both groups normal + equal variances"
-                    recommendation = "Independent samples t-test"
+                    reason = translations[language_code]["stat_reason_normal_equal"]
                 else:
-                    reason = "Both groups normal + unequal variances (Levene p < 0.05)"
-                    recommendation = "Welch t-test (does not assume equal variances)"
+                    reason = translations[language_code]["stat_reason_normal_unequal"]
 
                 st.success(
-                    f"**3. Selected test:** {test_method}  \n"
-                    f"**Reason:** {reason}  \n"
-                    f"**Result:** p = {test_pvalue:.4f} → **{significance}**"
+                    f"{translations[language_code]['stat_selected_test']} {test_method}  \n"
+                    f"{translations[language_code]['stat_reason']} {reason}  \n"
+                    f"{translations[language_code]['stat_result']} p = {test_pvalue:.4f} → **{significance}**"
                 )
 
                 if num_patient_groups >= 2:
-                    st.caption(
-                        "⚠️ Note: When ≥ 3 groups are present, see the "
-                        "**Multi-Group Comparison** section below for ANOVA / "
-                        "Kruskal-Wallis omnibus testing with post-hoc correction."
-                    )
+                    st.caption(translations[language_code]["stat_multigroup_note"])
             # ─────────────────────────────────────────────────────────────
 
             stats_data.append({
@@ -1870,7 +2177,7 @@ for i in range(num_target_genes):
         omnibus_type   = "non-parametric"
         posthoc_method = "Dunn (pairwise Mann-Whitney U)"
 
-    omnibus_sig = "Significant" if omnibus_p < 0.05 else "Not significant"
+    omnibus_sig = translations[language_code]["multigroup_significant"] if omnibus_p < 0.05 else translations[language_code]["multigroup_not_significant"]
 
     # ── Post-hoc pairwise comparisons ────────────────────────────────────────
     pairs      = []
@@ -1930,9 +2237,9 @@ for i in range(num_target_genes):
 # ── Display multi-group results ───────────────────────────────────────────────
 if any(r["n_groups"] >= 3 for r in multigroup_results):
     st.markdown("---")
-    st.markdown("## 📊 Multi-Group Comparison Analysis")
+    st.markdown(translations[language_code]["multigroup_title"])
 
-    with st.expander("ℹ️ About multi-group statistical analysis", expanded=False):
+    with st.expander(translations[language_code]["multigroup_expander"], expanded=False):
         st.markdown("""
 **When is multi-group analysis applied?**  
 Automatically activated when **≥ 3 groups** (control + 2 or more patient groups) are present for a target gene.  
@@ -1958,74 +2265,39 @@ This addresses the limitation of pairwise-only testing, which inflates Type I er
         if res["n_groups"] < 3:
             continue
 
-        st.markdown(f"### 🧬 {res['gene']} — {res['n_groups']} groups")
+        st.markdown(f"### 🧬 {res['gene']} — {res['n_groups']} {translations[language_code]['patient_group'].replace('🩸 ', '')}")
 
-        # Decision pathway
         if res["normality_ok"] and res["variance_ok"]:
-            decision_text = "✅ Normal distribution + equal variances → **One-way ANOVA + Tukey HSD**"
-            decision_color = "success"
+            st.success(translations[language_code]["multigroup_decision_normal_equal"])
         elif res["normality_ok"] and not res["variance_ok"]:
-            decision_text = "⚠️ Normal distribution + **unequal variances** → **Welch ANOVA + Games-Howell**"
-            decision_color = "warning"
+            st.warning(translations[language_code]["multigroup_decision_normal_unequal"])
         else:
-            decision_text = "⚠️ **Non-normal distribution** → **Kruskal-Wallis + Dunn post-hoc**"
-            decision_color = "warning"
+            st.warning(translations[language_code]["multigroup_decision_nonnormal"])
 
-        if decision_color == "success":
-            st.success(decision_text)
-        else:
-            st.warning(decision_text)
-
-        # Omnibus result
         omni_col1, omni_col2, omni_col3 = st.columns(3)
-        omni_col1.metric("Omnibus Test", res["omnibus_test"])
-        omni_col2.metric("p-value", f"{res['omnibus_p']:.4f}")
-        omni_col3.metric("Result", res["omnibus_sig"])
+        omni_col1.metric(translations[language_code]["multigroup_omnibus_test"], res["omnibus_test"])
+        omni_col2.metric(translations[language_code]["multigroup_pvalue"], f"{res['omnibus_p']:.4f}")
+        omni_col3.metric(translations[language_code]["multigroup_result"], res["omnibus_sig"])
 
         if res["omnibus_p"] >= 0.05:
-            st.info(
-                "ℹ️ Omnibus test is **not significant** (p ≥ 0.05). "
-                "Post-hoc comparisons are shown for completeness but should be interpreted with caution — "
-                "no overall group effect was detected."
-            )
+            st.info(translations[language_code]["multigroup_omnibus_ns"])
 
-        # Post-hoc table
-        st.markdown(f"**Post-hoc: {res['posthoc_method']}** with Bonferroni & FDR correction")
+        st.markdown(f"{translations[language_code]['multigroup_posthoc_label']} {res['posthoc_method']} — Bonferroni & FDR")
         ph_df = pd.DataFrame(res["posthoc_rows"])
         st.dataframe(ph_df, use_container_width=True)
 
-        # Visualise adjusted p-values
         fig_ph = go.Figure()
         comparisons = [r["Comparison"] for r in res["posthoc_rows"]]
-        fig_ph.add_trace(go.Bar(
-            name="Raw p", x=comparisons,
-            y=[r["Raw p"] for r in res["posthoc_rows"]],
-            marker_color="#4C72B0"
-        ))
-        fig_ph.add_trace(go.Bar(
-            name="Bonferroni p", x=comparisons,
-            y=[r["Bonferroni p"] for r in res["posthoc_rows"]],
-            marker_color="#DD8452"
-        ))
-        fig_ph.add_trace(go.Bar(
-            name="FDR p (B-H)", x=comparisons,
-            y=[r["FDR p (B-H)"] for r in res["posthoc_rows"]],
-            marker_color="#55A868"
-        ))
-        fig_ph.add_hline(y=0.05, line_dash="dash", line_color="red",
-                         annotation_text="α = 0.05", annotation_position="right")
-        fig_ph.update_layout(
-            barmode="group",
-            title=f"{res['gene']} — Post-hoc p-values (raw, Bonferroni, FDR)",
-            yaxis_title="p-value",
-            height=350
-        )
+        fig_ph.add_trace(go.Bar(name="Raw p", x=comparisons, y=[r["Raw p"] for r in res["posthoc_rows"]], marker_color="#4C72B0"))
+        fig_ph.add_trace(go.Bar(name="Bonferroni p", x=comparisons, y=[r["Bonferroni p"] for r in res["posthoc_rows"]], marker_color="#DD8452"))
+        fig_ph.add_trace(go.Bar(name="FDR p (B-H)", x=comparisons, y=[r["FDR p (B-H)"] for r in res["posthoc_rows"]], marker_color="#55A868"))
+        fig_ph.add_hline(y=0.05, line_dash="dash", line_color="red", annotation_text="α = 0.05", annotation_position="right")
+        fig_ph.update_layout(barmode="group", title=f"{res['gene']} — Post-hoc p-values", yaxis_title="p-value", height=350)
         st.plotly_chart(fig_ph, use_container_width=True)
 
-        # Download post-hoc CSV
         ph_csv = ph_df.to_csv(index=False).encode("utf-8")
         st.download_button(
-            label=f"📥 Download post-hoc results — {res['gene']}",
+            label=f"{translations[language_code]['multigroup_dl_button']} {res['gene']}",
             data=ph_csv,
             file_name=f"posthoc_{res['gene'].replace(' ', '_')}.csv",
             mime="text/csv",
@@ -2033,14 +2305,8 @@ This addresses the limitation of pairwise-only testing, which inflates Type I er
         )
 
 elif num_patient_groups >= 2 and multigroup_results:
-    # 2 groups present but no 3+ — show explicit limitation note
     st.markdown("---")
-    st.info(
-        "ℹ️ **Multi-group analysis not applicable:** Only 2 groups detected (Control + 1 patient group). "
-        "Pairwise statistics are reported above. "
-        "If your experiment includes 3 or more groups, increase the number of patient groups to enable "
-        "automatic ANOVA / Kruskal-Wallis testing with post-hoc correction."
-    )
+    st.info(translations[language_code]["multigroup_2group_note"])
 # ─────────────────────────────────────────────────────────────────────────────
 
 # Giriş Verileri Tablosunu Göster
@@ -2076,9 +2342,9 @@ if stats_data:
 # ─── MULTI-GENE P-VALUE CORRECTION ───────────────────────────────────────────
 if stats_data and num_target_genes >= 2:
     st.markdown("---")
-    st.markdown("### 🧬 Multi-Gene Multiple Comparison Correction")
+    st.markdown(translations[language_code]["multigene_title"])
 
-    with st.expander("ℹ️ Why is this needed?", expanded=False):
+    with st.expander(translations[language_code]["multigene_expander"], expanded=False):
         st.markdown("""
 When testing **multiple target genes** simultaneously, the probability of obtaining 
 at least one false positive increases with the number of tests performed 
@@ -2092,121 +2358,93 @@ at least one false positive increases with the number of tests performed
 | **Bonferroni** | Family-wise error rate (FWER) | Few genes, conservative |
 | **FDR (Benjamini-Hochberg)** | False discovery rate | Many genes, more power |
 
-**Recommendation:** Report both. Use FDR-adjusted p-values as primary metric 
-in multi-gene panels; use Bonferroni for single confirmatory comparisons.
-
 **References:** Benjamini & Hochberg. *J R Stat Soc B* 1995;  
 Ge Y et al. *Bioinformatics* 2003; Storey JD. *J R Stat Soc B* 2002.
 """)
 
-    if num_target_genes < 2:
-        st.info(
-            "ℹ️ Multi-gene correction not applicable: only 1 target gene analysed. "
-            "Add more target genes to enable this correction."
-        )
+    pval_key  = translations[language_code]["test_pvalue"]
+    gene_key  = translations[language_code]["target_gene"]
+    group_key = translations[language_code]["patient_group"]
+
+    correction_rows = [
+        {
+            "Gene":   r[gene_key],
+            "Group":  r[group_key],
+            "Raw p":  r[pval_key],
+            "Test":   r.get(translations[language_code]["test_method"], "—"),
+        }
+        for r in stats_data
+        if r.get(pval_key) is not None
+    ]
+
+    if not correction_rows:
+        st.info(translations[language_code]["multigene_no_data"])
     else:
-        # Collect one raw p-value per (gene × patient_group) pair
-        pval_key   = translations[language_code]["test_pvalue"]
-        gene_key   = translations[language_code]["target_gene"]
-        group_key  = translations[language_code]["patient_group"]
+        n_tests   = len(correction_rows)
+        raw_pvals = [r["Raw p"] for r in correction_rows]
 
-        correction_rows = [
-            {
-                "Gene":        r[gene_key],
-                "Group":       r[group_key],
-                "Raw p":       r[pval_key],
-                "Test":        r.get(translations[language_code]["test_method"], "—"),
-            }
-            for r in stats_data
-            if r.get(pval_key) is not None
-        ]
+        bonf = [min(p * n_tests, 1.0) for p in raw_pvals]
 
-        if not correction_rows:
-            st.info("No p-values available yet — enter data above to calculate corrections.")
-        else:
-            n_tests   = len(correction_rows)
-            raw_pvals = [r["Raw p"] for r in correction_rows]
+        ranked = sorted(range(n_tests), key=lambda k: raw_pvals[k])
+        fdr    = [1.0] * n_tests
+        for rank, idx in enumerate(ranked):
+            fdr[idx] = min(raw_pvals[idx] * n_tests / (rank + 1), 1.0)
+        for k in range(n_tests - 2, -1, -1):
+            fdr[ranked[k]] = min(fdr[ranked[k]], fdr[ranked[k + 1]])
 
-            # Bonferroni
-            bonf = [min(p * n_tests, 1.0) for p in raw_pvals]
+        for idx, row in enumerate(correction_rows):
+            row["Bonferroni p"]     = round(bonf[idx], 4)
+            row["FDR p (B-H)"]      = round(fdr[idx],  4)
+            row["Sig (raw)"]        = "✅" if raw_pvals[idx] < 0.05 else "—"
+            row["Sig (Bonferroni)"] = "✅" if bonf[idx]      < 0.05 else "—"
+            row["Sig (FDR)"]        = "✅" if fdr[idx]        < 0.05 else "—"
 
-            # FDR Benjamini-Hochberg
-            ranked    = sorted(range(n_tests), key=lambda k: raw_pvals[k])
-            fdr       = [1.0] * n_tests
-            for rank, idx in enumerate(ranked):
-                fdr[idx] = min(raw_pvals[idx] * n_tests / (rank + 1), 1.0)
-            for k in range(n_tests - 2, -1, -1):
-                fdr[ranked[k]] = min(fdr[ranked[k]], fdr[ranked[k + 1]])
+        corr_df = pd.DataFrame(correction_rows)
+        st.dataframe(corr_df, use_container_width=True)
 
-            for idx, row in enumerate(correction_rows):
-                row["Bonferroni p"]     = round(bonf[idx], 4)
-                row["FDR p (B-H)"]      = round(fdr[idx],  4)
-                row["Sig (raw)"]        = "✅" if raw_pvals[idx] < 0.05 else "—"
-                row["Sig (Bonferroni)"] = "✅" if bonf[idx]      < 0.05 else "—"
-                row["Sig (FDR)"]        = "✅" if fdr[idx]        < 0.05 else "—"
+        n_raw_sig  = sum(1 for p in raw_pvals if p < 0.05)
+        n_bonf_sig = sum(1 for p in bonf       if p < 0.05)
+        n_fdr_sig  = sum(1 for p in fdr         if p < 0.05)
 
-            corr_df = pd.DataFrame(correction_rows)
-            st.dataframe(corr_df, use_container_width=True)
+        sum_col1, sum_col2, sum_col3 = st.columns(3)
+        sum_col1.metric(translations[language_code]["multigene_sig_raw"],  f"{n_raw_sig} / {n_tests}")
+        sum_col2.metric(translations[language_code]["multigene_sig_bonf"], f"{n_bonf_sig} / {n_tests}")
+        sum_col3.metric(translations[language_code]["multigene_sig_fdr"],  f"{n_fdr_sig} / {n_tests}")
 
-            # Summary callout
-            n_raw_sig  = sum(1 for p in raw_pvals if p < 0.05)
-            n_bonf_sig = sum(1 for p in bonf       if p < 0.05)
-            n_fdr_sig  = sum(1 for p in fdr         if p < 0.05)
+        if n_raw_sig > n_fdr_sig:
+            st.warning(translations[language_code]["multigene_warning"].format(lost=n_raw_sig - n_fdr_sig))
+        elif n_raw_sig == n_fdr_sig and n_raw_sig > 0:
+            st.success(translations[language_code]["multigene_success"].format(n=n_raw_sig))
+        elif n_raw_sig == 0:
+            st.info(translations[language_code]["multigene_no_sig"])
 
-            sum_col1, sum_col2, sum_col3 = st.columns(3)
-            sum_col1.metric("Significant (raw)",        f"{n_raw_sig} / {n_tests}")
-            sum_col2.metric("Significant (Bonferroni)", f"{n_bonf_sig} / {n_tests}")
-            sum_col3.metric("Significant (FDR B-H)",    f"{n_fdr_sig} / {n_tests}")
+        fig_corr = go.Figure()
+        labels = [f"{r['Gene']} / {r['Group']}" for r in correction_rows]
+        fig_corr.add_trace(go.Bar(name="Raw p",        x=labels, y=raw_pvals, marker_color="#4C72B0"))
+        fig_corr.add_trace(go.Bar(name="Bonferroni p", x=labels, y=bonf,      marker_color="#DD8452"))
+        fig_corr.add_trace(go.Bar(name="FDR p (B-H)",  x=labels, y=fdr,       marker_color="#55A868"))
+        fig_corr.add_hline(y=0.05, line_dash="dash", line_color="red", annotation_text="α = 0.05", annotation_position="right")
+        fig_corr.update_layout(
+            barmode="group",
+            title=translations[language_code]["multigene_chart_title"],
+            yaxis_title="p-value",
+            xaxis_title=f"{translations[language_code]['target_gene']} / {translations[language_code]['patient_group']}",
+            height=380
+        )
+        st.plotly_chart(fig_corr, use_container_width=True)
 
-            if n_raw_sig > n_fdr_sig:
-                st.warning(
-                    f"⚠️ After correction, {n_raw_sig - n_fdr_sig} result(s) that appeared "
-                    f"significant at raw p < 0.05 are no longer significant after FDR adjustment. "
-                    f"Report corrected p-values as primary results in multi-gene analyses."
-                )
-            elif n_raw_sig == n_fdr_sig and n_raw_sig > 0:
-                st.success(
-                    f"✅ All {n_raw_sig} significant result(s) remain significant after "
-                    f"FDR correction — findings are robust to multiple testing."
-                )
-            elif n_raw_sig == 0:
-                st.info("No significant pairwise results detected (raw p < 0.05).")
-
-            # p-value comparison bar chart
-            fig_corr = go.Figure()
-            labels = [f"{r['Gene']} / {r['Group']}" for r in correction_rows]
-            fig_corr.add_trace(go.Bar(name="Raw p",        x=labels, y=raw_pvals, marker_color="#4C72B0"))
-            fig_corr.add_trace(go.Bar(name="Bonferroni p", x=labels, y=bonf,      marker_color="#DD8452"))
-            fig_corr.add_trace(go.Bar(name="FDR p (B-H)",  x=labels, y=fdr,       marker_color="#55A868"))
-            fig_corr.add_hline(y=0.05, line_dash="dash", line_color="red",
-                               annotation_text="α = 0.05", annotation_position="right")
-            fig_corr.update_layout(
-                barmode="group",
-                title="Multi-Gene p-value Correction: Raw vs Bonferroni vs FDR",
-                yaxis_title="p-value",
-                xaxis_title="Gene / Group",
-                height=380
-            )
-            st.plotly_chart(fig_corr, use_container_width=True)
-
-            # Download
-            corr_csv = corr_df.to_csv(index=False).encode("utf-8")
-            st.download_button(
-                label="📥 Download corrected p-values (CSV)",
-                data=corr_csv,
-                file_name="multi_gene_correction.csv",
-                mime="text/csv",
-                key="multigene_corr_dl"
-            )
+        corr_csv = corr_df.to_csv(index=False).encode("utf-8")
+        st.download_button(
+            label=translations[language_code]["multigene_dl_button"],
+            data=corr_csv,
+            file_name="multi_gene_correction.csv",
+            mime="text/csv",
+            key="multigene_corr_dl"
+        )
 
 elif stats_data and num_target_genes == 1:
     st.markdown("---")
-    st.info(
-        "ℹ️ **Multi-gene correction:** Only 1 target gene analysed — "
-        "multiple comparison correction across genes is not applicable. "
-        "If you add more target genes, Bonferroni and FDR corrections will be "
-        "calculated automatically in this section."
-    )
+    st.info(translations[language_code]["multigene_1gene_note"])
 # ─────────────────────────────────────────────────────────────────────────────
 
 # Grafik oluşturma
