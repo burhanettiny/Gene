@@ -1708,6 +1708,67 @@ for i in range(num_target_genes):
             significance = translations[language_code]["significant"] if test_pvalue < 0.05 \
                            else translations[language_code]["insignificant"]
 
+            # ── Decision pathway display ──────────────────────────────────
+            with st.expander(
+                f"🔬 Statistical decision — {translations[language_code]['target_gene']} {i+1} / "
+                f"{translations[language_code]['patient_group']} {j+1}",
+                expanded=False
+            ):
+                st.markdown("**Step-by-step test selection:**")
+
+                # Step 1 — Shapiro-Wilk
+                sw_ctrl_sym = "✅" if control_normal else "❌"
+                sw_smp_sym  = "✅" if sample_normal  else "❌"
+                st.markdown(
+                    f"**1. Shapiro-Wilk normality test**  \n"
+                    f"- Control group: W={shapiro_control.statistic:.4f}, "
+                    f"p={shapiro_control.pvalue:.4f} {sw_ctrl_sym} "
+                    f"{'Normal' if control_normal else 'Non-normal'}  \n"
+                    f"- {translations[language_code]['patient_group']} {j+1}: "
+                    f"W={shapiro_sample.statistic:.4f}, "
+                    f"p={shapiro_sample.pvalue:.4f} {sw_smp_sym} "
+                    f"{'Normal' if sample_normal else 'Non-normal'}"
+                )
+
+                # Step 2 — Levene (only if both normal)
+                if control_normal and sample_normal:
+                    lev_sym = "✅" if equal_variance else "⚠️"
+                    st.markdown(
+                        f"**2. Levene variance homogeneity test**  \n"
+                        f"- F={levene_test.statistic:.4f}, p={levene_test.pvalue:.4f} "
+                        f"{lev_sym} {'Equal variances' if equal_variance else 'Unequal variances'}"
+                    )
+                else:
+                    st.markdown(
+                        "**2. Levene test** — *skipped* "
+                        "(normality not met; non-parametric test will be used)"
+                    )
+
+                # Step 3 — Selected test
+                if not control_normal or not sample_normal:
+                    reason = "Non-normal distribution in one or both groups"
+                    recommendation = "Mann-Whitney U test (non-parametric)"
+                elif equal_variance:
+                    reason = "Both groups normal + equal variances"
+                    recommendation = "Independent samples t-test"
+                else:
+                    reason = "Both groups normal + unequal variances (Levene p < 0.05)"
+                    recommendation = "Welch t-test (does not assume equal variances)"
+
+                st.success(
+                    f"**3. Selected test:** {test_method}  \n"
+                    f"**Reason:** {reason}  \n"
+                    f"**Result:** p = {test_pvalue:.4f} → **{significance}**"
+                )
+
+                if num_patient_groups >= 2:
+                    st.caption(
+                        "⚠️ Note: When ≥ 3 groups are present, see the "
+                        "**Multi-Group Comparison** section below for ANOVA / "
+                        "Kruskal-Wallis omnibus testing with post-hoc correction."
+                    )
+            # ─────────────────────────────────────────────────────────────
+
             stats_data.append({
                 translations[language_code]["target_gene"]:   f"{translations[language_code]['target_gene']} {i+1}",
                 translations[language_code]["patient_group"]: f"{translations[language_code]['patient_group']} {j+1}",
