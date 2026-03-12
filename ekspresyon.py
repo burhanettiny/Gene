@@ -353,6 +353,33 @@ translations = {
         "multigene_chart_title": "Çoklu Gen p-değeri Düzeltmesi: Ham / Bonferroni / FDR",
         "multigene_1gene_note": "ℹ️ **Çoklu gen düzeltmesi:** Yalnızca 1 hedef gen analiz edildi — genler arası çoklu karşılaştırma düzeltmesi uygulanamaz.",
         "multigene_no_data": "Henüz p-değeri yok — hesaplama için yukarıya veri girin.",
+        # Reference gene settings
+        "ref_gene_section_title": "### 📚 Referans Gen Ayarları",
+        "ref_gene_num_label": "Hedef gen başına referans gen sayısı",
+        "ref_gene_num_help": "MIQE kılavuzları sağlam normalizasyon için ≥2 doğrulanmış referans gen önerir.",
+        "ref_gene_1_warning": "⚠️ **Metodolojik not:** Tek referans gen kullanımı normalizasyon sağlamlığını kısıtlar. MIQE kılavuzları (Bustin et al. 2009) **≥2 referans gen** ve stabilite değerlendirmesi (geNorm/NormFinder) önermektedir.",
+        "ref_gene_multi_success": "✅ {n} referans gen seçildi. Geometrik ortalama normalizasyonu ve geNorm M-değeri stabilitesi otomatik hesaplanacaktır.",
+        "ref_gene_expander": "ℹ️ Çoklu referans normalizasyonu hakkında",
+        # Standard curve calculator
+        "sc_expander": "📐 Standart Eğri Hesaplayıcı — Dilüsyon serisinden E hesapla",
+        "sc_gene_label": "Gen / Primer etiketi",
+        "sc_num_points": "Dilüsyon noktası sayısı",
+        "sc_dilution_factor_label": "**Dilüsyon faktörü** (örn. 10 katlı dilüsyon için 10)",
+        "sc_dilution_factor_input": "Dilüsyon faktörü",
+        "sc_start_conc_label": "**Başlangıç konsantrasyonu** (keyfi birim, örn. 1)",
+        "sc_start_conc_input": "Başlangıç konsantrasyonu",
+        "sc_enter_ct": "**Her dilüsyon için ortalama Ct girin:**",
+        "sc_calc_button": "📊 Etkinliği Hesapla",
+        "sc_slope": "Eğim",
+        "sc_e_value": "E değeri",
+        "sc_efficiency_pct": "Etkinlik %",
+        "sc_excellent": "✅ Mükemmel! E={e:.4f} ({pct:.1f}%), R²={r2:.4f} — Bu E değerini aşağıdaki etkinlik bölümüne girin.",
+        "sc_warning_r2": "⚠️ E kabul edilebilir ({pct:.1f}%) ancak R²={r2:.4f} < 0.99 — dilüsyon serinizi kontrol edin.",
+        "sc_error_range": "❌ E={e:.4f} ({pct:.1f}%) kabul edilebilir aralığın dışında (90–110%). Primer tasarımınızı veya dilüsyon serinizi gözden geçirin.",
+        "sc_chart_title": "Standart Eğri — {label} | E={e:.4f} ({pct:.1f}%), R²={r2:.4f}",
+        "sc_xaxis": "log₁₀(Konsantrasyon)",
+        "sc_data_points": "Veri noktaları",
+        "sc_copy_hint": "💡 Aşağıdaki etkinlik girdilerine eğim **{slope:.4f}** veya E değeri **{e:.4f}** kopyalayın.",
     },
 
     "en": {
@@ -504,6 +531,31 @@ translations = {
         "multigene_chart_title": "Multi-Gene p-value Correction: Raw vs Bonferroni vs FDR",
         "multigene_1gene_note": "ℹ️ **Multi-gene correction:** Only 1 target gene analysed — multiple comparison correction across genes is not applicable.",
         "multigene_no_data": "No p-values available yet — enter data above to calculate corrections.",
+        "ref_gene_section_title": "### 📚 Reference Gene Settings",
+        "ref_gene_num_label": "Number of reference genes per target gene",
+        "ref_gene_num_help": "MIQE guidelines recommend ≥2 validated reference genes for robust normalization.",
+        "ref_gene_1_warning": "⚠️ **Methodological note:** Using a single reference gene is a meaningful constraint on normalization robustness. MIQE guidelines (Bustin et al. 2009) recommend using **≥ 2 validated reference genes** and assessing their stability with tools such as geNorm or NormFinder.",
+        "ref_gene_multi_success": "✅ {n} reference genes selected. Geometric mean normalization and geNorm M-value stability will be calculated automatically.",
+        "ref_gene_expander": "ℹ️ About multi-reference normalization",
+        "sc_expander": "📐 Standard Curve Calculator — Calculate E from dilution series",
+        "sc_gene_label": "Gene / Primer label",
+        "sc_num_points": "Number of dilution points",
+        "sc_dilution_factor_label": "**Dilution factor** (e.g. 10 for 10-fold dilutions)",
+        "sc_dilution_factor_input": "Dilution factor",
+        "sc_start_conc_label": "**Starting concentration** (arbitrary units, e.g. 1)",
+        "sc_start_conc_input": "Starting concentration",
+        "sc_enter_ct": "**Enter mean Ct for each dilution:**",
+        "sc_calc_button": "📊 Calculate Efficiency",
+        "sc_slope": "Slope",
+        "sc_e_value": "E value",
+        "sc_efficiency_pct": "Efficiency %",
+        "sc_excellent": "✅ Excellent! E={e:.4f} ({pct:.1f}%), R²={r2:.4f} — Use this E value in the efficiency section below.",
+        "sc_warning_r2": "⚠️ E is acceptable ({pct:.1f}%) but R²={r2:.4f} is below 0.99 — check your dilution series.",
+        "sc_error_range": "❌ E={e:.4f} ({pct:.1f}%) is outside acceptable range (90–110%). Review your primer design or dilution series.",
+        "sc_chart_title": "Standard Curve — {label} | E={e:.4f} ({pct:.1f}%), R²={r2:.4f}",
+        "sc_xaxis": "log₁₀(Concentration)",
+        "sc_data_points": "Data points",
+        "sc_copy_hint": "💡 Copy slope **{slope:.4f}** or E value **{e:.4f}** into the efficiency inputs below.",
     },
 
     "de": {
@@ -655,6 +707,31 @@ translations = {
         "multigene_chart_title": "Mehrgen p-Wert-Korrektur: Roh / Bonferroni / FDR",
         "multigene_1gene_note": "ℹ️ **Mehrgen-Korrektur:** Nur 1 Zielgen analysiert — Mehrfachvergleichskorrektur nicht anwendbar.",
         "multigene_no_data": "Noch keine p-Werte — oben Daten eingeben.",
+        "ref_gene_section_title": "### 📚 Referenzgen-Einstellungen",
+        "ref_gene_num_label": "Anzahl der Referenzgene pro Zielgen",
+        "ref_gene_num_help": "MIQE-Richtlinien empfehlen ≥2 validierte Referenzgene für eine robuste Normalisierung.",
+        "ref_gene_1_warning": "⚠️ **Methodischer Hinweis:** Die Verwendung eines einzigen Referenzgens schränkt die Normalisierungsrobustheit ein. MIQE-Richtlinien (Bustin et al. 2009) empfehlen **≥2 validierte Referenzgene** und Stabilitätsbewertung (geNorm/NormFinder).",
+        "ref_gene_multi_success": "✅ {n} Referenzgene ausgewählt. Geometrische Mittelnormalisierung und geNorm M-Wert-Stabilität werden automatisch berechnet.",
+        "ref_gene_expander": "ℹ️ Über die Mehrfach-Referenznormalisierung",
+        "sc_expander": "📐 Standardkurven-Rechner — E aus Verdünnungsreihe berechnen",
+        "sc_gene_label": "Gen / Primer-Bezeichnung",
+        "sc_num_points": "Anzahl der Verdünnungspunkte",
+        "sc_dilution_factor_label": "**Verdünnungsfaktor** (z.B. 10 für 10-fache Verdünnung)",
+        "sc_dilution_factor_input": "Verdünnungsfaktor",
+        "sc_start_conc_label": "**Ausgangskonzentration** (beliebige Einheiten, z.B. 1)",
+        "sc_start_conc_input": "Ausgangskonzentration",
+        "sc_enter_ct": "**Mittleren Ct-Wert für jede Verdünnung eingeben:**",
+        "sc_calc_button": "📊 Effizienz berechnen",
+        "sc_slope": "Steigung",
+        "sc_e_value": "E-Wert",
+        "sc_efficiency_pct": "Effizienz %",
+        "sc_excellent": "✅ Ausgezeichnet! E={e:.4f} ({pct:.1f}%), R²={r2:.4f} — Diesen E-Wert im Effizienzabschnitt unten verwenden.",
+        "sc_warning_r2": "⚠️ E ist akzeptabel ({pct:.1f}%), aber R²={r2:.4f} < 0,99 — Verdünnungsreihe überprüfen.",
+        "sc_error_range": "❌ E={e:.4f} ({pct:.1f}%) liegt außerhalb des akzeptablen Bereichs (90–110%). Primerdesign oder Verdünnungsreihe überprüfen.",
+        "sc_chart_title": "Standardkurve — {label} | E={e:.4f} ({pct:.1f}%), R²={r2:.4f}",
+        "sc_xaxis": "log₁₀(Konzentration)",
+        "sc_data_points": "Datenpunkte",
+        "sc_copy_hint": "💡 Steigung **{slope:.4f}** oder E-Wert **{e:.4f}** in die Effizienz-Eingaben unten kopieren.",
     },
 
     "fr": {
@@ -806,6 +883,31 @@ translations = {
         "multigene_chart_title": "Correction p-valeur multi-gènes : Brut / Bonferroni / FDR",
         "multigene_1gene_note": "ℹ️ **Correction multi-gènes :** Seulement 1 gène cible analysé — correction non applicable.",
         "multigene_no_data": "Pas encore de p-valeurs — entrez des données ci-dessus.",
+        "ref_gene_section_title": "### 📚 Paramètres des gènes de référence",
+        "ref_gene_num_label": "Nombre de gènes de référence par gène cible",
+        "ref_gene_num_help": "Les directives MIQE recommandent ≥2 gènes de référence validés pour une normalisation robuste.",
+        "ref_gene_1_warning": "⚠️ **Note méthodologique :** L'utilisation d'un seul gène de référence limite la robustesse de la normalisation. Les directives MIQE (Bustin et al. 2009) recommandent **≥2 gènes de référence validés** avec évaluation de la stabilité (geNorm/NormFinder).",
+        "ref_gene_multi_success": "✅ {n} gènes de référence sélectionnés. La normalisation par moyenne géométrique et la stabilité geNorm M seront calculées automatiquement.",
+        "ref_gene_expander": "ℹ️ À propos de la normalisation multi-référence",
+        "sc_expander": "📐 Calculateur de courbe standard — Calculer E à partir d'une série de dilutions",
+        "sc_gene_label": "Gène / étiquette d'amorce",
+        "sc_num_points": "Nombre de points de dilution",
+        "sc_dilution_factor_label": "**Facteur de dilution** (ex. 10 pour des dilutions 10 fois)",
+        "sc_dilution_factor_input": "Facteur de dilution",
+        "sc_start_conc_label": "**Concentration initiale** (unités arbitraires, ex. 1)",
+        "sc_start_conc_input": "Concentration initiale",
+        "sc_enter_ct": "**Entrez la valeur Ct moyenne pour chaque dilution :**",
+        "sc_calc_button": "📊 Calculer l'efficacité",
+        "sc_slope": "Pente",
+        "sc_e_value": "Valeur E",
+        "sc_efficiency_pct": "Efficacité %",
+        "sc_excellent": "✅ Excellent ! E={e:.4f} ({pct:.1f}%), R²={r2:.4f} — Utilisez cette valeur E dans la section efficacité ci-dessous.",
+        "sc_warning_r2": "⚠️ E est acceptable ({pct:.1f}%) mais R²={r2:.4f} < 0,99 — vérifiez votre série de dilutions.",
+        "sc_error_range": "❌ E={e:.4f} ({pct:.1f}%) est hors de la plage acceptable (90–110%). Vérifiez la conception des amorces ou la série de dilutions.",
+        "sc_chart_title": "Courbe standard — {label} | E={e:.4f} ({pct:.1f}%), R²={r2:.4f}",
+        "sc_xaxis": "log₁₀(Concentration)",
+        "sc_data_points": "Points de données",
+        "sc_copy_hint": "💡 Copiez la pente **{slope:.4f}** ou la valeur E **{e:.4f}** dans les champs d'efficacité ci-dessous.",
     },
 
     "es": {
@@ -957,6 +1059,31 @@ translations = {
         "multigene_chart_title": "Corrección p-valor multigénica: Bruto / Bonferroni / FDR",
         "multigene_1gene_note": "ℹ️ **Corrección multigénica:** Solo 1 gen objetivo analizado — corrección no aplicable.",
         "multigene_no_data": "Aún no hay p-valores — ingrese datos arriba.",
+        "ref_gene_section_title": "### 📚 Configuración de genes de referencia",
+        "ref_gene_num_label": "Número de genes de referencia por gen objetivo",
+        "ref_gene_num_help": "Las directrices MIQE recomiendan ≥2 genes de referencia validados para una normalización robusta.",
+        "ref_gene_1_warning": "⚠️ **Nota metodológica:** El uso de un solo gen de referencia limita la robustez de la normalización. Las directrices MIQE (Bustin et al. 2009) recomiendan **≥2 genes de referencia validados** con evaluación de estabilidad (geNorm/NormFinder).",
+        "ref_gene_multi_success": "✅ {n} genes de referencia seleccionados. La normalización por media geométrica y la estabilidad geNorm M se calcularán automáticamente.",
+        "ref_gene_expander": "ℹ️ Sobre la normalización con múltiples referencias",
+        "sc_expander": "📐 Calculadora de curva estándar — Calcular E a partir de serie de diluciones",
+        "sc_gene_label": "Gen / etiqueta de cebador",
+        "sc_num_points": "Número de puntos de dilución",
+        "sc_dilution_factor_label": "**Factor de dilución** (ej. 10 para diluciones 10 veces)",
+        "sc_dilution_factor_input": "Factor de dilución",
+        "sc_start_conc_label": "**Concentración inicial** (unidades arbitrarias, ej. 1)",
+        "sc_start_conc_input": "Concentración inicial",
+        "sc_enter_ct": "**Ingrese el Ct medio para cada dilución:**",
+        "sc_calc_button": "📊 Calcular eficiencia",
+        "sc_slope": "Pendiente",
+        "sc_e_value": "Valor E",
+        "sc_efficiency_pct": "Eficiencia %",
+        "sc_excellent": "✅ ¡Excelente! E={e:.4f} ({pct:.1f}%), R²={r2:.4f} — Use este valor E en la sección de eficiencia abajo.",
+        "sc_warning_r2": "⚠️ E es aceptable ({pct:.1f}%) pero R²={r2:.4f} < 0,99 — verifique su serie de diluciones.",
+        "sc_error_range": "❌ E={e:.4f} ({pct:.1f}%) está fuera del rango aceptable (90–110%). Revise el diseño de cebadores o la serie de diluciones.",
+        "sc_chart_title": "Curva estándar — {label} | E={e:.4f} ({pct:.1f}%), R²={r2:.4f}",
+        "sc_xaxis": "log₁₀(Concentración)",
+        "sc_data_points": "Puntos de datos",
+        "sc_copy_hint": "💡 Copie la pendiente **{slope:.4f}** o el valor E **{e:.4f}** en los campos de eficiencia abajo.",
     },
 
     "ar": {
@@ -1108,6 +1235,31 @@ translations = {
         "multigene_chart_title": "تصحيح قيمة p متعدد الجينات: خام / بونفيروني / FDR",
         "multigene_1gene_note": "ℹ️ **تصحيح متعدد الجينات:** تم تحليل جين مستهدف واحد فقط — التصحيح غير قابل للتطبيق.",
         "multigene_no_data": "لا توجد قيم p بعد — أدخل البيانات أعلاه.",
+        "ref_gene_section_title": "### 📚 إعدادات الجين المرجعي",
+        "ref_gene_num_label": "عدد الجينات المرجعية لكل جين مستهدف",
+        "ref_gene_num_help": "توصي إرشادات MIQE بـ ≥2 جين مرجعي معتمد لتطبيع قوي.",
+        "ref_gene_1_warning": "⚠️ **ملاحظة منهجية:** استخدام جين مرجعي واحد يحد من متانة التطبيع. توصي إرشادات MIQE (Bustin et al. 2009) بـ **≥2 جين مرجعي معتمد** مع تقييم الاستقرار (geNorm/NormFinder).",
+        "ref_gene_multi_success": "✅ تم اختيار {n} جينات مرجعية. سيتم حساب التطبيع بالوسط الهندسي وقيمة M لـ geNorm تلقائياً.",
+        "ref_gene_expander": "ℹ️ حول التطبيع متعدد المراجع",
+        "sc_expander": "📐 حاسبة المنحنى المعياري — احسب E من سلسلة التخفيف",
+        "sc_gene_label": "الجين / تسمية البادئ",
+        "sc_num_points": "عدد نقاط التخفيف",
+        "sc_dilution_factor_label": "**عامل التخفيف** (مثال: 10 للتخفيف العشري)",
+        "sc_dilution_factor_input": "عامل التخفيف",
+        "sc_start_conc_label": "**التركيز الابتدائي** (وحدات اعتباطية، مثال: 1)",
+        "sc_start_conc_input": "التركيز الابتدائي",
+        "sc_enter_ct": "**أدخل متوسط Ct لكل تخفيف:**",
+        "sc_calc_button": "📊 احسب الكفاءة",
+        "sc_slope": "الميل",
+        "sc_e_value": "قيمة E",
+        "sc_efficiency_pct": "الكفاءة %",
+        "sc_excellent": "✅ ممتاز! E={e:.4f} ({pct:.1f}%)، R²={r2:.4f} — استخدم هذه القيمة في قسم الكفاءة أدناه.",
+        "sc_warning_r2": "⚠️ E مقبولة ({pct:.1f}%) لكن R²={r2:.4f} < 0.99 — تحقق من سلسلة التخفيف.",
+        "sc_error_range": "❌ E={e:.4f} ({pct:.1f}%) خارج النطاق المقبول (90–110%). راجع تصميم البادئ أو سلسلة التخفيف.",
+        "sc_chart_title": "المنحنى المعياري — {label} | E={e:.4f} ({pct:.1f}%)، R²={r2:.4f}",
+        "sc_xaxis": "log₁₀(التركيز)",
+        "sc_data_points": "نقاط البيانات",
+        "sc_copy_hint": "💡 انسخ الميل **{slope:.4f}** أو قيمة E **{e:.4f}** في حقول الكفاءة أدناه.",
     }
 }
 
@@ -1149,7 +1301,7 @@ Manufacturer often validates and publishes E for commercial primer sets.
 st.info(translations[language_code]["efficiency_note"])
 
 # ─── STANDARD CURVE CALCULATOR ───────────────────────────────────────────────
-with st.expander("📐 Standard Curve Calculator — Calculate E from dilution series", expanded=False):
+with st.expander(translations[language_code]["sc_expander"], expanded=False):
     st.markdown("""
 Enter your serial dilution Ct values below. The calculator will fit a linear regression,
 compute the slope, R², and amplification efficiency automatically.
@@ -1162,16 +1314,16 @@ compute the slope, R², and amplification efficiency automatically.
 
     sc_col1, sc_col2 = st.columns(2)
     with sc_col1:
-        sc_gene_label = st.text_input("Gene / Primer label", value="Target Gene 1", key="sc_label")
-        sc_num_points = st.number_input("Number of dilution points", min_value=3, max_value=10, value=5, step=1, key="sc_npts")
+        sc_gene_label = st.text_input(translations[language_code]["sc_gene_label"], value="Target Gene 1", key="sc_label")
+        sc_num_points = st.number_input(translations[language_code]["sc_num_points"], min_value=3, max_value=10, value=5, step=1, key="sc_npts")
 
     with sc_col2:
-        st.markdown("**Dilution factor** (e.g. 10 for 10-fold dilutions)")
-        sc_dilution_factor = st.number_input("Dilution factor", min_value=2, max_value=100, value=10, step=1, key="sc_dilfactor")
-        st.markdown("**Starting concentration** (arbitrary units, e.g. 1)")
-        sc_start_conc = st.number_input("Starting concentration", min_value=0.0001, value=1.0, format="%.4f", key="sc_startconc")
+        st.markdown(translations[language_code]["sc_dilution_factor_label"])
+        sc_dilution_factor = st.number_input(translations[language_code]["sc_dilution_factor_input"], min_value=2, max_value=100, value=10, step=1, key="sc_dilfactor")
+        st.markdown(translations[language_code]["sc_start_conc_label"])
+        sc_start_conc = st.number_input(translations[language_code]["sc_start_conc_input"], min_value=0.0001, value=1.0, format="%.4f", key="sc_startconc")
 
-    st.markdown("**Enter mean Ct for each dilution:**")
+    st.markdown(translations[language_code]["sc_enter_ct"])
     sc_ct_cols = st.columns(min(sc_num_points, 5))
     sc_ct_values = []
     sc_log_concs = []
@@ -1189,37 +1341,35 @@ compute the slope, R², and amplification efficiency automatically.
             sc_ct_values.append(ct_val)
             sc_log_concs.append(log_c)
 
-    if st.button("📊 Calculate Efficiency", key="sc_calc"):
+    if st.button(translations[language_code]["sc_calc_button"], key="sc_calc"):
         sc_log_concs_arr = np.array(sc_log_concs)
         sc_ct_arr = np.array(sc_ct_values)
 
-        # Linear regression: Ct = slope * log(conc) + intercept
         slope_val, intercept_val, r_val, p_val, se_val = stats.linregress(sc_log_concs_arr, sc_ct_arr)
         r2 = r_val ** 2
         E_calc = 10 ** (-1.0 / slope_val) if slope_val != 0 else float('nan')
         E_pct = (E_calc - 1) * 100
 
         res_col1, res_col2, res_col3, res_col4 = st.columns(4)
-        res_col1.metric("Slope", f"{slope_val:.4f}")
-        res_col2.metric("E value", f"{E_calc:.4f}")
-        res_col3.metric("Efficiency %", f"{E_pct:.1f}%")
+        res_col1.metric(translations[language_code]["sc_slope"], f"{slope_val:.4f}")
+        res_col2.metric(translations[language_code]["sc_e_value"], f"{E_calc:.4f}")
+        res_col3.metric(translations[language_code]["sc_efficiency_pct"], f"{E_pct:.1f}%")
         res_col4.metric("R²", f"{r2:.4f}")
 
         if 1.8 <= E_calc <= 2.2 and r2 >= 0.99:
-            st.success(f"✅ Excellent! E={E_calc:.4f} ({E_pct:.1f}%), R²={r2:.4f} — Use this E value in the efficiency section below.")
+            st.success(translations[language_code]["sc_excellent"].format(e=E_calc, pct=E_pct, r2=r2))
         elif 1.8 <= E_calc <= 2.2:
-            st.warning(f"⚠️ E is acceptable ({E_pct:.1f}%) but R²={r2:.4f} is below 0.99 — check your dilution series.")
+            st.warning(translations[language_code]["sc_warning_r2"].format(pct=E_pct, r2=r2))
         else:
-            st.error(f"❌ E={E_calc:.4f} ({E_pct:.1f}%) is outside acceptable range (90–110%). Review your primer design or dilution series.")
+            st.error(translations[language_code]["sc_error_range"].format(e=E_calc, pct=E_pct))
 
-        # Plot standard curve
         x_fit = np.linspace(min(sc_log_concs_arr), max(sc_log_concs_arr), 100)
         y_fit = slope_val * x_fit + intercept_val
 
         fig_sc = go.Figure()
         fig_sc.add_trace(go.Scatter(
             x=sc_log_concs_arr, y=sc_ct_arr,
-            mode='markers', name='Data points',
+            mode='markers', name=translations[language_code]["sc_data_points"],
             marker=dict(size=10, color='#4C72B0')
         ))
         fig_sc.add_trace(go.Scatter(
@@ -1228,13 +1378,13 @@ compute the slope, R², and amplification efficiency automatically.
             line=dict(color='red', dash='dash')
         ))
         fig_sc.update_layout(
-            title=f"Standard Curve — {sc_gene_label} | E={E_calc:.4f} ({E_pct:.1f}%), R²={r2:.4f}",
-            xaxis_title="log₁₀(Concentration)",
+            title=translations[language_code]["sc_chart_title"].format(label=sc_gene_label, e=E_calc, pct=E_pct, r2=r2),
+            xaxis_title=translations[language_code]["sc_xaxis"],
             yaxis_title="Ct",
             height=350
         )
         st.plotly_chart(fig_sc, use_container_width=True)
-        st.info(f"💡 Copy slope **{slope_val:.4f}** or E value **{E_calc:.4f}** into the efficiency inputs below.")
+        st.info(translations[language_code]["sc_copy_hint"].format(slope=slope_val, e=E_calc))
 
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -1471,33 +1621,24 @@ def render_outlier_ui(data, label, key_prefix, method):
 
 # ─── MULTI-REFERENCE GENE SETTINGS ───────────────────────────────────────────
 st.markdown("---")
-st.markdown("### 📚 Reference Gene Settings")
+st.markdown(translations[language_code]["ref_gene_section_title"])
 
 ref_info_col, ref_warn_col = st.columns([3, 2])
 with ref_info_col:
     num_ref_genes = st.number_input(
-        "Number of reference genes per target gene",
+        translations[language_code]["ref_gene_num_label"],
         min_value=1, max_value=10, value=1, step=1,
         key="num_ref_genes",
-        help="MIQE guidelines recommend ≥2 validated reference genes for robust normalization."
+        help=translations[language_code]["ref_gene_num_help"]
     )
 with ref_warn_col:
     if num_ref_genes == 1:
-        st.warning(
-            "⚠️ **Methodological note:** Using a single reference gene is a meaningful "
-            "constraint on normalization robustness. MIQE guidelines (Bustin et al. 2009) "
-            "recommend using **≥ 2 validated reference genes** and assessing their stability "
-            "with tools such as geNorm or NormFinder. Consider adding a second reference gene "
-            "to strengthen your conclusions."
-        )
+        st.warning(translations[language_code]["ref_gene_1_warning"])
     else:
-        st.success(
-            f"✅ {num_ref_genes} reference genes selected. "
-            "Geometric mean normalization and geNorm M-value stability will be calculated automatically."
-        )
+        st.success(translations[language_code]["ref_gene_multi_success"].format(n=num_ref_genes))
 
 if num_ref_genes > 1:
-    with st.expander("ℹ️ About multi-reference normalization", expanded=False):
+    with st.expander(translations[language_code]["ref_gene_expander"], expanded=False):
         st.markdown("""
 **Geometric mean normalization** (Vandesompele et al. 2002)  
 The normalization factor (NF) is the arithmetic mean of Ct values across all reference genes per sample,
