@@ -2073,6 +2073,142 @@ if stats_data:
         file_name="istatistik_sonuclari.csv",
         mime="text/csv")
 
+# ─── MULTI-GENE P-VALUE CORRECTION ───────────────────────────────────────────
+if stats_data and num_target_genes >= 2:
+    st.markdown("---")
+    st.markdown("### 🧬 Multi-Gene Multiple Comparison Correction")
+
+    with st.expander("ℹ️ Why is this needed?", expanded=False):
+        st.markdown("""
+When testing **multiple target genes** simultaneously, the probability of obtaining 
+at least one false positive increases with the number of tests performed 
+(family-wise error inflation). For example, testing 5 genes at α = 0.05 gives a 
+~23% chance of at least one spurious significant result by chance alone.
+
+**Standard practice in multi-gene expression studies requires correction:**
+
+| Method | Controls | Best for |
+|---|---|---|
+| **Bonferroni** | Family-wise error rate (FWER) | Few genes, conservative |
+| **FDR (Benjamini-Hochberg)** | False discovery rate | Many genes, more power |
+
+**Recommendation:** Report both. Use FDR-adjusted p-values as primary metric 
+in multi-gene panels; use Bonferroni for single confirmatory comparisons.
+
+**References:** Benjamini & Hochberg. *J R Stat Soc B* 1995;  
+Ge Y et al. *Bioinformatics* 2003; Storey JD. *J R Stat Soc B* 2002.
+""")
+
+    if num_target_genes < 2:
+        st.info(
+            "ℹ️ Multi-gene correction not applicable: only 1 target gene analysed. "
+            "Add more target genes to enable this correction."
+        )
+    else:
+        # Collect one raw p-value per (gene × patient_group) pair
+        pval_key   = translations[language_code]["test_pvalue"]
+        gene_key   = translations[language_code]["target_gene"]
+        group_key  = translations[language_code]["patient_group"]
+
+        correction_rows = [
+            {
+                "Gene":        r[gene_key],
+                "Group":       r[group_key],
+                "Raw p":       r[pval_key],
+                "Test":        r.get(translations[language_code]["test_method"], "—"),
+            }
+            for r in stats_data
+            if r.get(pval_key) is not None
+        ]
+
+        if not correction_rows:
+            st.info("No p-values available yet — enter data above to calculate corrections.")
+        else:
+            n_tests   = len(correction_rows)
+            raw_pvals = [r["Raw p"] for r in correction_rows]
+
+            # Bonferroni
+            bonf = [min(p * n_tests, 1.0) for p in raw_pvals]
+
+            # FDR Benjamini-Hochberg
+            ranked    = sorted(range(n_tests), key=lambda k: raw_pvals[k])
+            fdr       = [1.0] * n_tests
+            for rank, idx in enumerate(ranked):
+                fdr[idx] = min(raw_pvals[idx] * n_tests / (rank + 1), 1.0)
+            for k in range(n_tests - 2, -1, -1):
+                fdr[ranked[k]] = min(fdr[ranked[k]], fdr[ranked[k + 1]])
+
+            for idx, row in enumerate(correction_rows):
+                row["Bonferroni p"]     = round(bonf[idx], 4)
+                row["FDR p (B-H)"]      = round(fdr[idx],  4)
+                row["Sig (raw)"]        = "✅" if raw_pvals[idx] < 0.05 else "—"
+                row["Sig (Bonferroni)"] = "✅" if bonf[idx]      < 0.05 else "—"
+                row["Sig (FDR)"]        = "✅" if fdr[idx]        < 0.05 else "—"
+
+            corr_df = pd.DataFrame(correction_rows)
+            st.dataframe(corr_df, use_container_width=True)
+
+            # Summary callout
+            n_raw_sig  = sum(1 for p in raw_pvals if p < 0.05)
+            n_bonf_sig = sum(1 for p in bonf       if p < 0.05)
+            n_fdr_sig  = sum(1 for p in fdr         if p < 0.05)
+
+            sum_col1, sum_col2, sum_col3 = st.columns(3)
+            sum_col1.metric("Significant (raw)",        f"{n_raw_sig} / {n_tests}")
+            sum_col2.metric("Significant (Bonferroni)", f"{n_bonf_sig} / {n_tests}")
+            sum_col3.metric("Significant (FDR B-H)",    f"{n_fdr_sig} / {n_tests}")
+
+            if n_raw_sig > n_fdr_sig:
+                st.warning(
+                    f"⚠️ After correction, {n_raw_sig - n_fdr_sig} result(s) that appeared "
+                    f"significant at raw p < 0.05 are no longer significant after FDR adjustment. "
+                    f"Report corrected p-values as primary results in multi-gene analyses."
+                )
+            elif n_raw_sig == n_fdr_sig and n_raw_sig > 0:
+                st.success(
+                    f"✅ All {n_raw_sig} significant result(s) remain significant after "
+                    f"FDR correction — findings are robust to multiple testing."
+                )
+            elif n_raw_sig == 0:
+                st.info("No significant pairwise results detected (raw p < 0.05).")
+
+            # p-value comparison bar chart
+            fig_corr = go.Figure()
+            labels = [f"{r['Gene']} / {r['Group']}" for r in correction_rows]
+            fig_corr.add_trace(go.Bar(name="Raw p",        x=labels, y=raw_pvals, marker_color="#4C72B0"))
+            fig_corr.add_trace(go.Bar(name="Bonferroni p", x=labels, y=bonf,      marker_color="#DD8452"))
+            fig_corr.add_trace(go.Bar(name="FDR p (B-H)",  x=labels, y=fdr,       marker_color="#55A868"))
+            fig_corr.add_hline(y=0.05, line_dash="dash", line_color="red",
+                               annotation_text="α = 0.05", annotation_position="right")
+            fig_corr.update_layout(
+                barmode="group",
+                title="Multi-Gene p-value Correction: Raw vs Bonferroni vs FDR",
+                yaxis_title="p-value",
+                xaxis_title="Gene / Group",
+                height=380
+            )
+            st.plotly_chart(fig_corr, use_container_width=True)
+
+            # Download
+            corr_csv = corr_df.to_csv(index=False).encode("utf-8")
+            st.download_button(
+                label="📥 Download corrected p-values (CSV)",
+                data=corr_csv,
+                file_name="multi_gene_correction.csv",
+                mime="text/csv",
+                key="multigene_corr_dl"
+            )
+
+elif stats_data and num_target_genes == 1:
+    st.markdown("---")
+    st.info(
+        "ℹ️ **Multi-gene correction:** Only 1 target gene analysed — "
+        "multiple comparison correction across genes is not applicable. "
+        "If you add more target genes, Bonferroni and FDR corrections will be "
+        "calculated automatically in this section."
+    )
+# ─────────────────────────────────────────────────────────────────────────────
+
 # Grafik oluşturma
 for i in range(num_target_genes):
     st.subheader(f"{translations[language_code]['target_gene']} {i+1} - {translations[language_code]['distribution_graph']}")
