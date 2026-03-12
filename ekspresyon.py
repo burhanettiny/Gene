@@ -1318,13 +1318,11 @@ for i in range(num_target_genes):
     ctrl_ref_arrays = [a[:min_control_len] for a in ctrl_ref_arrays]
 
     # ── Outlier detection — Control Target Ct ────────────────────────────────
-    ctrl_excluded_target = []
+    ctrl_excluded_target = []  # always initialized
     if outlier_enabled and len(control_target_ct_values) >= 3:
-        def _grubbs_ctrl(d): return detect_outliers_grubbs(d, alpha=grubbs_alpha)
-        def _iqr_ctrl(d):    return detect_outliers_iqr(d, multiplier=iqr_multiplier)
-        _detect_fn = _grubbs_ctrl if outlier_method == "Grubbs" else _iqr_ctrl
-
-        detected_ctrl_tgt = _detect_fn(control_target_ct_values)
+        detected_ctrl_tgt = detect_outliers_grubbs(control_target_ct_values, alpha=grubbs_alpha) \
+                            if outlier_method == "Grubbs" \
+                            else detect_outliers_iqr(control_target_ct_values, multiplier=iqr_multiplier)
         if detected_ctrl_tgt:
             control_target_ct_values, ctrl_excluded_target = render_outlier_ui(
                 control_target_ct_values,
@@ -1332,13 +1330,10 @@ for i in range(num_target_genes):
                 f"ctrl_tgt_{i}",
                 outlier_method
             )
-            # Align ref arrays to same length after exclusion
             if ctrl_excluded_target:
-                keep_mask = np.ones(min_control_len, dtype=bool)
-                for ex in ctrl_excluded_target:
-                    keep_mask[ex] = False
-                ctrl_ref_arrays = [a[keep_mask] for a in ctrl_ref_arrays]
-                min_control_len = len(control_target_ct_values)
+                keep_indices = [k for k in range(min_control_len) if k not in ctrl_excluded_target]
+                ctrl_ref_arrays = [a[keep_indices] for a in ctrl_ref_arrays]
+                min_control_len = len(keep_indices)
 
     # ── geNorm + CV stability (shown when ≥2 ref genes) ──────────────────────
     if num_ref_genes >= 2:
@@ -1492,13 +1487,11 @@ for i in range(num_target_genes):
         smp_ref_arrays = [a[:min_sample_len] for a in smp_ref_arrays]
 
         # ── Outlier detection — Patient Target Ct ─────────────────────────────
-        smp_excluded_target = []
+        smp_excluded_target = []  # always initialized
         if outlier_enabled and len(sample_target_ct_values) >= 3:
-            _detect_fn_smp = (lambda d: detect_outliers_grubbs(d, alpha=grubbs_alpha)) \
-                             if outlier_method == "Grubbs" \
-                             else (lambda d: detect_outliers_iqr(d, multiplier=iqr_multiplier))
-
-            detected_smp_tgt = _detect_fn_smp(sample_target_ct_values)
+            detected_smp_tgt = detect_outliers_grubbs(sample_target_ct_values, alpha=grubbs_alpha) \
+                               if outlier_method == "Grubbs" \
+                               else detect_outliers_iqr(sample_target_ct_values, multiplier=iqr_multiplier)
             if detected_smp_tgt:
                 sample_target_ct_values, smp_excluded_target = render_outlier_ui(
                     sample_target_ct_values,
@@ -1507,11 +1500,9 @@ for i in range(num_target_genes):
                     outlier_method
                 )
                 if smp_excluded_target:
-                    keep_mask_smp = np.ones(min_sample_len, dtype=bool)
-                    for ex in smp_excluded_target:
-                        keep_mask_smp[ex] = False
-                    smp_ref_arrays = [a[keep_mask_smp] for a in smp_ref_arrays]
-                    min_sample_len = len(sample_target_ct_values)
+                    keep_indices_smp = [k for k in range(min_sample_len) if k not in smp_excluded_target]
+                    smp_ref_arrays = [a[keep_indices_smp] for a in smp_ref_arrays]
+                    min_sample_len = len(keep_indices_smp)
 
         # ── geNorm + CV stability (Patient, shown when ≥2 ref genes) ─────────
         if num_ref_genes >= 2:
