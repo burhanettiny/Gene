@@ -1035,5 +1035,14 @@ if st.button(f"📥 {translations[language_code]['generate_pdf']}"):
 
 st.markdown(f"<h4 style='font-size: 12px; font-family: Arial, sans-serif; color: #555;'><a href='mailto:mailtoburhanettin@gmail.com' style='color: #555; text-decoration: none;'>{translations[language_code]['subtitle']}</a></h4>", unsafe_allow_html=True)
 
-
+st.sidebar.markdown("---")
+st.sidebar.markdown(
+    "### 💻 Desktop Application",
+    unsafe_allow_html=False
+)
+st.sidebar.link_button(
+    "⬇️ Download Desktop App",
+    "https://drive.google.com/file/d/1oGBPqLeS6JxWBdVSs47qgEfl0wiMI3Z9/view?usp=sharing",
+    use_container_width=True
+)
 
