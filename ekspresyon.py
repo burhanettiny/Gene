@@ -1807,6 +1807,7 @@ for i in range(num_target_genes):
         if d.get("Grup") == translations[language_code]["control_group"]
         and d.get(translations[language_code]["target_gene"]) == gene_label
         and d.get(translations[language_code]["delta_ct_control"]) not in ("EXCLUDED", None)
+        and d.get("Outlier Excluded", "No") == "No"
     ]
 
     patient_dcts = {}
@@ -1818,6 +1819,7 @@ for i in range(num_target_genes):
             if d.get("Grup") == pg_label
             and d.get(translations[language_code]["target_gene"]) == gene_label
             and d.get(translations[language_code]["delta_ct_patient"]) not in ("EXCLUDED", None)
+            and d.get("Outlier Excluded", "No") == "No"
         ]
         if vals:
             patient_dcts[pg_label] = vals
@@ -2079,21 +2081,25 @@ for i in range(num_target_genes):
         d[translations[language_code]["target_ct"]] 
         for d in input_values_table
         if d["Grup"] == translations[language_code]["control_group"] and
-           d[translations[language_code]["target_gene"]] == f"{translations[language_code]['target_gene']} {i+1}"
+           d[translations[language_code]["target_gene"]] == f"{translations[language_code]['target_gene']} {i+1}" and
+           d.get(translations[language_code]["target_ct"]) not in ("EXCLUDED", None) and
+           d.get("Outlier Excluded", "No") == "No"
     ]
 
     control_reference_ct_values = [
         d[translations[language_code]["reference_ct"]] 
         for d in input_values_table
         if d["Grup"] == translations[language_code]["control_group"] and
-           d[translations[language_code]["target_gene"]] == f"{translations[language_code]['target_gene']} {i+1}"
+           d[translations[language_code]["target_gene"]] == f"{translations[language_code]['target_gene']} {i+1}" and
+           d.get(translations[language_code]["reference_ct"]) not in ("EXCLUDED", None) and
+           d.get("Outlier Excluded", "No") == "No"
     ]
 
     if len(control_target_ct_values) == 0 or len(control_reference_ct_values) == 0:
         st.error(f" {translations[language_code]['error_missing_control_data'].format(i=i+1)}")
         continue
 
-    control_delta_ct = np.array(control_target_ct_values) - np.array(control_reference_ct_values)
+    control_delta_ct = np.array(control_target_ct_values, dtype=float) - np.array(control_reference_ct_values, dtype=float)
     average_control_delta_ct = np.mean(control_delta_ct)
 
     fig = go.Figure()
@@ -2108,10 +2114,12 @@ for i in range(num_target_genes):
 
     for j in range(num_patient_groups):
         sample_delta_ct_values = [
-            d[translations[language_code]["delta_ct_patient"]] 
+            float(d[translations[language_code]["delta_ct_patient"]])
             for d in input_values_table 
             if d["Grup"] == f"{translations[language_code]['patient_group']} {j+1}" and 
-               d[translations[language_code]["target_gene"]] == f"{translations[language_code]['target_gene']} {i+1}"
+               d[translations[language_code]["target_gene"]] == f"{translations[language_code]['target_gene']} {i+1}" and
+               d.get(translations[language_code]["delta_ct_patient"]) not in ("EXCLUDED", None) and
+               d.get("Outlier Excluded", "No") == "No"
         ]
 
         if not sample_delta_ct_values:
@@ -2138,10 +2146,12 @@ for i in range(num_target_genes):
 
     for j in range(num_patient_groups):
         sample_delta_ct_values = [
-            d[translations[language_code]["delta_ct_patient"]] 
+            float(d[translations[language_code]["delta_ct_patient"]])
             for d in input_values_table 
             if d["Grup"] == f"{translations[language_code]['patient_group']} {j+1}" and 
-               d[translations[language_code]["target_gene"]] == f"{translations[language_code]['target_gene']} {i+1}"
+               d[translations[language_code]["target_gene"]] == f"{translations[language_code]['target_gene']} {i+1}" and
+               d.get(translations[language_code]["delta_ct_patient"]) not in ("EXCLUDED", None) and
+               d.get("Outlier Excluded", "No") == "No"
         ]
 
         if not sample_delta_ct_values:
