@@ -505,6 +505,8 @@ translations = {
         "multigene_1gene_note": "ℹ️ **Multi-gene correction:** Only 1 target gene analysed — multiple comparison correction across genes is not applicable.",
         "multigene_no_data": "No p-values available yet — enter data above to calculate corrections.",
     },
+
+    "de": {
         "title": "🧬 GeneQuantify: Expressions- und CNV-Analyse",
         "subtitle": "Entwickelt von B. Yalçınkaya",
         "patient_data_header": "📊 Geben Sie Patientendaten und Kontrollgruppen ein",
@@ -654,6 +656,8 @@ translations = {
         "multigene_1gene_note": "ℹ️ **Mehrgen-Korrektur:** Nur 1 Zielgen analysiert — Mehrfachvergleichskorrektur nicht anwendbar.",
         "multigene_no_data": "Noch keine p-Werte — oben Daten eingeben.",
     },
+
+    "fr": {
         "title": "🧬 GeneQuantify : Analyse de l'expression génique et des variations du nombre de copies (CNV)",
         "subtitle": "Développé par B. Yalçınkaya",
         "patient_data_header": "📊 Entrez les données des groupes patients et témoins",
@@ -803,6 +807,8 @@ translations = {
         "multigene_1gene_note": "ℹ️ **Correction multi-gènes :** Seulement 1 gène cible analysé — correction non applicable.",
         "multigene_no_data": "Pas encore de p-valeurs — entrez des données ci-dessus.",
     },
+
+    "es": {
         "title": "🧬 GeneQuantify: Análisis de Expresión Génica y CNV",
         "subtitle": "Desarrollado por B. Yalçınkaya",
         "patient_data_header": "📊 Ingrese Datos de Grupos de Pacientes y de Control",
@@ -952,6 +958,8 @@ translations = {
         "multigene_1gene_note": "ℹ️ **Corrección multigénica:** Solo 1 gen objetivo analizado — corrección no aplicable.",
         "multigene_no_data": "Aún no hay p-valores — ingrese datos arriba.",
     },
+
+    "ar": {
         "title": "🧬 جين كوانتيفاي: تحليل التعبير الجيني وتغير عدد النسخ (CNV)",
         "subtitle": "تم تطويره بواسطة ب. يالجنكايا",
         "patient_data_header": "📊 إدخال بيانات مجموعة المرضى ومجموعة التحكم",
