@@ -1683,51 +1683,302 @@ for i in range(num_target_genes):
                 )
             # ─────────────────────────────────────────────────────────────
 
-            # İstatistiksel Testler
+            # ── Per-group pairwise stats (control vs this patient group) ────
             shapiro_control = stats.shapiro(control_delta_ct)
-            shapiro_sample = stats.shapiro(sample_delta_ct)
-            levene_test = stats.levene(control_delta_ct, sample_delta_ct)
-            
+            shapiro_sample  = stats.shapiro(sample_delta_ct)
+            levene_test     = stats.levene(control_delta_ct, sample_delta_ct)
+
             control_normal = shapiro_control.pvalue > 0.05
-            sample_normal = shapiro_sample.pvalue > 0.05
-            equal_variance = levene_test.pvalue > 0.05
-            
+            sample_normal  = shapiro_sample.pvalue  > 0.05
+            equal_variance = levene_test.pvalue     > 0.05
+
             if control_normal and sample_normal:
-               if equal_variance:
-                   test_pvalue = stats.ttest_ind(control_delta_ct, sample_delta_ct).pvalue
-                   test_method = translations[language_code]["t_test"]
-               else:
-                   test_pvalue = stats.ttest_ind(control_delta_ct, sample_delta_ct, equal_var=False).pvalue
-                   test_method = translations[language_code]["welch_t_test"]
-               test_type = translations[language_code]["parametric"]
+                if equal_variance:
+                    test_pvalue = stats.ttest_ind(control_delta_ct, sample_delta_ct).pvalue
+                    test_method = translations[language_code]["t_test"]
+                else:
+                    test_pvalue = stats.ttest_ind(control_delta_ct, sample_delta_ct, equal_var=False).pvalue
+                    test_method = translations[language_code]["welch_t_test"]
+                test_type = translations[language_code]["parametric"]
             else:
                 test_pvalue = stats.mannwhitneyu(control_delta_ct, sample_delta_ct).pvalue
                 test_method = translations[language_code]["mann_whitney_u_test"]
-                test_type = translations[language_code]["non_parametric"]
-               
-            significance = translations[language_code]["significant"] if test_pvalue < 0.05 else translations[language_code]["insignificant"]
-            
+                test_type   = translations[language_code]["non_parametric"]
+
+            significance = translations[language_code]["significant"] if test_pvalue < 0.05 \
+                           else translations[language_code]["insignificant"]
+
             stats_data.append({
-                translations[language_code]["target_gene"]: f"{translations[language_code]['target_gene']} {i+1}",
+                translations[language_code]["target_gene"]:   f"{translations[language_code]['target_gene']} {i+1}",
                 translations[language_code]["patient_group"]: f"{translations[language_code]['patient_group']} {j+1}",
-                translations[language_code]["test_type"]: test_type,
-                translations[language_code]["test_method"]: test_method,
-                translations[language_code]["test_pvalue"]: test_pvalue,
-                translations[language_code]["significance"]: significance
+                translations[language_code]["test_type"]:     test_type,
+                translations[language_code]["test_method"]:   test_method,
+                translations[language_code]["test_pvalue"]:   test_pvalue,
+                translations[language_code]["significance"]:  significance,
+                "Comparison": f"Control vs {translations[language_code]['patient_group']} {j+1}"
             })
-            
+
             data.append({
-                translations[language_code]["target_gene"]: f"{translations[language_code]['target_gene']} {i+1}",
-                translations[language_code]["patient_group"]: f"{translations[language_code]['patient_group']} {j+1}",
-                translations[language_code]["delta_delta_ct"]: delta_delta_ct,
+                translations[language_code]["target_gene"]:         f"{translations[language_code]['target_gene']} {i+1}",
+                translations[language_code]["patient_group"]:       f"{translations[language_code]['patient_group']} {j+1}",
+                translations[language_code]["delta_delta_ct"]:      delta_delta_ct,
                 translations[language_code]["gene_expression_change"]: expression_change,
-                translations[language_code]["pfaffl_ratio"]: pfaffl_ratio,
-                f"E target": round(E_target, 4),
-                f"E ref": round(E_ref, 4),
-                translations[language_code]["regulation_status"]: regulation_status,
-                translations[language_code]["delta_ct_control"]: average_control_delta_ct,
-                translations[language_code]["delta_ct_patient"]: average_sample_delta_ct
+                translations[language_code]["pfaffl_ratio"]:        pfaffl_ratio,
+                "E target":                                          round(E_target, 4),
+                "E ref":                                             round(E_ref, 4),
+                translations[language_code]["regulation_status"]:   regulation_status,
+                translations[language_code]["delta_ct_control"]:    average_control_delta_ct,
+                translations[language_code]["delta_ct_patient"]:    average_sample_delta_ct
             })
+
+# ─── MULTI-GROUP ANALYSIS (3+ patient groups per target gene) ────────────────
+# Collect all ΔCt arrays per target gene for omnibus testing
+multigroup_results = []   # records for display / PDF
+
+for i in range(num_target_genes):
+    # Pull per-group ΔCt values from stats_data provenance via data dict
+    # Re-derive from input_values_table (source of truth after outlier removal)
+    gene_label = f"{translations[language_code]['target_gene']} {i+1}"
+
+    ctrl_dct = [
+        float(d[translations[language_code]["delta_ct_control"]])
+        for d in input_values_table
+        if d.get("Grup") == translations[language_code]["control_group"]
+        and d.get(translations[language_code]["target_gene"]) == gene_label
+        and d.get(translations[language_code]["delta_ct_control"]) not in ("EXCLUDED", None)
+    ]
+
+    patient_dcts = {}
+    for j in range(num_patient_groups):
+        pg_label = f"{translations[language_code]['patient_group']} {j+1}"
+        vals = [
+            float(d[translations[language_code]["delta_ct_patient"]])
+            for d in input_values_table
+            if d.get("Grup") == pg_label
+            and d.get(translations[language_code]["target_gene"]) == gene_label
+            and d.get(translations[language_code]["delta_ct_patient"]) not in ("EXCLUDED", None)
+        ]
+        if vals:
+            patient_dcts[pg_label] = vals
+
+    if not ctrl_dct or not patient_dcts:
+        continue
+
+    all_groups      = [ctrl_dct] + list(patient_dcts.values())
+    all_group_names = [translations[language_code]["control_group"]] + list(patient_dcts.keys())
+    n_groups        = len(all_groups)
+
+    if n_groups < 3:
+        # 2-group: already handled above — just note it
+        multigroup_results.append({
+            "gene": gene_label,
+            "n_groups": n_groups,
+            "note": "2-group comparison — pairwise test already reported above.",
+            "omnibus_test": "—", "omnibus_p": None,
+            "posthoc": [], "correction": "—"
+        })
+        continue
+
+    # ── Omnibus test selection ────────────────────────────────────────────────
+    normality_ok  = all(stats.shapiro(g).pvalue > 0.05 for g in all_groups if len(g) >= 3)
+    levene_p      = stats.levene(*all_groups).pvalue if n_groups >= 2 else 1.0
+    variance_ok   = levene_p > 0.05
+
+    if normality_ok and variance_ok:
+        omnibus_stat, omnibus_p = stats.f_oneway(*all_groups)
+        omnibus_test  = "One-way ANOVA"
+        omnibus_type  = "parametric"
+        posthoc_method = "Tukey HSD"
+    elif normality_ok and not variance_ok:
+        # Welch ANOVA (scipy ≥ 1.11) — fallback to regular ANOVA if unavailable
+        try:
+            from scipy.stats import alexandergovern
+            result = alexandergovern(*all_groups)
+            omnibus_p    = result.pvalue
+            omnibus_stat = result.statistic
+        except Exception:
+            omnibus_stat, omnibus_p = stats.f_oneway(*all_groups)
+        omnibus_test   = "Welch ANOVA (unequal variances)"
+        omnibus_type   = "parametric"
+        posthoc_method = "Games-Howell (approx. via pairwise Welch t-test + FDR)"
+    else:
+        omnibus_stat, omnibus_p = stats.kruskal(*all_groups)
+        omnibus_test   = "Kruskal-Wallis"
+        omnibus_type   = "non-parametric"
+        posthoc_method = "Dunn (pairwise Mann-Whitney U)"
+
+    omnibus_sig = "Significant" if omnibus_p < 0.05 else "Not significant"
+
+    # ── Post-hoc pairwise comparisons ────────────────────────────────────────
+    pairs      = []
+    raw_pvals  = []
+
+    for a in range(n_groups):
+        for b in range(a + 1, n_groups):
+            g_a, g_b = all_groups[a], all_groups[b]
+            if omnibus_type == "parametric" and variance_ok:
+                p = stats.ttest_ind(g_a, g_b).pvalue
+            elif omnibus_type == "parametric" and not variance_ok:
+                p = stats.ttest_ind(g_a, g_b, equal_var=False).pvalue
+            else:
+                p = stats.mannwhitneyu(g_a, g_b, alternative="two-sided").pvalue
+            pairs.append((all_group_names[a], all_group_names[b]))
+            raw_pvals.append(p)
+
+    # ── Multiple comparison correction ───────────────────────────────────────
+    n_tests = len(raw_pvals)
+    bonf_pvals = [min(p * n_tests, 1.0) for p in raw_pvals]
+
+    # FDR Benjamini-Hochberg
+    ranked     = sorted(range(n_tests), key=lambda k: raw_pvals[k])
+    fdr_pvals  = [1.0] * n_tests
+    for rank, idx in enumerate(ranked):
+        fdr_pvals[idx] = min(raw_pvals[idx] * n_tests / (rank + 1), 1.0)
+    # Enforce monotonicity
+    for k in range(n_tests - 2, -1, -1):
+        fdr_pvals[ranked[k]] = min(fdr_pvals[ranked[k]], fdr_pvals[ranked[k + 1]])
+
+    posthoc_rows = []
+    for idx, (pa, pb) in enumerate(pairs):
+        posthoc_rows.append({
+            "Comparison":        f"{pa} vs {pb}",
+            "Raw p":             round(raw_pvals[idx], 4),
+            "Bonferroni p":      round(bonf_pvals[idx], 4),
+            "FDR p (B-H)":       round(fdr_pvals[idx], 4),
+            "Sig (raw)":         "✅" if raw_pvals[idx]  < 0.05 else "—",
+            "Sig (Bonferroni)":  "✅" if bonf_pvals[idx] < 0.05 else "—",
+            "Sig (FDR)":         "✅" if fdr_pvals[idx]  < 0.05 else "—",
+        })
+
+    multigroup_results.append({
+        "gene":          gene_label,
+        "n_groups":      n_groups,
+        "omnibus_test":  omnibus_test,
+        "omnibus_type":  omnibus_type,
+        "omnibus_p":     omnibus_p,
+        "omnibus_sig":   omnibus_sig,
+        "posthoc_method": posthoc_method,
+        "posthoc_rows":  posthoc_rows,
+        "normality_ok":  normality_ok,
+        "variance_ok":   variance_ok,
+        "note":          None
+    })
+
+# ── Display multi-group results ───────────────────────────────────────────────
+if any(r["n_groups"] >= 3 for r in multigroup_results):
+    st.markdown("---")
+    st.markdown("## 📊 Multi-Group Comparison Analysis")
+
+    with st.expander("ℹ️ About multi-group statistical analysis", expanded=False):
+        st.markdown("""
+**When is multi-group analysis applied?**  
+Automatically activated when **≥ 3 groups** (control + 2 or more patient groups) are present for a target gene.  
+This addresses the limitation of pairwise-only testing, which inflates Type I error when multiple comparisons are made without correction.
+
+**Test selection logic (automatic):**
+
+| Condition | Test |
+|---|---|
+| All groups normal + equal variances | One-way ANOVA → Tukey HSD |
+| All groups normal + unequal variances | Welch ANOVA → Games-Howell |
+| Any group non-normal | Kruskal-Wallis → Dunn (Mann-Whitney U) |
+
+**Multiple comparison correction:**
+- **Bonferroni**: conservative, controls family-wise error rate (FWER). Best when few comparisons.
+- **FDR (Benjamini-Hochberg)**: controls false discovery rate. Better power for many comparisons.
+
+**Recommendation:** Report both, discuss which is more appropriate for your study design.  
+**Reference:** Dunn OJ. *J Am Stat Assoc* 1961; Benjamini & Hochberg. *J R Stat Soc B* 1995.
+""")
+
+    for res in multigroup_results:
+        if res["n_groups"] < 3:
+            continue
+
+        st.markdown(f"### 🧬 {res['gene']} — {res['n_groups']} groups")
+
+        # Decision pathway
+        if res["normality_ok"] and res["variance_ok"]:
+            decision_text = "✅ Normal distribution + equal variances → **One-way ANOVA + Tukey HSD**"
+            decision_color = "success"
+        elif res["normality_ok"] and not res["variance_ok"]:
+            decision_text = "⚠️ Normal distribution + **unequal variances** → **Welch ANOVA + Games-Howell**"
+            decision_color = "warning"
+        else:
+            decision_text = "⚠️ **Non-normal distribution** → **Kruskal-Wallis + Dunn post-hoc**"
+            decision_color = "warning"
+
+        if decision_color == "success":
+            st.success(decision_text)
+        else:
+            st.warning(decision_text)
+
+        # Omnibus result
+        omni_col1, omni_col2, omni_col3 = st.columns(3)
+        omni_col1.metric("Omnibus Test", res["omnibus_test"])
+        omni_col2.metric("p-value", f"{res['omnibus_p']:.4f}")
+        omni_col3.metric("Result", res["omnibus_sig"])
+
+        if res["omnibus_p"] >= 0.05:
+            st.info(
+                "ℹ️ Omnibus test is **not significant** (p ≥ 0.05). "
+                "Post-hoc comparisons are shown for completeness but should be interpreted with caution — "
+                "no overall group effect was detected."
+            )
+
+        # Post-hoc table
+        st.markdown(f"**Post-hoc: {res['posthoc_method']}** with Bonferroni & FDR correction")
+        ph_df = pd.DataFrame(res["posthoc_rows"])
+        st.dataframe(ph_df, use_container_width=True)
+
+        # Visualise adjusted p-values
+        fig_ph = go.Figure()
+        comparisons = [r["Comparison"] for r in res["posthoc_rows"]]
+        fig_ph.add_trace(go.Bar(
+            name="Raw p", x=comparisons,
+            y=[r["Raw p"] for r in res["posthoc_rows"]],
+            marker_color="#4C72B0"
+        ))
+        fig_ph.add_trace(go.Bar(
+            name="Bonferroni p", x=comparisons,
+            y=[r["Bonferroni p"] for r in res["posthoc_rows"]],
+            marker_color="#DD8452"
+        ))
+        fig_ph.add_trace(go.Bar(
+            name="FDR p (B-H)", x=comparisons,
+            y=[r["FDR p (B-H)"] for r in res["posthoc_rows"]],
+            marker_color="#55A868"
+        ))
+        fig_ph.add_hline(y=0.05, line_dash="dash", line_color="red",
+                         annotation_text="α = 0.05", annotation_position="right")
+        fig_ph.update_layout(
+            barmode="group",
+            title=f"{res['gene']} — Post-hoc p-values (raw, Bonferroni, FDR)",
+            yaxis_title="p-value",
+            height=350
+        )
+        st.plotly_chart(fig_ph, use_container_width=True)
+
+        # Download post-hoc CSV
+        ph_csv = ph_df.to_csv(index=False).encode("utf-8")
+        st.download_button(
+            label=f"📥 Download post-hoc results — {res['gene']}",
+            data=ph_csv,
+            file_name=f"posthoc_{res['gene'].replace(' ', '_')}.csv",
+            mime="text/csv",
+            key=f"ph_dl_{res['gene']}"
+        )
+
+elif num_patient_groups >= 2 and multigroup_results:
+    # 2 groups present but no 3+ — show explicit limitation note
+    st.markdown("---")
+    st.info(
+        "ℹ️ **Multi-group analysis not applicable:** Only 2 groups detected (Control + 1 patient group). "
+        "Pairwise statistics are reported above. "
+        "If your experiment includes 3 or more groups, increase the number of patient groups to enable "
+        "automatic ANOVA / Kruskal-Wallis testing with post-hoc correction."
+    )
+# ─────────────────────────────────────────────────────────────────────────────
 
 # Giriş Verileri Tablosunu Göster
 if input_values_table: 
