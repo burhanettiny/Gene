@@ -1264,6 +1264,7 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE guidelines).
 
 st.markdown("---")
 # ─────────────────────────────────────────────────────────────────────────────
+input_values_table = []
 data = []
 stats_data = []
 
@@ -1412,6 +1413,11 @@ for i in range(num_target_genes):
             )
 
     # ── Compute normalization factor (geometric mean of refs) ─────────────────
+    # Re-sync min_control_len to actual array lengths after any outlier removal
+    min_control_len = min(len(control_target_ct_values), *[len(a) for a in ctrl_ref_arrays])
+    control_target_ct_values = control_target_ct_values[:min_control_len]
+    ctrl_ref_arrays = [a[:min_control_len] for a in ctrl_ref_arrays]
+
     ctrl_norm_factor = geometric_mean_ct(ctrl_ref_arrays)   # per-sample NF
     control_delta_ct = control_target_ct_values - ctrl_norm_factor
 
@@ -1440,7 +1446,7 @@ for i in range(num_target_genes):
     # Log excluded outliers as separate flagged rows
     for ex_idx in ctrl_excluded_target:
         input_values_table.append({
-            translations[language_code]["sample_number"]: ex_idx + 1,
+            translations[language_code]["sample_number"]: f"{ex_idx + 1} ⚠️",
             translations[language_code]["target_gene"]: f"{target_gene} {i+1}",
             "Grup": translations[language_code]["control_group"],
             translations[language_code]["target_ct"]: "EXCLUDED",
@@ -1584,6 +1590,11 @@ for i in range(num_target_genes):
                 )
 
         # ── Normalization factor & ΔCt ────────────────────────────────────────
+        # Re-sync lengths after any outlier removal
+        min_sample_len = min(len(sample_target_ct_values), *[len(a) for a in smp_ref_arrays])
+        sample_target_ct_values = sample_target_ct_values[:min_sample_len]
+        smp_ref_arrays = [a[:min_sample_len] for a in smp_ref_arrays]
+
         smp_norm_factor = geometric_mean_ct(smp_ref_arrays)
         sample_delta_ct = sample_target_ct_values - smp_norm_factor
         sample_reference_ct_values = smp_ref_arrays[0]
@@ -1610,7 +1621,7 @@ for i in range(num_target_genes):
         # Log excluded outliers as flagged rows
         for ex_idx in smp_excluded_target:
             input_values_table.append({
-                translations[language_code]["sample_number"]: ex_idx + 1,
+                translations[language_code]["sample_number"]: f"{ex_idx + 1} ⚠️",
                 translations[language_code]["target_gene"]: f"{translations[language_code]['target_gene']} {i+1}",
                 "Grup": f"{translations[language_code]['patient_group']} {j+1}",
                 translations[language_code]["target_ct"]: "EXCLUDED",
