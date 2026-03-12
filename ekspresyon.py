@@ -1017,6 +1017,93 @@ def parse_input_data(input_data):
     values = [x.replace(",", ".").strip() for x in input_data.split() if x.strip()]
     return np.array([float(x) for x in values if x])
 
+# ─── geNorm M-value stability ─────────────────────────────────────────────────
+def compute_genorm_m(ref_ct_matrix):
+    """
+    ref_ct_matrix: 2D numpy array, shape (n_refs, n_samples)
+    Returns M-values for each reference gene (lower = more stable).
+    Vandesompele et al. 2002 algorithm.
+    """
+    n_refs, n_samples = ref_ct_matrix.shape
+    if n_refs < 2:
+        return np.array([0.0])
+    m_values = []
+    for i in range(n_refs):
+        pairwise_vars = []
+        for j in range(n_refs):
+            if i == j:
+                continue
+            ratio = ref_ct_matrix[i] - ref_ct_matrix[j]   # log2 ratio in Ct space
+            pairwise_vars.append(np.std(ratio, ddof=1) if len(ratio) > 1 else 0.0)
+        m_values.append(np.mean(pairwise_vars))
+    return np.array(m_values)
+
+def compute_cv(ct_values):
+    """Coefficient of variation (%) for a 1D array of Ct values."""
+    if len(ct_values) < 2 or np.mean(ct_values) == 0:
+        return 0.0
+    return (np.std(ct_values, ddof=1) / np.mean(ct_values)) * 100
+
+def geometric_mean_ct(ct_arrays):
+    """
+    Compute per-sample geometric mean of multiple reference genes.
+    ct_arrays: list of 1D arrays (each = one ref gene, all same length n_samples)
+    Returns 1D array of length n_samples.
+    """
+    stacked = np.vstack(ct_arrays)   # shape (n_refs, n_samples)
+    return np.mean(stacked, axis=0)  # arithmetic mean in Ct = geometric mean of expression
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ─── MULTI-REFERENCE GENE SETTINGS ───────────────────────────────────────────
+st.markdown("---")
+st.markdown("### 📚 Reference Gene Settings")
+
+ref_info_col, ref_warn_col = st.columns([3, 2])
+with ref_info_col:
+    num_ref_genes = st.number_input(
+        "Number of reference genes per target gene",
+        min_value=1, max_value=10, value=1, step=1,
+        key="num_ref_genes",
+        help="MIQE guidelines recommend ≥2 validated reference genes for robust normalization."
+    )
+with ref_warn_col:
+    if num_ref_genes == 1:
+        st.warning(
+            "⚠️ **Methodological note:** Using a single reference gene is a meaningful "
+            "constraint on normalization robustness. MIQE guidelines (Bustin et al. 2009) "
+            "recommend using **≥ 2 validated reference genes** and assessing their stability "
+            "with tools such as geNorm or NormFinder. Consider adding a second reference gene "
+            "to strengthen your conclusions."
+        )
+    else:
+        st.success(
+            f"✅ {num_ref_genes} reference genes selected. "
+            "Geometric mean normalization and geNorm M-value stability will be calculated automatically."
+        )
+
+if num_ref_genes > 1:
+    with st.expander("ℹ️ About multi-reference normalization", expanded=False):
+        st.markdown("""
+**Geometric mean normalization** (Vandesompele et al. 2002)  
+The normalization factor (NF) is the arithmetic mean of Ct values across all reference genes per sample,
+which corresponds to the geometric mean of their expression levels.  
+`NF_sample = mean(Ct_ref1, Ct_ref2, ..., Ct_refN)` for each sample  
+`ΔCt = Ct_target − NF`
+
+**geNorm M-value** (stability score)  
+For each reference gene, M = average standard deviation of log-ratios against all other reference genes.  
+**Lower M = more stable.** MIQE-recommended threshold: M < 0.5 (strict) or M < 1.0 (acceptable).
+
+**CV (Coefficient of Variation)**  
+`CV = (SD / mean) × 100%` of raw Ct values across all samples.  
+Lower CV indicates less variation and better stability as a reference.
+
+**Reference:** Vandesompele J et al. *Genome Biology* 2002; Bustin SA et al. *Clin Chem* 2009 (MIQE).
+""")
+
+st.markdown("---")
+# ─────────────────────────────────────────────────────────────────────────────
+
 input_values_table = []
 data = []
 stats_data = []
@@ -1030,77 +1117,201 @@ reference_gene = translations[language_code]["reference_gene"]
 ct_value = translations[language_code]["ct_value"]
 patient_group = translations[language_code]["patient_group"]
 
-    # Kontrol Grubu Verileri
-for i in range(num_target_genes):    
+# Kontrol Grubu Verileri
+for i in range(num_target_genes):
     st.markdown(
-    f"<h4>{translations[language_code]['control_group']} {i+1} - {translations[language_code]['target_gene']} {i+1}</h4>",
-    unsafe_allow_html=True
-)
+        f"<h4>{translations[language_code]['control_group']} {i+1} - {translations[language_code]['target_gene']} {i+1}</h4>",
+        unsafe_allow_html=True
+    )
 
-    control_target_ct = st.text_area(f"{translations[language_code]['control_group']} {i+1} - {translations[language_code]['target_gene']} {i+1} - {translations[language_code]['ct_value']}", key=f"control_target_ct_{i}")
-    control_reference_ct = st.text_area(f"{translations[language_code]['control_group']} {i+1} - {translations[language_code]['reference_gene']} {i+1} - {translations[language_code]['ct_value']}", key=f"control_reference_ct_{i}")
-   
+    control_target_ct = st.text_area(
+        f"{translations[language_code]['control_group']} {i+1} - {translations[language_code]['target_gene']} {i+1} - {translations[language_code]['ct_value']}",
+        key=f"control_target_ct_{i}"
+    )
+
+    # ── Multi-reference gene input (Control) ─────────────────────────────────
+    ctrl_ref_arrays = []
+    ctrl_ref_names  = []
+    all_ctrl_refs_valid = True
+
+    for r in range(num_ref_genes):
+        ref_label = f"Ref Gene {r+1}" if num_ref_genes > 1 else translations[language_code]["reference_gene"]
+        ctrl_ref_ct_raw = st.text_area(
+            f"{translations[language_code]['control_group']} {i+1} — {ref_label} {i+1} — {translations[language_code]['ct_value']}",
+            key=f"control_reference_ct_{i}_{r}"
+        )
+        parsed = parse_input_data(ctrl_ref_ct_raw)
+        if len(parsed) == 0:
+            all_ctrl_refs_valid = False
+        else:
+            ctrl_ref_arrays.append(parsed)
+            ctrl_ref_names.append(f"Ref Gene {r+1}")
+
     control_target_ct_values = np.array(parse_input_data(control_target_ct))
-    control_reference_ct_values = np.array(parse_input_data(control_reference_ct))
 
-    if len(control_target_ct_values) == 0 or len(control_reference_ct_values) == 0:
+    if len(control_target_ct_values) == 0 or not all_ctrl_refs_valid or len(ctrl_ref_arrays) == 0:
         st.error(translations[language_code]["warning_control_ct"].format(i=i+1))
         continue
-    
-    min_control_len = min(len(control_target_ct_values), len(control_reference_ct_values))
+
+    # Trim all arrays to common length
+    min_control_len = min(len(control_target_ct_values), *[len(a) for a in ctrl_ref_arrays])
     control_target_ct_values = control_target_ct_values[:min_control_len]
-    control_reference_ct_values = control_reference_ct_values[:min_control_len]
-    control_delta_ct = control_target_ct_values - control_reference_ct_values
+    ctrl_ref_arrays = [a[:min_control_len] for a in ctrl_ref_arrays]
+
+    # ── geNorm + CV stability (shown when ≥2 ref genes) ──────────────────────
+    if num_ref_genes >= 2:
+        ref_matrix = np.vstack(ctrl_ref_arrays)   # (n_refs, n_samples)
+        m_values   = compute_genorm_m(ref_matrix)
+        cv_values  = [compute_cv(a) for a in ctrl_ref_arrays]
+
+        st.markdown(f"##### 📊 Reference Gene Stability — Control Group {i+1}")
+        stab_cols = st.columns(num_ref_genes)
+        for r, col in enumerate(stab_cols):
+            m_ok = m_values[r] < 1.0
+            cv_ok = cv_values[r] < 5.0
+            with col:
+                st.metric(
+                    label=f"Ref Gene {r+1}",
+                    value=f"M = {m_values[r]:.3f}",
+                    delta=f"CV = {cv_values[r]:.2f}%"
+                )
+                if m_ok and cv_ok:
+                    st.caption("✅ Stable")
+                elif m_ok or cv_ok:
+                    st.caption("⚠️ Borderline")
+                else:
+                    st.caption("❌ Unstable")
+
+        # Stability bar chart
+        fig_stab = go.Figure()
+        fig_stab.add_trace(go.Bar(
+            name="geNorm M-value",
+            x=[f"Ref {r+1}" for r in range(num_ref_genes)],
+            y=m_values,
+            marker_color=["#2ecc71" if m < 0.5 else "#f39c12" if m < 1.0 else "#e74c3c" for m in m_values],
+            text=[f"{m:.3f}" for m in m_values],
+            textposition="outside"
+        ))
+        fig_stab.add_hline(y=0.5, line_dash="dot", line_color="green",
+                           annotation_text="M=0.5 (strict)", annotation_position="right")
+        fig_stab.add_hline(y=1.0, line_dash="dash", line_color="orange",
+                           annotation_text="M=1.0 (acceptable)", annotation_position="right")
+        fig_stab.update_layout(
+            title=f"geNorm M-value — Control Group {i+1} Reference Genes",
+            yaxis_title="M-value (lower = more stable)",
+            height=280
+        )
+        st.plotly_chart(fig_stab, use_container_width=True)
+
+    # ── Compute normalization factor (geometric mean of refs) ─────────────────
+    ctrl_norm_factor = geometric_mean_ct(ctrl_ref_arrays)   # per-sample NF
+    control_delta_ct = control_target_ct_values - ctrl_norm_factor
+
+    # For table: show first ref gene Ct as representative; NF shown separately
+    control_reference_ct_values = ctrl_ref_arrays[0]   # kept for legacy table column
 
     average_control_delta_ct = np.mean(control_delta_ct) if len(control_delta_ct) > 0 else None
     sample_counter = 1
-    
+
     for idx in range(min_control_len):
-        input_values_table.append({
+        row = {
             translations[language_code]["sample_number"]: sample_counter,
             translations[language_code]["target_gene"]: f"{target_gene} {i+1}",
             "Grup": translations[language_code]["control_group"],
             translations[language_code]["target_ct"]: control_target_ct_values[idx],
-            translations[language_code]["reference_ct"]: control_reference_ct_values[idx],  
-            translations[language_code]["delta_ct_control"]: control_delta_ct[idx]
-        })
+            translations[language_code]["reference_ct"]: round(ctrl_norm_factor[idx], 4),
+            translations[language_code]["delta_ct_control"]: round(control_delta_ct[idx], 4)
+        }
+        if num_ref_genes > 1:
+            for r, arr in enumerate(ctrl_ref_arrays):
+                row[f"Ref Gene {r+1} Ct"] = arr[idx]
+        input_values_table.append(row)
         sample_counter += 1
- 
+
     for j in range(num_patient_groups):
         st.markdown(
             f"<h4>{translations[language_code]['patient_group']} {j+1} - {translations[language_code]['target_gene']} {i+1}</h4>",
             unsafe_allow_html=True
         )
 
-        sample_target_ct = st.text_area(f"{translations[language_code]['patient_group']} {j+1} - {translations[language_code]['target_gene']} {i+1} - {translations[language_code]['ct_value']}", key=f"sample_target_ct_{i}_{j}")
-        sample_reference_ct = st.text_area(f"{translations[language_code]['patient_group']} {j+1} - {translations[language_code]['reference_gene']} {i+1} - {translations[language_code]['ct_value']}", key=f"sample_reference_ct_{i}_{j}")
-        
+        sample_target_ct = st.text_area(
+            f"{translations[language_code]['patient_group']} {j+1} - {translations[language_code]['target_gene']} {i+1} - {translations[language_code]['ct_value']}",
+            key=f"sample_target_ct_{i}_{j}"
+        )
+
+        # ── Multi-reference gene input (Patient) ──────────────────────────────
+        smp_ref_arrays = []
+        all_smp_refs_valid = True
+
+        for r in range(num_ref_genes):
+            ref_label = f"Ref Gene {r+1}" if num_ref_genes > 1 else translations[language_code]["reference_gene"]
+            smp_ref_ct_raw = st.text_area(
+                f"{translations[language_code]['patient_group']} {j+1} — {ref_label} {i+1} — {translations[language_code]['ct_value']}",
+                key=f"sample_reference_ct_{i}_{j}_{r}"
+            )
+            parsed = parse_input_data(smp_ref_ct_raw)
+            if len(parsed) == 0:
+                all_smp_refs_valid = False
+            else:
+                smp_ref_arrays.append(parsed)
+
         sample_target_ct_values = np.array(parse_input_data(sample_target_ct))
-        sample_reference_ct_values = np.array(parse_input_data(sample_reference_ct))
-         
-        if len(sample_target_ct_values) == 0 or len(sample_reference_ct_values) == 0:
+
+        if len(sample_target_ct_values) == 0 or not all_smp_refs_valid or len(smp_ref_arrays) == 0:
             st.error(translations[language_code]["warning_patient_ct"].format(j=j+1))
             continue
-        
-        min_sample_len = min(len(sample_target_ct_values), len(sample_reference_ct_values))
+
+        min_sample_len = min(len(sample_target_ct_values), *[len(a) for a in smp_ref_arrays])
         sample_target_ct_values = sample_target_ct_values[:min_sample_len]
-        sample_reference_ct_values = sample_reference_ct_values[:min_sample_len]
-        sample_delta_ct = sample_target_ct_values - sample_reference_ct_values
-        
+        smp_ref_arrays = [a[:min_sample_len] for a in smp_ref_arrays]
+
+        # ── geNorm + CV stability (Patient, shown when ≥2 ref genes) ─────────
+        if num_ref_genes >= 2:
+            smp_ref_matrix = np.vstack(smp_ref_arrays)
+            smp_m_values   = compute_genorm_m(smp_ref_matrix)
+            smp_cv_values  = [compute_cv(a) for a in smp_ref_arrays]
+
+            st.markdown(f"##### 📊 Reference Gene Stability — {translations[language_code]['patient_group']} {j+1}")
+            smp_stab_cols = st.columns(num_ref_genes)
+            for r, col in enumerate(smp_stab_cols):
+                m_ok = smp_m_values[r] < 1.0
+                cv_ok = smp_cv_values[r] < 5.0
+                with col:
+                    st.metric(
+                        label=f"Ref Gene {r+1}",
+                        value=f"M = {smp_m_values[r]:.3f}",
+                        delta=f"CV = {smp_cv_values[r]:.2f}%"
+                    )
+                    if m_ok and cv_ok:
+                        st.caption("✅ Stable")
+                    elif m_ok or cv_ok:
+                        st.caption("⚠️ Borderline")
+                    else:
+                        st.caption("❌ Unstable")
+
+        # ── Normalization factor & ΔCt ────────────────────────────────────────
+        smp_norm_factor = geometric_mean_ct(smp_ref_arrays)
+        sample_delta_ct = sample_target_ct_values - smp_norm_factor
+        sample_reference_ct_values = smp_ref_arrays[0]
+
         average_sample_delta_ct = np.mean(sample_delta_ct) if len(sample_delta_ct) > 0 else None
-        
-        sample_counter = 1  
+
+        sample_counter = 1
         for idx in range(min_sample_len):
-            input_values_table.append({
+            row = {
                 translations[language_code]["sample_number"]: sample_counter,
                 translations[language_code]["target_gene"]: f"{translations[language_code]['target_gene']} {i+1}",
                 "Grup": f"{translations[language_code]['patient_group']} {j+1}",
                 translations[language_code]["target_ct"]: sample_target_ct_values[idx],
-                translations[language_code]["reference_ct"]: sample_reference_ct_values[idx],
-                translations[language_code]["delta_ct_patient"]: sample_delta_ct[idx]
-            })
+                translations[language_code]["reference_ct"]: round(smp_norm_factor[idx], 4),
+                translations[language_code]["delta_ct_patient"]: round(sample_delta_ct[idx], 4)
+            }
+            if num_ref_genes > 1:
+                for r, arr in enumerate(smp_ref_arrays):
+                    row[f"Ref Gene {r+1} Ct"] = arr[idx]
+            input_values_table.append(row)
             sample_counter += 1
-        
+
         # ΔΔCt ve Gen Ekspresyon Değişimi Hesaplama
         if average_control_delta_ct is not None and average_sample_delta_ct is not None:
             delta_delta_ct = average_sample_delta_ct - average_control_delta_ct
@@ -1111,13 +1322,10 @@ for i in range(num_target_genes):
             E_target = eff["target_E"]
             E_ref = eff["ref_E"]
 
-            # Pfaffl: Ratio = (E_target ^ ΔCt_target) / (E_ref ^ ΔCt_ref)
-            # ΔCt_target = mean_control_target - mean_sample_target (control vs sample direction)
-            # ΔCt_ref    = mean_control_ref - mean_sample_ref
             avg_ctrl_target = np.mean(control_target_ct_values)
-            avg_ctrl_ref    = np.mean(control_reference_ct_values)
+            avg_ctrl_ref    = np.mean(ctrl_norm_factor)
             avg_smp_target  = np.mean(sample_target_ct_values)
-            avg_smp_ref     = np.mean(sample_reference_ct_values)
+            avg_smp_ref     = np.mean(smp_norm_factor)
 
             delta_ct_target_pfaffl = avg_ctrl_target - avg_smp_target
             delta_ct_ref_pfaffl    = avg_ctrl_ref    - avg_smp_ref
