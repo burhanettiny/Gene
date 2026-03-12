@@ -1164,6 +1164,9 @@ for i in range(num_target_genes):
         m_values   = compute_genorm_m(ref_matrix)
         cv_values  = [compute_cv(a) for a in ctrl_ref_arrays]
 
+        unstable_ctrl = [r for r, m in enumerate(m_values) if m >= 1.0]
+        borderline_ctrl = [r for r, m in enumerate(m_values) if 0.5 <= m < 1.0]
+
         st.markdown(f"##### 📊 Reference Gene Stability — Control Group {i+1}")
         stab_cols = st.columns(num_ref_genes)
         for r, col in enumerate(stab_cols):
@@ -1180,7 +1183,7 @@ for i in range(num_target_genes):
                 elif m_ok or cv_ok:
                     st.caption("⚠️ Borderline")
                 else:
-                    st.caption("❌ Unstable")
+                    st.caption("❌ Unstable — M ≥ 1.0")
 
         # Stability bar chart
         fig_stab = go.Figure()
@@ -1202,6 +1205,34 @@ for i in range(num_target_genes):
             height=280
         )
         st.plotly_chart(fig_stab, use_container_width=True)
+
+        # ── Stability warnings ────────────────────────────────────────────────
+        if unstable_ctrl:
+            unstable_names = ", ".join([f"Ref Gene {r+1}" for r in unstable_ctrl])
+            st.warning(
+                f"⚠️ **Unstable reference gene(s) detected in Control Group {i+1}: {unstable_names}**\n\n"
+                f"geNorm M-value ≥ 1.0 indicates that the expression of this gene varies "
+                f"considerably across samples, which may distort normalization.\n\n"
+                f"**Analysis will continue**, but results should be interpreted with caution.\n\n"
+                f"**Recommendations:**\n"
+                f"- Verify Ct values for {unstable_names} — check for pipetting errors or outliers\n"
+                f"- Consider replacing {unstable_names} with a more stable reference gene\n"
+                f"- If only 2 reference genes are used and one is unstable, results rely entirely "
+                f"on the remaining gene — consider adding a third validated reference\n"
+                f"- Consult: Vandesompele et al. *Genome Biology* 2002 for geNorm methodology"
+            )
+        elif borderline_ctrl:
+            borderline_names = ", ".join([f"Ref Gene {r+1}" for r in borderline_ctrl])
+            st.info(
+                f"ℹ️ **Borderline stability in Control Group {i+1}: {borderline_names}** (M = 0.5–1.0)\n\n"
+                f"Expression stability is acceptable per MIQE guidelines, but not ideal. "
+                f"Consider validating with an additional reference gene for greater confidence."
+            )
+        else:
+            st.success(
+                f"✅ All reference genes in Control Group {i+1} are stable (M < 0.5). "
+                f"Normalization quality is excellent."
+            )
 
     # ── Compute normalization factor (geometric mean of refs) ─────────────────
     ctrl_norm_factor = geometric_mean_ct(ctrl_ref_arrays)   # per-sample NF
@@ -1271,6 +1302,9 @@ for i in range(num_target_genes):
             smp_m_values   = compute_genorm_m(smp_ref_matrix)
             smp_cv_values  = [compute_cv(a) for a in smp_ref_arrays]
 
+            unstable_smp   = [r for r, m in enumerate(smp_m_values) if m >= 1.0]
+            borderline_smp = [r for r, m in enumerate(smp_m_values) if 0.5 <= m < 1.0]
+
             st.markdown(f"##### 📊 Reference Gene Stability — {translations[language_code]['patient_group']} {j+1}")
             smp_stab_cols = st.columns(num_ref_genes)
             for r, col in enumerate(smp_stab_cols):
@@ -1287,7 +1321,59 @@ for i in range(num_target_genes):
                     elif m_ok or cv_ok:
                         st.caption("⚠️ Borderline")
                     else:
-                        st.caption("❌ Unstable")
+                        st.caption("❌ Unstable — M ≥ 1.0")
+
+            # Stability bar chart (patient)
+            fig_stab_smp = go.Figure()
+            fig_stab_smp.add_trace(go.Bar(
+                name="geNorm M-value",
+                x=[f"Ref {r+1}" for r in range(num_ref_genes)],
+                y=smp_m_values,
+                marker_color=["#2ecc71" if m < 0.5 else "#f39c12" if m < 1.0 else "#e74c3c" for m in smp_m_values],
+                text=[f"{m:.3f}" for m in smp_m_values],
+                textposition="outside"
+            ))
+            fig_stab_smp.add_hline(y=0.5, line_dash="dot", line_color="green",
+                               annotation_text="M=0.5 (strict)", annotation_position="right")
+            fig_stab_smp.add_hline(y=1.0, line_dash="dash", line_color="orange",
+                               annotation_text="M=1.0 (acceptable)", annotation_position="right")
+            fig_stab_smp.update_layout(
+                title=f"geNorm M-value — {translations[language_code]['patient_group']} {j+1} Reference Genes",
+                yaxis_title="M-value (lower = more stable)",
+                height=280
+            )
+            st.plotly_chart(fig_stab_smp, use_container_width=True)
+
+            # ── Stability warnings (patient) ──────────────────────────────────
+            if unstable_smp:
+                unstable_names = ", ".join([f"Ref Gene {r+1}" for r in unstable_smp])
+                st.warning(
+                    f"⚠️ **Unstable reference gene(s) detected in "
+                    f"{translations[language_code]['patient_group']} {j+1}: {unstable_names}**\n\n"
+                    f"geNorm M-value ≥ 1.0 indicates considerable expression variability across "
+                    f"samples in this group, which may compromise normalization reliability.\n\n"
+                    f"**Analysis will continue**, but interpret results with caution.\n\n"
+                    f"**Recommendations:**\n"
+                    f"- Check for sample-to-sample variation, outliers, or data entry errors\n"
+                    f"- Validate {unstable_names} in this sample group before drawing conclusions\n"
+                    f"- A mismatch between control and patient group stability may itself indicate "
+                    f"a biological or technical difference worth investigating\n"
+                    f"- Consider replacing {unstable_names} with a validated, tissue-appropriate "
+                    f"reference gene (e.g. from literature or HouseKeeper database)"
+                )
+            elif borderline_smp:
+                borderline_names = ", ".join([f"Ref Gene {r+1}" for r in borderline_smp])
+                st.info(
+                    f"ℹ️ **Borderline stability in "
+                    f"{translations[language_code]['patient_group']} {j+1}: {borderline_names}** (M = 0.5–1.0)\n\n"
+                    f"Stability is within MIQE acceptable range. Consider adding a third reference "
+                    f"gene to confirm robustness of normalization."
+                )
+            else:
+                st.success(
+                    f"✅ All reference genes in "
+                    f"{translations[language_code]['patient_group']} {j+1} are stable (M < 0.5)."
+                )
 
         # ── Normalization factor & ΔCt ────────────────────────────────────────
         smp_norm_factor = geometric_mean_ct(smp_ref_arrays)
