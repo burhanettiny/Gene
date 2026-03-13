@@ -1620,11 +1620,6 @@ def parse_input_data(input_data):
     return np.array([float(x) for x in values if x])
 
 def compute_genorm_m(ref_ct_matrix):
-    """
-    ref_ct_matrix: 2D numpy array, shape (n_refs, n_samples)
-    Returns M-values for each reference gene (lower = more stable).
-    Vandesompele et al. 2002 algorithm.
-    """
     n_refs, n_samples = ref_ct_matrix.shape
     if n_refs < 2:
         return np.array([0.0])
@@ -1640,27 +1635,16 @@ def compute_genorm_m(ref_ct_matrix):
     return np.array(m_values)
 
 def compute_cv(ct_values):
-    """Coefficient of variation (%) for a 1D array of Ct values."""
     if len(ct_values) < 2 or np.mean(ct_values) == 0:
         return 0.0
     return (np.std(ct_values, ddof=1) / np.mean(ct_values)) * 100
 
-
-    """
-    Compute per-sample geometric mean of multiple reference genes.
-    ct_arrays: list of 1D arrays (each = one ref gene, all same length n_samples)
-    Returns 1D array of length n_samples.
-    """
-    stacked = np.vstack(ct_arrays)   # shape (n_refs, n_samples)
-    return np.mean(stacked, axis=0)  # arithmetic mean in Ct = geometric mean of expression
+def geometric_mean_ct(ct_arrays):
+    stacked = np.vstack(ct_arrays)
+    return np.mean(stacked, axis=0)
 
 # ─── OUTLIER DETECTION FUNCTIONS ─────────────────────────────────────────────
 def detect_outliers_grubbs(data, alpha=0.05):
-    """
-    Grubbs test for a single outlier (two-sided).
-    Returns list of outlier indices. Requires n >= 3.
-    Grubbs 1969; commonly used in qPCR Ct data QC.
-    """
     data = np.array(data, dtype=float)
     n = len(data)
     if n < 3:
@@ -1676,7 +1660,6 @@ def detect_outliers_grubbs(data, alpha=0.05):
         g_vals = np.abs(working - mean_w) / std_w
         max_idx = np.argmax(g_vals)
         G = g_vals[max_idx]
-        # Critical value (two-sided, approximate)
         t_crit = stats.t.ppf(1 - alpha / (2 * len(working)), df=len(working) - 2)
         G_crit = ((len(working) - 1) / np.sqrt(len(working))) * \
                  np.sqrt(t_crit**2 / (len(working) - 2 + t_crit**2))
@@ -1689,10 +1672,6 @@ def detect_outliers_grubbs(data, alpha=0.05):
     return outlier_indices
 
 def detect_outliers_iqr(data, multiplier=1.5):
-    """
-    IQR-based outlier detection (Tukey fences).
-    Returns list of outlier indices.
-    """
     data = np.array(data, dtype=float)
     q1, q3 = np.percentile(data, [25, 75])
     iqr = q3 - q1
@@ -1701,26 +1680,19 @@ def detect_outliers_iqr(data, multiplier=1.5):
     return [i for i, v in enumerate(data) if v < lower or v > upper]
 
 def render_outlier_ui(data, label, key_prefix, method):
-    """
-    Show detected outliers, let user confirm exclusion via checkboxes.
-    Returns cleaned array (with confirmed outliers removed) and list of excluded indices.
-    """
     data = np.array(data, dtype=float)
     if method == "Grubbs":
         detected = detect_outliers_grubbs(data)
     else:
         detected = detect_outliers_iqr(data)
-
     if not detected:
         return data, []
-
     st.warning(
         f"⚠️ **Potential outlier(s) detected in {label}** "
         f"({method} test): Sample(s) **{[i+1 for i in detected]}** "
         f"— values: **{[round(data[i], 3) for i in detected]}**\n\n"
         f"Select which samples to exclude from analysis:"
     )
-
     excluded = []
     for idx in detected:
         confirm = st.checkbox(
@@ -1730,7 +1702,6 @@ def render_outlier_ui(data, label, key_prefix, method):
         )
         if confirm:
             excluded.append(idx)
-
     if excluded:
         cleaned = np.delete(data, excluded)
         st.info(
@@ -1740,7 +1711,6 @@ def render_outlier_ui(data, label, key_prefix, method):
         )
         return cleaned, excluded
     return data, []
-# ─────────────────────────────────────────────────────────────────────────────
 
 # ─────────────────────────────────────────────────────────────────────────────
 
