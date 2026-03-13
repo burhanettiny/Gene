@@ -201,6 +201,9 @@ language_code = language_map.get(selected_language_name, "en")
 translations = {
     "tr": {
         "title": "🧬 GeneQuantify: Gen Ekspresyonu ve Kopya Sayısı Varyasyonu (CNV) Analizi",
+        "tab_data": "Veri Girişi",
+        "tab_results": "Sonuçlar",
+        "tab_report": "Rapor",
         "subtitle": "B. Yalçınkaya tarafından geliştirildi",
         "patient_data_header": "📊 Hasta ve Kontrol Grubu Verisi Girin",
         "num_target_genes": "🔹 Hedef Gen Sayısını Girin",
@@ -438,6 +441,9 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE kılavuzları).
 
     "en": {
         "title": "🧬 GeneQuantify: Expression & CNV Analysis",
+        "tab_data": "Data Entry",
+        "tab_results": "Results",
+        "tab_report": "Report",
         "subtitle": "Developed by B. Yalçınkaya",
         "patient_data_header": "📊 Enter Patient and Control Group Data",
         "num_target_genes": "🔹 Enter the Number of Target Genes",
@@ -671,6 +677,9 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE guidelines).
 
     "de": {
         "title": "🧬 GeneQuantify: Expressions- und CNV-Analyse",
+        "tab_data": "Dateneingabe",
+        "tab_results": "Ergebnisse",
+        "tab_report": "Bericht",
         "subtitle": "Entwickelt von B. Yalçınkaya",
         "patient_data_header": "📊 Geben Sie Patientendaten und Kontrollgruppen ein",
         "num_target_genes": "🔹 Geben Sie die Anzahl der Zielgene ein",
@@ -899,6 +908,9 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE-Richtlinien).
 
     "fr": {
         "title": "🧬 GeneQuantify : Analyse de l'expression génique et des variations du nombre de copies (CNV)",
+        "tab_data": "Saisie des données",
+        "tab_results": "Résultats",
+        "tab_report": "Rapport",
         "subtitle": "Développé par B. Yalçınkaya",
         "patient_data_header": "📊 Entrez les données des groupes patients et témoins",
         "num_target_genes": "🔹 Entrez le nombre de gènes cibles",
@@ -1127,6 +1139,9 @@ Bustin SA et al. *Clin Chem* 2009 (directives MIQE).
 
     "es": {
         "title": "🧬 GeneQuantify: Análisis de Expresión Génica y CNV",
+        "tab_data": "Entrada de datos",
+        "tab_results": "Resultados",
+        "tab_report": "Informe",
         "subtitle": "Desarrollado por B. Yalçınkaya",
         "patient_data_header": "📊 Ingrese Datos de Grupos de Pacientes y de Control",
         "num_target_genes": "🔹 Ingrese el número de Genes Objetivo",
@@ -1355,6 +1370,9 @@ Bustin SA et al. *Clin Chem* 2009 (directrices MIQE).
 
     "ar": {
         "title": "🧬 جين كوانتيفاي: تحليل التعبير الجيني وتغير عدد النسخ (CNV)",
+        "tab_data": "إدخال البيانات",
+        "tab_results": "النتائج",
+        "tab_report": "التقرير",
         "subtitle": "تم تطويره بواسطة ب. يالجنكايا",
         "patient_data_header": "📊 إدخال بيانات مجموعة المرضى ومجموعة التحكم",
         "num_target_genes": "🔹 إدخال عدد الجينات المستهدفة",
@@ -1583,123 +1601,86 @@ Bustin SA et al. *Clin Chem* 2009 (إرشادات MIQE).
 }
 
                   
-st.markdown(f"<h3>{translations[language_code]['title']}</h3>", unsafe_allow_html=True)
-st.markdown(f"<h4>{translations[language_code]['patient_data_header']}</h4>", unsafe_allow_html=True)
+# ═══════════════════════════════════════════════════════════════════════════════
+# SIDEBAR — Tüm ayarlar
+# ═══════════════════════════════════════════════════════════════════════════════
+st.sidebar.markdown("---")
+st.sidebar.markdown(f"### ⚙️ {translations[language_code]['patient_data_header']}")
 
-num_target_genes = st.number_input(translations[language_code]["num_target_genes"], min_value=1, step=1, key="gene_count")
-num_patient_groups = st.number_input(translations[language_code]["num_patient_groups"], min_value=1, step=1, key="patient_count")
+num_target_genes = st.sidebar.number_input(translations[language_code]["num_target_genes"], min_value=1, step=1, key="gene_count")
+num_patient_groups = st.sidebar.number_input(translations[language_code]["num_patient_groups"], min_value=1, step=1, key="patient_count")
 
-# ─── EFFICIENCY VALIDATION SECTION ───────────────────────────────────────────
-st.markdown("---")
+# ─── EFFICIENCY VALIDATION SECTION (SIDEBAR) ──────────────────────────────────
+st.sidebar.markdown("---")
+st.sidebar.markdown(f"#### {translations[language_code]['efficiency_header']}")
 
-# Header + ℹ️ tooltip side by side
-eff_col_title, eff_col_help = st.columns([8, 1])
-with eff_col_title:
-    st.markdown(f"<h4>{translations[language_code]['efficiency_header']}</h4>", unsafe_allow_html=True)
-with eff_col_help:
-    with st.popover("ℹ️"):
-        st.markdown("""
-**How to obtain your Efficiency (E) value:**
-
-**Method 1 — Standard Curve** *(recommended)*  
-Run qPCR on 4–5 serial dilutions (e.g. 10× each) for each primer.  
-Your qPCR software will report a **slope** → enter it below, or use the **Standard Curve Calculator** in the expander below.  
-`E = 10^(−1 / slope)`
-
-**Method 2 — Software tools**  
-- LinRegPCR (free download)  
-- qBase+, Bio-Rad CFX Maestro, QuantStudio
-
-**Method 3 — Primer/Kit datasheet**  
-Manufacturer often validates and publishes E for commercial primer sets.
-
-**Acceptable range:** E = 1.8–2.2 (90–110%)  
-**If |E_target − E_ref| > 10% → use Pfaffl method**
-""")
+with st.sidebar.expander("ℹ️", expanded=False):
+    st.markdown(
+        "**How to obtain your Efficiency (E) value:**\n\n"
+        "**Method 1 — Standard Curve** *(recommended)*  \n"
+        "Run qPCR on 4-5 serial dilutions (e.g. 10x each) for each primer.  \n"
+        "Your qPCR software will report a **slope** — enter it below, or use the Standard Curve Calculator.  \n"
+        "`E = 10^(-1 / slope)`\n\n"
+        "**Method 2 — Software tools**  \n"
+        "- LinRegPCR (free download)  \n"
+        "- qBase+, Bio-Rad CFX Maestro, QuantStudio\n\n"
+        "**Method 3 — Primer/Kit datasheet**  \n"
+        "Manufacturer often validates and publishes E for commercial primer sets.\n\n"
+        "**Acceptable range:** E = 1.8-2.2 (90-110%)  \n"
+        "**If |E_target - E_ref| > 10% use Pfaffl method**"
+    )
 
 st.info(translations[language_code]["efficiency_note"])
 
-# ─── STANDARD CURVE CALCULATOR ───────────────────────────────────────────────
-with st.expander(translations[language_code]["sc_expander"], expanded=False):
+# ─── STANDARD CURVE CALCULATOR (SIDEBAR) ──────────────────────────────────────
+st.sidebar.markdown("---")
+with st.sidebar.expander(translations[language_code]["sc_expander"], expanded=False):
     st.markdown(translations[language_code]["sc_description"])
 
-    sc_col1, sc_col2 = st.columns(2)
-    with sc_col1:
-        sc_gene_label = st.text_input(translations[language_code]["sc_gene_label"], value="Target Gene 1", key="sc_label")
-        sc_num_points = st.number_input(translations[language_code]["sc_num_points"], min_value=3, max_value=10, value=5, step=1, key="sc_npts")
-
-    with sc_col2:
-        st.markdown(translations[language_code]["sc_dilution_factor_label"])
-        sc_dilution_factor = st.number_input(translations[language_code]["sc_dilution_factor_input"], min_value=2, max_value=100, value=10, step=1, key="sc_dilfactor")
-        st.markdown(translations[language_code]["sc_start_conc_label"])
-        sc_start_conc = st.number_input(translations[language_code]["sc_start_conc_input"], min_value=0.0001, value=1.0, format="%.4f", key="sc_startconc")
+    sc_gene_label = st.text_input(translations[language_code]["sc_gene_label"], value="Target Gene 1", key="sc_label")
+    sc_num_points = st.number_input(translations[language_code]["sc_num_points"], min_value=3, max_value=10, value=5, step=1, key="sc_npts")
+    st.markdown(translations[language_code]["sc_dilution_factor_label"])
+    sc_dilution_factor = st.number_input(translations[language_code]["sc_dilution_factor_input"], min_value=2, max_value=100, value=10, step=1, key="sc_dilfactor")
+    st.markdown(translations[language_code]["sc_start_conc_label"])
+    sc_start_conc = st.number_input(translations[language_code]["sc_start_conc_input"], min_value=0.0001, value=1.0, format="%.4f", key="sc_startconc")
 
     st.markdown(translations[language_code]["sc_enter_ct"])
-    sc_ct_cols = st.columns(min(sc_num_points, 5))
     sc_ct_values = []
     sc_log_concs = []
     for pt in range(sc_num_points):
         conc = sc_start_conc / (sc_dilution_factor ** pt)
         log_c = np.log10(conc)
-        col_idx = pt % 5
-        with sc_ct_cols[col_idx]:
-            ct_val = st.number_input(
-                f"Dil. {pt+1}\n(log={log_c:.2f})",
-                value=18.0 + pt * 3.32,
-                step=0.01, format="%.2f",
-                key=f"sc_ct_{pt}"
-            )
-            sc_ct_values.append(ct_val)
-            sc_log_concs.append(log_c)
+        ct_val = st.number_input(
+            f"Dil. {pt+1} (log={log_c:.2f})",
+            value=18.0 + pt * 3.32,
+            step=0.01, format="%.2f",
+            key=f"sc_ct_{pt}"
+        )
+        sc_ct_values.append(ct_val)
+        sc_log_concs.append(log_c)
 
     if st.button(translations[language_code]["sc_calc_button"], key="sc_calc"):
         sc_log_concs_arr = np.array(sc_log_concs)
         sc_ct_arr = np.array(sc_ct_values)
-
         slope_val, intercept_val, r_val, p_val, se_val = stats.linregress(sc_log_concs_arr, sc_ct_arr)
         r2 = r_val ** 2
         E_calc = 10 ** (-1.0 / slope_val) if slope_val != 0 else float('nan')
         E_pct = (E_calc - 1) * 100
-
-        res_col1, res_col2, res_col3, res_col4 = st.columns(4)
-        res_col1.metric(translations[language_code]["sc_slope"], f"{slope_val:.4f}")
-        res_col2.metric(translations[language_code]["sc_e_value"], f"{E_calc:.4f}")
-        res_col3.metric(translations[language_code]["sc_efficiency_pct"], f"{E_pct:.1f}%")
-        res_col4.metric("R²", f"{r2:.4f}")
-
+        st.metric(translations[language_code]["sc_slope"], f"{slope_val:.4f}")
+        st.metric(translations[language_code]["sc_e_value"], f"{E_calc:.4f}")
+        st.metric(translations[language_code]["sc_efficiency_pct"], f"{E_pct:.1f}%")
+        st.metric("R²", f"{r2:.4f}")
         if 1.8 <= E_calc <= 2.2 and r2 >= 0.99:
             st.success(translations[language_code]["sc_excellent"].format(e=E_calc, pct=E_pct, r2=r2))
         elif 1.8 <= E_calc <= 2.2:
             st.warning(translations[language_code]["sc_warning_r2"].format(pct=E_pct, r2=r2))
         else:
             st.error(translations[language_code]["sc_error_range"].format(e=E_calc, pct=E_pct))
-
-        x_fit = np.linspace(min(sc_log_concs_arr), max(sc_log_concs_arr), 100)
-        y_fit = slope_val * x_fit + intercept_val
-
-        fig_sc = go.Figure()
-        fig_sc.add_trace(go.Scatter(
-            x=sc_log_concs_arr, y=sc_ct_arr,
-            mode='markers', name=translations[language_code]["sc_data_points"],
-            marker=dict(size=10, color='#4C72B0')
-        ))
-        fig_sc.add_trace(go.Scatter(
-            x=x_fit, y=y_fit,
-            mode='lines', name=f'Fit (slope={slope_val:.4f})',
-            line=dict(color='red', dash='dash')
-        ))
-        fig_sc.update_layout(
-            title=translations[language_code]["sc_chart_title"].format(label=sc_gene_label, e=E_calc, pct=E_pct, r2=r2),
-            xaxis_title=translations[language_code]["sc_xaxis"],
-            yaxis_title="Ct",
-            height=350
-        )
-        st.plotly_chart(fig_sc, use_container_width=True)
         st.info(translations[language_code]["sc_copy_hint"].format(slope=slope_val, e=E_calc))
 
 # ─────────────────────────────────────────────────────────────────────────────
 
-efficiency_method = st.radio(
+efficiency_method = st.sidebar.radio(
     translations[language_code]["efficiency_method"],
     options=[
         translations[language_code]["efficiency_manual"],
@@ -1709,7 +1690,7 @@ efficiency_method = st.radio(
     horizontal=True
 )
 
-efficiency_threshold = st.number_input(
+efficiency_threshold = st.sidebar.number_input(
     translations[language_code]["efficiency_threshold"],
     min_value=1.0,
     max_value=50.0,
@@ -1725,48 +1706,43 @@ gene_efficiencies = {}  # {gene_index: {"target_E": float, "ref_E": float}}
 use_slope = (efficiency_method == translations[language_code]["efficiency_slope"])
 
 for i in range(num_target_genes):
-    with st.expander(f"🔬 {translations[language_code]['target_gene']} {i+1} — Efficiency", expanded=True):
-        col1, col2 = st.columns(2)
+    with st.sidebar.expander(f"🔬 {translations[language_code]['target_gene']} {i+1} — Efficiency", expanded=(i==0)):
+        if use_slope:
+            target_slope = st.number_input(
+                translations[language_code]["efficiency_target_slope_label"].format(i=i+1),
+                value=-3.32, step=0.01, format="%.4f",
+                key=f"target_slope_{i}",
+                help="Enter slope from your qPCR software standard curve output. Typical range: −3.1 to −3.6"
+            )
+            target_E = 10 ** (-1.0 / target_slope) if target_slope != 0 else 2.0
+            st.markdown(f"**E (target) = {target_E:.4f}** ({(target_E - 1) * 100:.1f}%)")
+        else:
+            target_E = st.number_input(
+                translations[language_code]["efficiency_target_label"].format(i=i+1),
+                min_value=1.0, max_value=3.0, value=2.0, step=0.01, format="%.4f",
+                key=f"target_E_{i}",
+                help="E=2.0 = 100% (perfect). Acceptable range: 1.8–2.2."
+            )
+            st.markdown(f"**{(target_E - 1) * 100:.1f}%**")
 
-        with col1:
-            if use_slope:
-                target_slope = st.number_input(
-                    translations[language_code]["efficiency_target_slope_label"].format(i=i+1),
-                    value=-3.32, step=0.01, format="%.4f",
-                    key=f"target_slope_{i}",
-                    help="Enter slope from your qPCR software standard curve output. Typical range: −3.1 to −3.6"
-                )
-                target_E = 10 ** (-1.0 / target_slope) if target_slope != 0 else 2.0
-                st.markdown(f"**E (target) = {target_E:.4f}** ({(target_E - 1) * 100:.1f}%)")
-            else:
-                target_E = st.number_input(
-                    translations[language_code]["efficiency_target_label"].format(i=i+1),
-                    min_value=1.0, max_value=3.0, value=2.0, step=0.01, format="%.4f",
-                    key=f"target_E_{i}",
-                    help="E=2.0 = 100% (perfect). Acceptable range: 1.8–2.2. Obtain from standard curve or primer datasheet."
-                )
-                st.markdown(f"**{(target_E - 1) * 100:.1f}%**")
+        if use_slope:
+            ref_slope = st.number_input(
+                translations[language_code]["efficiency_ref_slope_label"].format(i=i+1),
+                value=-3.32, step=0.01, format="%.4f",
+                key=f"ref_slope_{i}",
+                help="Enter slope from your qPCR software standard curve output for the reference gene."
+            )
+            ref_E = 10 ** (-1.0 / ref_slope) if ref_slope != 0 else 2.0
+            st.markdown(f"**E (ref) = {ref_E:.4f}** ({(ref_E - 1) * 100:.1f}%)")
+        else:
+            ref_E = st.number_input(
+                translations[language_code]["efficiency_ref_label"].format(i=i+1),
+                min_value=1.0, max_value=3.0, value=2.0, step=0.01, format="%.4f",
+                key=f"ref_E_{i}",
+                help="E=2.0 = 100% (perfect)."
+            )
+            st.markdown(f"**{(ref_E - 1) * 100:.1f}%**")
 
-        with col2:
-            if use_slope:
-                ref_slope = st.number_input(
-                    translations[language_code]["efficiency_ref_slope_label"].format(i=i+1),
-                    value=-3.32, step=0.01, format="%.4f",
-                    key=f"ref_slope_{i}",
-                    help="Enter slope from your qPCR software standard curve output for the reference gene."
-                )
-                ref_E = 10 ** (-1.0 / ref_slope) if ref_slope != 0 else 2.0
-                st.markdown(f"**E (ref) = {ref_E:.4f}** ({(ref_E - 1) * 100:.1f}%)")
-            else:
-                ref_E = st.number_input(
-                    translations[language_code]["efficiency_ref_label"].format(i=i+1),
-                    min_value=1.0, max_value=3.0, value=2.0, step=0.01, format="%.4f",
-                    key=f"ref_E_{i}",
-                    help="E=2.0 = 100% (perfect). Obtain from standard curve or primer datasheet for the reference gene."
-                )
-                st.markdown(f"**{(ref_E - 1) * 100:.1f}%**")
-
-        # Efficiency difference check
         target_pct = (target_E - 1) * 100
         ref_pct = (ref_E - 1) * 100
         diff = abs(target_pct - ref_pct)
@@ -1776,62 +1752,78 @@ for i in range(num_target_genes):
         else:
             st.warning(translations[language_code]["efficiency_warning"].format(diff=diff))
 
-        # Efficiency gauge chart
-        fig_eff = go.Figure()
-        fig_eff.add_trace(go.Bar(
-            x=[translations[language_code]["efficiency_target_pct"],
-               translations[language_code]["efficiency_ref_pct"]],
-            y=[target_pct, ref_pct],
-            marker_color=["#4C72B0", "#DD8452"],
-            text=[f"{target_pct:.1f}%", f"{ref_pct:.1f}%"],
-            textposition="outside"
-        ))
-        fig_eff.add_hline(y=90, line_dash="dash", line_color="green",
-                          annotation_text="90% (min)", annotation_position="right")
-        fig_eff.add_hline(y=110, line_dash="dash", line_color="green",
-                          annotation_text="110% (max)", annotation_position="right")
-        fig_eff.update_layout(
-            title=f"{translations[language_code]['target_gene']} {i+1} — Amplification Efficiency (%)",
-            yaxis=dict(title="Efficiency (%)", range=[0, 130]),
-            height=300
-        )
-        st.plotly_chart(fig_eff, use_container_width=True)
-
         gene_efficiencies[i] = {"target_E": target_E, "ref_E": ref_E}
 
+# ─── MULTI-REFERENCE GENE SETTINGS (SIDEBAR) ─────────────────────────────────
+st.sidebar.markdown("---")
+st.sidebar.markdown(translations[language_code]["ref_gene_section_title"])
+
+num_ref_genes = st.sidebar.number_input(
+    translations[language_code]["ref_gene_num_label"],
+    min_value=1, max_value=10, value=1, step=1,
+    key="num_ref_genes",
+    help=translations[language_code]["ref_gene_num_help"]
+)
+if num_ref_genes == 1:
+    st.sidebar.warning(translations[language_code]["ref_gene_1_warning"])
+else:
+    st.sidebar.success(translations[language_code]["ref_gene_multi_success"].format(n=num_ref_genes))
+
+if num_ref_genes > 1:
+    with st.sidebar.expander(translations[language_code]["ref_gene_expander"], expanded=False):
+        st.markdown(translations[language_code]["ref_multi_description"])
+
+# ─── OUTLIER DETECTION SETTINGS (SIDEBAR) ────────────────────────────────────
+st.sidebar.markdown("---")
+st.sidebar.markdown(translations[language_code]["outlier_section_title"])
+
+outlier_enabled = st.sidebar.checkbox(
+    translations[language_code]["outlier_enable"],
+    value=True,
+    key="outlier_enabled",
+    help=translations[language_code]["outlier_enable_help"]
+)
+outlier_method = st.sidebar.radio(
+    translations[language_code]["outlier_method_label"],
+    options=["Grubbs", "IQR"],
+    key="outlier_method",
+    horizontal=True,
+    help=translations[language_code]["outlier_method_help"]
+)
+if outlier_method == "Grubbs":
+    grubbs_alpha = st.sidebar.number_input(
+        translations[language_code]["outlier_alpha_label"],
+        min_value=0.01, max_value=0.10, value=0.05, step=0.01, format="%.2f",
+        key="grubbs_alpha",
+        help=translations[language_code]["outlier_alpha_help"]
+    )
+    iqr_multiplier = 1.5
+else:
+    iqr_multiplier = st.sidebar.number_input(
+        translations[language_code]["outlier_iqr_label"],
+        min_value=1.0, max_value=3.0, value=1.5, step=0.25, format="%.2f",
+        key="iqr_mult",
+        help=translations[language_code]["outlier_iqr_help"]
+    )
+    grubbs_alpha = 0.05
+
+with st.sidebar.expander(translations[language_code]["outlier_expander"], expanded=False):
+    st.markdown(translations[language_code]["outlier_description"])
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ANA ALAN — Başlık + 3 sekme
+# ═══════════════════════════════════════════════════════════════════════════════
+st.markdown(f"<h2 style='margin-bottom:0'>{translations[language_code]['title']}</h2>", unsafe_allow_html=True)
+st.caption(translations[language_code]['subtitle'])
 st.markdown("---")
-# ─────────────────────────────────────────────────────────────────────────────
 
-def parse_input_data(input_data):
-    values = [x.replace(",", ".").strip() for x in input_data.split() if x.strip()]
-    return np.array([float(x) for x in values if x])
+tab_data, tab_results, tab_report = st.tabs([
+    f"📥 {translations[language_code].get('tab_data', 'Veri Girişi')}",
+    f"📊 {translations[language_code].get('tab_results', 'Sonuçlar')}",
+    f"📄 {translations[language_code].get('tab_report', 'Rapor')}",
+])
 
-# ─── geNorm M-value stability ─────────────────────────────────────────────────
-def compute_genorm_m(ref_ct_matrix):
-    """
-    ref_ct_matrix: 2D numpy array, shape (n_refs, n_samples)
-    Returns M-values for each reference gene (lower = more stable).
-    Vandesompele et al. 2002 algorithm.
-    """
-    n_refs, n_samples = ref_ct_matrix.shape
-    if n_refs < 2:
-        return np.array([0.0])
-    m_values = []
-    for i in range(n_refs):
-        pairwise_vars = []
-        for j in range(n_refs):
-            if i == j:
-                continue
-            ratio = ref_ct_matrix[i] - ref_ct_matrix[j]   # log2 ratio in Ct space
-            pairwise_vars.append(np.std(ratio, ddof=1) if len(ratio) > 1 else 0.0)
-        m_values.append(np.mean(pairwise_vars))
-    return np.array(m_values)
 
-def compute_cv(ct_values):
-    """Coefficient of variation (%) for a 1D array of Ct values."""
-    if len(ct_values) < 2 or np.mean(ct_values) == 0:
-        return 0.0
-    return (np.std(ct_values, ddof=1) / np.mean(ct_values)) * 100
 
 def geometric_mean_ct(ct_arrays):
     """
@@ -1930,73 +1922,8 @@ def render_outlier_ui(data, label, key_prefix, method):
     return data, []
 # ─────────────────────────────────────────────────────────────────────────────
 
-# ─── MULTI-REFERENCE GENE SETTINGS ───────────────────────────────────────────
-st.markdown("---")
-st.markdown(translations[language_code]["ref_gene_section_title"])
-
-ref_info_col, ref_warn_col = st.columns([3, 2])
-with ref_info_col:
-    num_ref_genes = st.number_input(
-        translations[language_code]["ref_gene_num_label"],
-        min_value=1, max_value=10, value=1, step=1,
-        key="num_ref_genes",
-        help=translations[language_code]["ref_gene_num_help"]
-    )
-with ref_warn_col:
-    if num_ref_genes == 1:
-        st.warning(translations[language_code]["ref_gene_1_warning"])
-    else:
-        st.success(translations[language_code]["ref_gene_multi_success"].format(n=num_ref_genes))
-
-if num_ref_genes > 1:
-    with st.expander(translations[language_code]["ref_gene_expander"], expanded=False):
-        st.markdown(translations[language_code]["ref_multi_description"])
-
-st.markdown("---")
 # ─────────────────────────────────────────────────────────────────────────────
 
-# ─── OUTLIER DETECTION SETTINGS ──────────────────────────────────────────────
-st.markdown(translations[language_code]["outlier_section_title"])
-
-out_col1, out_col2, out_col3 = st.columns([2, 2, 3])
-with out_col1:
-    outlier_enabled = st.checkbox(
-        translations[language_code]["outlier_enable"],
-        value=True,
-        key="outlier_enabled",
-        help=translations[language_code]["outlier_enable_help"]
-    )
-with out_col2:
-    outlier_method = st.radio(
-        translations[language_code]["outlier_method_label"],
-        options=["Grubbs", "IQR"],
-        key="outlier_method",
-        horizontal=True,
-        help=translations[language_code]["outlier_method_help"]
-    )
-with out_col3:
-    if outlier_method == "Grubbs":
-        grubbs_alpha = st.number_input(
-            translations[language_code]["outlier_alpha_label"],
-            min_value=0.01, max_value=0.10, value=0.05, step=0.01, format="%.2f",
-            key="grubbs_alpha",
-            help=translations[language_code]["outlier_alpha_help"]
-        )
-        iqr_multiplier = 1.5
-    else:
-        iqr_multiplier = st.number_input(
-            translations[language_code]["outlier_iqr_label"],
-            min_value=1.0, max_value=3.0, value=1.5, step=0.25, format="%.2f",
-            key="iqr_mult",
-            help=translations[language_code]["outlier_iqr_help"]
-        )
-        grubbs_alpha = 0.05
-
-with st.expander(translations[language_code]["outlier_expander"], expanded=False):
-    st.markdown(translations[language_code]["outlier_description"])
-
-st.markdown("---")
-# ─────────────────────────────────────────────────────────────────────────────
 input_values_table = []
 data = []
 stats_data = []
@@ -2010,258 +1937,90 @@ reference_gene = translations[language_code]["reference_gene"]
 ct_value = translations[language_code]["ct_value"]
 patient_group = translations[language_code]["patient_group"]
 
-# Kontrol Grubu Verileri
-for i in range(num_target_genes):
-    st.markdown(
-        f"<h4>{translations[language_code]['control_group']} {i+1} - {translations[language_code]['target_gene']} {i+1}</h4>",
-        unsafe_allow_html=True
-    )
+# ═══════════════════════════════════════════════════════════════════════════════
+# SEKME 1: VERİ GİRİŞİ  (tüm girişler bu tab içinde)
+# ═══════════════════════════════════════════════════════════════════════════════
+with tab_data:
+    st.markdown(f"### {translations[language_code]['patient_data_header']}")
 
-    control_target_ct = st.text_area(
-        f"{translations[language_code]['control_group']} {i+1} - {translations[language_code]['target_gene']} {i+1} - {translations[language_code]['ct_value']}",
-        key=f"control_target_ct_{i}"
-    )
-
-    # ── Multi-reference gene input (Control) ─────────────────────────────────
-    ctrl_ref_arrays = []
-    ctrl_ref_names  = []
-    all_ctrl_refs_valid = True
-
-    for r in range(num_ref_genes):
-        ref_label = f"Ref Gene {r+1}" if num_ref_genes > 1 else translations[language_code]["reference_gene"]
-        ctrl_ref_ct_raw = st.text_area(
-            f"{translations[language_code]['control_group']} {i+1} — {ref_label} {i+1} — {translations[language_code]['ct_value']}",
-            key=f"control_reference_ct_{i}_{r}"
-        )
-        parsed = parse_input_data(ctrl_ref_ct_raw)
-        if len(parsed) == 0:
-            all_ctrl_refs_valid = False
-        else:
-            ctrl_ref_arrays.append(parsed)
-            ctrl_ref_names.append(f"Ref Gene {r+1}")
-
-    control_target_ct_values = np.array(parse_input_data(control_target_ct))
-
-    if len(control_target_ct_values) == 0 or not all_ctrl_refs_valid or len(ctrl_ref_arrays) == 0:
-        st.error(translations[language_code]["warning_control_ct"].format(i=i+1))
-        continue
-
-    # Trim all arrays to common length
-    min_control_len = min(len(control_target_ct_values), *[len(a) for a in ctrl_ref_arrays])
-    control_target_ct_values = control_target_ct_values[:min_control_len]
-    ctrl_ref_arrays = [a[:min_control_len] for a in ctrl_ref_arrays]
-
-    # ── Outlier detection — Control Target Ct ────────────────────────────────
-    ctrl_excluded_target = []  # always initialized
-    if outlier_enabled and len(control_target_ct_values) >= 3:
-        detected_ctrl_tgt = detect_outliers_grubbs(control_target_ct_values, alpha=grubbs_alpha) \
-                            if outlier_method == "Grubbs" \
-                            else detect_outliers_iqr(control_target_ct_values, multiplier=iqr_multiplier)
-        if detected_ctrl_tgt:
-            control_target_ct_values, ctrl_excluded_target = render_outlier_ui(
-                control_target_ct_values,
-                f"Control Group {i+1} — Target Gene {i+1}",
-                f"ctrl_tgt_{i}",
-                outlier_method
-            )
-            if ctrl_excluded_target:
-                keep_indices = [k for k in range(min_control_len) if k not in ctrl_excluded_target]
-                ctrl_ref_arrays = [a[keep_indices] for a in ctrl_ref_arrays]
-                min_control_len = len(keep_indices)
-
-    # ── geNorm + CV stability (shown when ≥2 ref genes) ──────────────────────
-    if num_ref_genes >= 2:
-        ref_matrix = np.vstack(ctrl_ref_arrays)   # (n_refs, n_samples)
-        m_values   = compute_genorm_m(ref_matrix)
-        cv_values  = [compute_cv(a) for a in ctrl_ref_arrays]
-
-        unstable_ctrl = [r for r, m in enumerate(m_values) if m >= 1.0]
-        borderline_ctrl = [r for r, m in enumerate(m_values) if 0.5 <= m < 1.0]
-
-        st.markdown(f"##### 📊 Reference Gene Stability — Control Group {i+1}")
-        stab_cols = st.columns(num_ref_genes)
-        for r, col in enumerate(stab_cols):
-            m_ok = m_values[r] < 1.0
-            cv_ok = cv_values[r] < 5.0
-            with col:
-                st.metric(
-                    label=f"Ref Gene {r+1}",
-                    value=f"M = {m_values[r]:.3f}",
-                    delta=f"CV = {cv_values[r]:.2f}%"
-                )
-                if m_ok and cv_ok:
-                    st.caption("✅ Stable")
-                elif m_ok or cv_ok:
-                    st.caption("⚠️ Borderline")
-                else:
-                    st.caption("❌ Unstable — M ≥ 1.0")
-
-        # Stability bar chart
-        fig_stab = go.Figure()
-        fig_stab.add_trace(go.Bar(
-            name="geNorm M-value",
-            x=[f"Ref {r+1}" for r in range(num_ref_genes)],
-            y=m_values,
-            marker_color=["#2ecc71" if m < 0.5 else "#f39c12" if m < 1.0 else "#e74c3c" for m in m_values],
-            text=[f"{m:.3f}" for m in m_values],
-            textposition="outside"
-        ))
-        fig_stab.add_hline(y=0.5, line_dash="dot", line_color="green",
-                           annotation_text="M=0.5 (strict)", annotation_position="right")
-        fig_stab.add_hline(y=1.0, line_dash="dash", line_color="orange",
-                           annotation_text="M=1.0 (acceptable)", annotation_position="right")
-        fig_stab.update_layout(
-            title=f"geNorm M-value — Control Group {i+1} Reference Genes",
-            yaxis_title="M-value (lower = more stable)",
-            height=280
-        )
-        st.plotly_chart(fig_stab, use_container_width=True)
-
-        # ── Stability warnings ────────────────────────────────────────────────
-        if unstable_ctrl:
-            unstable_names = ", ".join([f"Ref Gene {r+1}" for r in unstable_ctrl])
-            st.warning(
-                f"⚠️ **Unstable reference gene(s) detected in Control Group {i+1}: {unstable_names}**\n\n"
-                f"geNorm M-value ≥ 1.0 indicates that the expression of this gene varies "
-                f"considerably across samples, which may distort normalization.\n\n"
-                f"**Analysis will continue**, but results should be interpreted with caution.\n\n"
-                f"**Recommendations:**\n"
-                f"- Verify Ct values for {unstable_names} — check for pipetting errors or outliers\n"
-                f"- Consider replacing {unstable_names} with a more stable reference gene\n"
-                f"- If only 2 reference genes are used and one is unstable, results rely entirely "
-                f"on the remaining gene — consider adding a third validated reference\n"
-                f"- Consult: Vandesompele et al. *Genome Biology* 2002 for geNorm methodology"
-            )
-        elif borderline_ctrl:
-            borderline_names = ", ".join([f"Ref Gene {r+1}" for r in borderline_ctrl])
-            st.info(
-                f"ℹ️ **Borderline stability in Control Group {i+1}: {borderline_names}** (M = 0.5–1.0)\n\n"
-                f"Expression stability is acceptable per MIQE guidelines, but not ideal. "
-                f"Consider validating with an additional reference gene for greater confidence."
-            )
-        else:
-            st.success(
-                f"✅ All reference genes in Control Group {i+1} are stable (M < 0.5). "
-                f"Normalization quality is excellent."
-            )
-
-    # ── Compute normalization factor (geometric mean of refs) ─────────────────
-    # Re-sync min_control_len to actual array lengths after any outlier removal
-    min_control_len = min(len(control_target_ct_values), *[len(a) for a in ctrl_ref_arrays])
-    control_target_ct_values = control_target_ct_values[:min_control_len]
-    ctrl_ref_arrays = [a[:min_control_len] for a in ctrl_ref_arrays]
-
-    ctrl_norm_factor = geometric_mean_ct(ctrl_ref_arrays)   # per-sample NF
-    control_delta_ct = control_target_ct_values - ctrl_norm_factor
-
-    # For table: show first ref gene Ct as representative; NF shown separately
-    control_reference_ct_values = ctrl_ref_arrays[0]   # kept for legacy table column
-
-    average_control_delta_ct = np.mean(control_delta_ct) if len(control_delta_ct) > 0 else None
-    sample_counter = 1
-
-    for idx in range(min_control_len):
-        row = {
-            translations[language_code]["sample_number"]: sample_counter,
-            translations[language_code]["target_gene"]: f"{target_gene} {i+1}",
-            "Grup": translations[language_code]["control_group"],
-            translations[language_code]["target_ct"]: control_target_ct_values[idx],
-            translations[language_code]["reference_ct"]: round(ctrl_norm_factor[idx], 4),
-            translations[language_code]["delta_ct_control"]: round(control_delta_ct[idx], 4),
-            "Outlier Excluded": "No"
-        }
-        if num_ref_genes > 1:
-            for r, arr in enumerate(ctrl_ref_arrays):
-                row[f"Ref Gene {r+1} Ct"] = arr[idx]
-        input_values_table.append(row)
-        sample_counter += 1
-
-    # Log excluded outliers as separate flagged rows
-    for ex_idx in ctrl_excluded_target:
-        input_values_table.append({
-            translations[language_code]["sample_number"]: f"{ex_idx + 1} ⚠️",
-            translations[language_code]["target_gene"]: f"{target_gene} {i+1}",
-            "Grup": translations[language_code]["control_group"],
-            translations[language_code]["target_ct"]: "EXCLUDED",
-            translations[language_code]["reference_ct"]: "EXCLUDED",
-            translations[language_code]["delta_ct_control"]: "EXCLUDED",
-            "Outlier Excluded": f"Yes ({outlier_method})"
-        })
-
-    for j in range(num_patient_groups):
+    # Kontrol + Hasta Grubu Veri Giriş Döngüsü
+    for i in range(num_target_genes):
         st.markdown(
-            f"<h4>{translations[language_code]['patient_group']} {j+1} - {translations[language_code]['target_gene']} {i+1}</h4>",
+            f"<h4>{translations[language_code]['control_group']} {i+1} - {translations[language_code]['target_gene']} {i+1}</h4>",
             unsafe_allow_html=True
         )
 
-        sample_target_ct = st.text_area(
-            f"{translations[language_code]['patient_group']} {j+1} - {translations[language_code]['target_gene']} {i+1} - {translations[language_code]['ct_value']}",
-            key=f"sample_target_ct_{i}_{j}"
+        control_target_ct = st.text_area(
+            f"{translations[language_code]['control_group']} {i+1} - {translations[language_code]['target_gene']} {i+1} - {translations[language_code]['ct_value']}",
+            key=f"control_target_ct_{i}"
         )
 
-        # ── Multi-reference gene input (Patient) ──────────────────────────────
-        smp_ref_arrays = []
-        all_smp_refs_valid = True
+        # ── Multi-reference gene input (Control) ─────────────────────────────────
+        ctrl_ref_arrays = []
+        ctrl_ref_names  = []
+        all_ctrl_refs_valid = True
 
         for r in range(num_ref_genes):
             ref_label = f"Ref Gene {r+1}" if num_ref_genes > 1 else translations[language_code]["reference_gene"]
-            smp_ref_ct_raw = st.text_area(
-                f"{translations[language_code]['patient_group']} {j+1} — {ref_label} {i+1} — {translations[language_code]['ct_value']}",
-                key=f"sample_reference_ct_{i}_{j}_{r}"
+            ctrl_ref_ct_raw = st.text_area(
+                f"{translations[language_code]['control_group']} {i+1} — {ref_label} {i+1} — {translations[language_code]['ct_value']}",
+                key=f"control_reference_ct_{i}_{r}"
             )
-            parsed = parse_input_data(smp_ref_ct_raw)
+            parsed = parse_input_data(ctrl_ref_ct_raw)
             if len(parsed) == 0:
-                all_smp_refs_valid = False
+                all_ctrl_refs_valid = False
             else:
-                smp_ref_arrays.append(parsed)
+                ctrl_ref_arrays.append(parsed)
+                ctrl_ref_names.append(f"Ref Gene {r+1}")
 
-        sample_target_ct_values = np.array(parse_input_data(sample_target_ct))
+        control_target_ct_values = np.array(parse_input_data(control_target_ct))
 
-        if len(sample_target_ct_values) == 0 or not all_smp_refs_valid or len(smp_ref_arrays) == 0:
-            st.error(translations[language_code]["warning_patient_ct"].format(j=j+1))
+        if len(control_target_ct_values) == 0 or not all_ctrl_refs_valid or len(ctrl_ref_arrays) == 0:
+            st.error(translations[language_code]["warning_control_ct"].format(i=i+1))
             continue
 
-        min_sample_len = min(len(sample_target_ct_values), *[len(a) for a in smp_ref_arrays])
-        sample_target_ct_values = sample_target_ct_values[:min_sample_len]
-        smp_ref_arrays = [a[:min_sample_len] for a in smp_ref_arrays]
+        # Trim all arrays to common length
+        min_control_len = min(len(control_target_ct_values), *[len(a) for a in ctrl_ref_arrays])
+        control_target_ct_values = control_target_ct_values[:min_control_len]
+        ctrl_ref_arrays = [a[:min_control_len] for a in ctrl_ref_arrays]
 
-        # ── Outlier detection — Patient Target Ct ─────────────────────────────
-        smp_excluded_target = []  # always initialized
-        if outlier_enabled and len(sample_target_ct_values) >= 3:
-            detected_smp_tgt = detect_outliers_grubbs(sample_target_ct_values, alpha=grubbs_alpha) \
-                               if outlier_method == "Grubbs" \
-                               else detect_outliers_iqr(sample_target_ct_values, multiplier=iqr_multiplier)
-            if detected_smp_tgt:
-                sample_target_ct_values, smp_excluded_target = render_outlier_ui(
-                    sample_target_ct_values,
-                    f"{translations[language_code]['patient_group']} {j+1} — Target Gene {i+1}",
-                    f"smp_tgt_{i}_{j}",
+        # ── Outlier detection — Control Target Ct ────────────────────────────────
+        ctrl_excluded_target = []  # always initialized
+        if outlier_enabled and len(control_target_ct_values) >= 3:
+            detected_ctrl_tgt = detect_outliers_grubbs(control_target_ct_values, alpha=grubbs_alpha) \
+                                if outlier_method == "Grubbs" \
+                                else detect_outliers_iqr(control_target_ct_values, multiplier=iqr_multiplier)
+            if detected_ctrl_tgt:
+                control_target_ct_values, ctrl_excluded_target = render_outlier_ui(
+                    control_target_ct_values,
+                    f"Control Group {i+1} — Target Gene {i+1}",
+                    f"ctrl_tgt_{i}",
                     outlier_method
                 )
-                if smp_excluded_target:
-                    keep_indices_smp = [k for k in range(min_sample_len) if k not in smp_excluded_target]
-                    smp_ref_arrays = [a[keep_indices_smp] for a in smp_ref_arrays]
-                    min_sample_len = len(keep_indices_smp)
+                if ctrl_excluded_target:
+                    keep_indices = [k for k in range(min_control_len) if k not in ctrl_excluded_target]
+                    ctrl_ref_arrays = [a[keep_indices] for a in ctrl_ref_arrays]
+                    min_control_len = len(keep_indices)
 
-        # ── geNorm + CV stability (Patient, shown when ≥2 ref genes) ─────────
+        # ── geNorm + CV stability (shown when ≥2 ref genes) ──────────────────────
         if num_ref_genes >= 2:
-            smp_ref_matrix = np.vstack(smp_ref_arrays)
-            smp_m_values   = compute_genorm_m(smp_ref_matrix)
-            smp_cv_values  = [compute_cv(a) for a in smp_ref_arrays]
+            ref_matrix = np.vstack(ctrl_ref_arrays)   # (n_refs, n_samples)
+            m_values   = compute_genorm_m(ref_matrix)
+            cv_values  = [compute_cv(a) for a in ctrl_ref_arrays]
 
-            unstable_smp   = [r for r, m in enumerate(smp_m_values) if m >= 1.0]
-            borderline_smp = [r for r, m in enumerate(smp_m_values) if 0.5 <= m < 1.0]
+            unstable_ctrl = [r for r, m in enumerate(m_values) if m >= 1.0]
+            borderline_ctrl = [r for r, m in enumerate(m_values) if 0.5 <= m < 1.0]
 
-            st.markdown(f"##### 📊 Reference Gene Stability — {translations[language_code]['patient_group']} {j+1}")
-            smp_stab_cols = st.columns(num_ref_genes)
-            for r, col in enumerate(smp_stab_cols):
-                m_ok = smp_m_values[r] < 1.0
-                cv_ok = smp_cv_values[r] < 5.0
+            st.markdown(f"##### 📊 Reference Gene Stability — Control Group {i+1}")
+            stab_cols = st.columns(num_ref_genes)
+            for r, col in enumerate(stab_cols):
+                m_ok = m_values[r] < 1.0
+                cv_ok = cv_values[r] < 5.0
                 with col:
                     st.metric(
                         label=f"Ref Gene {r+1}",
-                        value=f"M = {smp_m_values[r]:.3f}",
-                        delta=f"CV = {smp_cv_values[r]:.2f}%"
+                        value=f"M = {m_values[r]:.3f}",
+                        delta=f"CV = {cv_values[r]:.2f}%"
                     )
                     if m_ok and cv_ok:
                         st.caption("✅ Stable")
@@ -2270,248 +2029,422 @@ for i in range(num_target_genes):
                     else:
                         st.caption("❌ Unstable — M ≥ 1.0")
 
-            # Stability bar chart (patient)
-            fig_stab_smp = go.Figure()
-            fig_stab_smp.add_trace(go.Bar(
+            # Stability bar chart
+            fig_stab = go.Figure()
+            fig_stab.add_trace(go.Bar(
                 name="geNorm M-value",
                 x=[f"Ref {r+1}" for r in range(num_ref_genes)],
-                y=smp_m_values,
-                marker_color=["#2ecc71" if m < 0.5 else "#f39c12" if m < 1.0 else "#e74c3c" for m in smp_m_values],
-                text=[f"{m:.3f}" for m in smp_m_values],
+                y=m_values,
+                marker_color=["#2ecc71" if m < 0.5 else "#f39c12" if m < 1.0 else "#e74c3c" for m in m_values],
+                text=[f"{m:.3f}" for m in m_values],
                 textposition="outside"
             ))
-            fig_stab_smp.add_hline(y=0.5, line_dash="dot", line_color="green",
+            fig_stab.add_hline(y=0.5, line_dash="dot", line_color="green",
                                annotation_text="M=0.5 (strict)", annotation_position="right")
-            fig_stab_smp.add_hline(y=1.0, line_dash="dash", line_color="orange",
+            fig_stab.add_hline(y=1.0, line_dash="dash", line_color="orange",
                                annotation_text="M=1.0 (acceptable)", annotation_position="right")
-            fig_stab_smp.update_layout(
-                title=f"geNorm M-value — {translations[language_code]['patient_group']} {j+1} Reference Genes",
+            fig_stab.update_layout(
+                title=f"geNorm M-value — Control Group {i+1} Reference Genes",
                 yaxis_title="M-value (lower = more stable)",
                 height=280
             )
-            st.plotly_chart(fig_stab_smp, use_container_width=True)
+            st.plotly_chart(fig_stab, use_container_width=True)
 
-            # ── Stability warnings (patient) ──────────────────────────────────
-            if unstable_smp:
-                unstable_names = ", ".join([f"Ref Gene {r+1}" for r in unstable_smp])
+            # ── Stability warnings ────────────────────────────────────────────────
+            if unstable_ctrl:
+                unstable_names = ", ".join([f"Ref Gene {r+1}" for r in unstable_ctrl])
                 st.warning(
-                    f"⚠️ **Unstable reference gene(s) detected in "
-                    f"{translations[language_code]['patient_group']} {j+1}: {unstable_names}**\n\n"
-                    f"geNorm M-value ≥ 1.0 indicates considerable expression variability across "
-                    f"samples in this group, which may compromise normalization reliability.\n\n"
-                    f"**Analysis will continue**, but interpret results with caution.\n\n"
+                    f"⚠️ **Unstable reference gene(s) detected in Control Group {i+1}: {unstable_names}**\n\n"
+                    f"geNorm M-value ≥ 1.0 indicates that the expression of this gene varies "
+                    f"considerably across samples, which may distort normalization.\n\n"
+                    f"**Analysis will continue**, but results should be interpreted with caution.\n\n"
                     f"**Recommendations:**\n"
-                    f"- Check for sample-to-sample variation, outliers, or data entry errors\n"
-                    f"- Validate {unstable_names} in this sample group before drawing conclusions\n"
-                    f"- A mismatch between control and patient group stability may itself indicate "
-                    f"a biological or technical difference worth investigating\n"
-                    f"- Consider replacing {unstable_names} with a validated, tissue-appropriate "
-                    f"reference gene (e.g. from literature or HouseKeeper database)"
+                    f"- Verify Ct values for {unstable_names} — check for pipetting errors or outliers\n"
+                    f"- Consider replacing {unstable_names} with a more stable reference gene\n"
+                    f"- If only 2 reference genes are used and one is unstable, results rely entirely "
+                    f"on the remaining gene — consider adding a third validated reference\n"
+                    f"- Consult: Vandesompele et al. *Genome Biology* 2002 for geNorm methodology"
                 )
-            elif borderline_smp:
-                borderline_names = ", ".join([f"Ref Gene {r+1}" for r in borderline_smp])
+            elif borderline_ctrl:
+                borderline_names = ", ".join([f"Ref Gene {r+1}" for r in borderline_ctrl])
                 st.info(
-                    f"ℹ️ **Borderline stability in "
-                    f"{translations[language_code]['patient_group']} {j+1}: {borderline_names}** (M = 0.5–1.0)\n\n"
-                    f"Stability is within MIQE acceptable range. Consider adding a third reference "
-                    f"gene to confirm robustness of normalization."
+                    f"ℹ️ **Borderline stability in Control Group {i+1}: {borderline_names}** (M = 0.5–1.0)\n\n"
+                    f"Expression stability is acceptable per MIQE guidelines, but not ideal. "
+                    f"Consider validating with an additional reference gene for greater confidence."
                 )
             else:
                 st.success(
-                    f"✅ All reference genes in "
-                    f"{translations[language_code]['patient_group']} {j+1} are stable (M < 0.5)."
+                    f"✅ All reference genes in Control Group {i+1} are stable (M < 0.5). "
+                    f"Normalization quality is excellent."
                 )
 
-        # ── Normalization factor & ΔCt ────────────────────────────────────────
-        # Re-sync lengths after any outlier removal
-        min_sample_len = min(len(sample_target_ct_values), *[len(a) for a in smp_ref_arrays])
-        sample_target_ct_values = sample_target_ct_values[:min_sample_len]
-        smp_ref_arrays = [a[:min_sample_len] for a in smp_ref_arrays]
+        # ── Compute normalization factor (geometric mean of refs) ─────────────────
+        # Re-sync min_control_len to actual array lengths after any outlier removal
+        min_control_len = min(len(control_target_ct_values), *[len(a) for a in ctrl_ref_arrays])
+        control_target_ct_values = control_target_ct_values[:min_control_len]
+        ctrl_ref_arrays = [a[:min_control_len] for a in ctrl_ref_arrays]
 
-        smp_norm_factor = geometric_mean_ct(smp_ref_arrays)
-        sample_delta_ct = sample_target_ct_values - smp_norm_factor
-        sample_reference_ct_values = smp_ref_arrays[0]
+        ctrl_norm_factor = geometric_mean_ct(ctrl_ref_arrays)   # per-sample NF
+        control_delta_ct = control_target_ct_values - ctrl_norm_factor
 
-        average_sample_delta_ct = np.mean(sample_delta_ct) if len(sample_delta_ct) > 0 else None
+        # For table: show first ref gene Ct as representative; NF shown separately
+        control_reference_ct_values = ctrl_ref_arrays[0]   # kept for legacy table column
 
+        average_control_delta_ct = np.mean(control_delta_ct) if len(control_delta_ct) > 0 else None
         sample_counter = 1
-        for idx in range(min_sample_len):
+
+        for idx in range(min_control_len):
             row = {
                 translations[language_code]["sample_number"]: sample_counter,
-                translations[language_code]["target_gene"]: f"{translations[language_code]['target_gene']} {i+1}",
-                "Grup": f"{translations[language_code]['patient_group']} {j+1}",
-                translations[language_code]["target_ct"]: sample_target_ct_values[idx],
-                translations[language_code]["reference_ct"]: round(smp_norm_factor[idx], 4),
-                translations[language_code]["delta_ct_patient"]: round(sample_delta_ct[idx], 4),
+                translations[language_code]["target_gene"]: f"{target_gene} {i+1}",
+                "Grup": translations[language_code]["control_group"],
+                translations[language_code]["target_ct"]: control_target_ct_values[idx],
+                translations[language_code]["reference_ct"]: round(ctrl_norm_factor[idx], 4),
+                translations[language_code]["delta_ct_control"]: round(control_delta_ct[idx], 4),
                 "Outlier Excluded": "No"
             }
             if num_ref_genes > 1:
-                for r, arr in enumerate(smp_ref_arrays):
+                for r, arr in enumerate(ctrl_ref_arrays):
                     row[f"Ref Gene {r+1} Ct"] = arr[idx]
             input_values_table.append(row)
             sample_counter += 1
 
-        # Log excluded outliers as flagged rows
-        for ex_idx in smp_excluded_target:
+        # Log excluded outliers as separate flagged rows
+        for ex_idx in ctrl_excluded_target:
             input_values_table.append({
                 translations[language_code]["sample_number"]: f"{ex_idx + 1} ⚠️",
-                translations[language_code]["target_gene"]: f"{translations[language_code]['target_gene']} {i+1}",
-                "Grup": f"{translations[language_code]['patient_group']} {j+1}",
+                translations[language_code]["target_gene"]: f"{target_gene} {i+1}",
+                "Grup": translations[language_code]["control_group"],
                 translations[language_code]["target_ct"]: "EXCLUDED",
                 translations[language_code]["reference_ct"]: "EXCLUDED",
-                translations[language_code]["delta_ct_patient"]: "EXCLUDED",
+                translations[language_code]["delta_ct_control"]: "EXCLUDED",
                 "Outlier Excluded": f"Yes ({outlier_method})"
             })
 
-        # ΔΔCt ve Gen Ekspresyon Değişimi Hesaplama
-        if average_control_delta_ct is not None and average_sample_delta_ct is not None:
-            delta_delta_ct = average_sample_delta_ct - average_control_delta_ct
-            expression_change = 2 ** (-delta_delta_ct)
+        for j in range(num_patient_groups):
+            st.markdown(
+                f"<h4>{translations[language_code]['patient_group']} {j+1} - {translations[language_code]['target_gene']} {i+1}</h4>",
+                unsafe_allow_html=True
+            )
 
-            # ── Pfaffl Calculation ──────────────────────────────────────────
-            eff = gene_efficiencies.get(i, {"target_E": 2.0, "ref_E": 2.0})
-            E_target = eff["target_E"]
-            E_ref = eff["ref_E"]
+            sample_target_ct = st.text_area(
+                f"{translations[language_code]['patient_group']} {j+1} - {translations[language_code]['target_gene']} {i+1} - {translations[language_code]['ct_value']}",
+                key=f"sample_target_ct_{i}_{j}"
+            )
 
-            avg_ctrl_target = np.mean(control_target_ct_values)
-            avg_ctrl_ref    = np.mean(ctrl_norm_factor)
-            avg_smp_target  = np.mean(sample_target_ct_values)
-            avg_smp_ref     = np.mean(smp_norm_factor)
+            # ── Multi-reference gene input (Patient) ──────────────────────────────
+            smp_ref_arrays = []
+            all_smp_refs_valid = True
 
-            delta_ct_target_pfaffl = avg_ctrl_target - avg_smp_target
-            delta_ct_ref_pfaffl    = avg_ctrl_ref    - avg_smp_ref
-
-            pfaffl_ratio = (E_target ** delta_ct_target_pfaffl) / (E_ref ** delta_ct_ref_pfaffl)
-            # ────────────────────────────────────────────────────────────────
-            
-            if expression_change == 1:
-                regulation_status = translations[language_code]["no_change"]
-            elif expression_change > 1:
-                regulation_status = translations[language_code]["upregulated"]
-            else:
-                regulation_status = translations[language_code]["downregulated"]
-
-            # Pfaffl regulation
-            if pfaffl_ratio > 1:
-                pfaffl_regulation = translations[language_code]["upregulated"]
-            elif pfaffl_ratio < 1:
-                pfaffl_regulation = translations[language_code]["downregulated"]
-            else:
-                pfaffl_regulation = translations[language_code]["no_change"]
-
-            # ── Method comparison display ─────────────────────────────────
-            st.markdown(f"#### {translations[language_code]['method_comparison']} — {translations[language_code]['target_gene']} {i+1} / {translations[language_code]['patient_group']} {j+1}")
-            comp_col1, comp_col2 = st.columns(2)
-            with comp_col1:
-                st.metric(
-                    label=translations[language_code]["classic_ddct"],
-                    value=f"{expression_change:.4f}",
-                    delta=regulation_status
+            for r in range(num_ref_genes):
+                ref_label = f"Ref Gene {r+1}" if num_ref_genes > 1 else translations[language_code]["reference_gene"]
+                smp_ref_ct_raw = st.text_area(
+                    f"{translations[language_code]['patient_group']} {j+1} — {ref_label} {i+1} — {translations[language_code]['ct_value']}",
+                    key=f"sample_reference_ct_{i}_{j}_{r}"
                 )
-            with comp_col2:
-                st.metric(
-                    label=translations[language_code]["pfaffl_ratio"],
-                    value=f"{pfaffl_ratio:.4f}",
-                    delta=pfaffl_regulation
-                )
-            # ─────────────────────────────────────────────────────────────
-
-            # ── Per-group pairwise stats (control vs this patient group) ────
-            shapiro_control = stats.shapiro(control_delta_ct)
-            shapiro_sample  = stats.shapiro(sample_delta_ct)
-            levene_test     = stats.levene(control_delta_ct, sample_delta_ct)
-
-            control_normal = shapiro_control.pvalue > 0.05
-            sample_normal  = shapiro_sample.pvalue  > 0.05
-            equal_variance = levene_test.pvalue     > 0.05
-
-            if control_normal and sample_normal:
-                if equal_variance:
-                    test_pvalue = stats.ttest_ind(control_delta_ct, sample_delta_ct).pvalue
-                    test_method = translations[language_code]["t_test"]
+                parsed = parse_input_data(smp_ref_ct_raw)
+                if len(parsed) == 0:
+                    all_smp_refs_valid = False
                 else:
-                    test_pvalue = stats.ttest_ind(control_delta_ct, sample_delta_ct, equal_var=False).pvalue
-                    test_method = translations[language_code]["welch_t_test"]
-                test_type = translations[language_code]["parametric"]
-            else:
-                test_pvalue = stats.mannwhitneyu(control_delta_ct, sample_delta_ct).pvalue
-                test_method = translations[language_code]["mann_whitney_u_test"]
-                test_type   = translations[language_code]["non_parametric"]
+                    smp_ref_arrays.append(parsed)
 
-            significance = translations[language_code]["significant"] if test_pvalue < 0.05 \
-                           else translations[language_code]["insignificant"]
+            sample_target_ct_values = np.array(parse_input_data(sample_target_ct))
 
-            # ── Decision pathway display ──────────────────────────────────
-            with st.expander(
-                f"{translations[language_code]['stat_decision_title']} — "
-                f"{translations[language_code]['target_gene']} {i+1} / "
-                f"{translations[language_code]['patient_group']} {j+1}",
-                expanded=False
-            ):
-                st.markdown(translations[language_code]["stat_decision_steps"])
+            if len(sample_target_ct_values) == 0 or not all_smp_refs_valid or len(smp_ref_arrays) == 0:
+                st.error(translations[language_code]["warning_patient_ct"].format(j=j+1))
+                continue
 
-                sw_ctrl_sym = "✅" if control_normal else "❌"
-                sw_smp_sym  = "✅" if sample_normal  else "❌"
-                st.markdown(
-                    f"{translations[language_code]['stat_shapiro_title']}  \n"
-                    f"- {translations[language_code]['control_group']}: W={shapiro_control.statistic:.4f}, "
-                    f"p={shapiro_control.pvalue:.4f} {sw_ctrl_sym} "
-                    f"{translations[language_code]['stat_normal'] if control_normal else translations[language_code]['stat_nonnormal']}  \n"
-                    f"- {translations[language_code]['patient_group']} {j+1}: "
-                    f"W={shapiro_sample.statistic:.4f}, "
-                    f"p={shapiro_sample.pvalue:.4f} {sw_smp_sym} "
-                    f"{translations[language_code]['stat_normal'] if sample_normal else translations[language_code]['stat_nonnormal']}"
+            min_sample_len = min(len(sample_target_ct_values), *[len(a) for a in smp_ref_arrays])
+            sample_target_ct_values = sample_target_ct_values[:min_sample_len]
+            smp_ref_arrays = [a[:min_sample_len] for a in smp_ref_arrays]
+
+            # ── Outlier detection — Patient Target Ct ─────────────────────────────
+            smp_excluded_target = []  # always initialized
+            if outlier_enabled and len(sample_target_ct_values) >= 3:
+                detected_smp_tgt = detect_outliers_grubbs(sample_target_ct_values, alpha=grubbs_alpha) \
+                                   if outlier_method == "Grubbs" \
+                                   else detect_outliers_iqr(sample_target_ct_values, multiplier=iqr_multiplier)
+                if detected_smp_tgt:
+                    sample_target_ct_values, smp_excluded_target = render_outlier_ui(
+                        sample_target_ct_values,
+                        f"{translations[language_code]['patient_group']} {j+1} — Target Gene {i+1}",
+                        f"smp_tgt_{i}_{j}",
+                        outlier_method
+                    )
+                    if smp_excluded_target:
+                        keep_indices_smp = [k for k in range(min_sample_len) if k not in smp_excluded_target]
+                        smp_ref_arrays = [a[keep_indices_smp] for a in smp_ref_arrays]
+                        min_sample_len = len(keep_indices_smp)
+
+            # ── geNorm + CV stability (Patient, shown when ≥2 ref genes) ─────────
+            if num_ref_genes >= 2:
+                smp_ref_matrix = np.vstack(smp_ref_arrays)
+                smp_m_values   = compute_genorm_m(smp_ref_matrix)
+                smp_cv_values  = [compute_cv(a) for a in smp_ref_arrays]
+
+                unstable_smp   = [r for r, m in enumerate(smp_m_values) if m >= 1.0]
+                borderline_smp = [r for r, m in enumerate(smp_m_values) if 0.5 <= m < 1.0]
+
+                st.markdown(f"##### 📊 Reference Gene Stability — {translations[language_code]['patient_group']} {j+1}")
+                smp_stab_cols = st.columns(num_ref_genes)
+                for r, col in enumerate(smp_stab_cols):
+                    m_ok = smp_m_values[r] < 1.0
+                    cv_ok = smp_cv_values[r] < 5.0
+                    with col:
+                        st.metric(
+                            label=f"Ref Gene {r+1}",
+                            value=f"M = {smp_m_values[r]:.3f}",
+                            delta=f"CV = {smp_cv_values[r]:.2f}%"
+                        )
+                        if m_ok and cv_ok:
+                            st.caption("✅ Stable")
+                        elif m_ok or cv_ok:
+                            st.caption("⚠️ Borderline")
+                        else:
+                            st.caption("❌ Unstable — M ≥ 1.0")
+
+                # Stability bar chart (patient)
+                fig_stab_smp = go.Figure()
+                fig_stab_smp.add_trace(go.Bar(
+                    name="geNorm M-value",
+                    x=[f"Ref {r+1}" for r in range(num_ref_genes)],
+                    y=smp_m_values,
+                    marker_color=["#2ecc71" if m < 0.5 else "#f39c12" if m < 1.0 else "#e74c3c" for m in smp_m_values],
+                    text=[f"{m:.3f}" for m in smp_m_values],
+                    textposition="outside"
+                ))
+                fig_stab_smp.add_hline(y=0.5, line_dash="dot", line_color="green",
+                                   annotation_text="M=0.5 (strict)", annotation_position="right")
+                fig_stab_smp.add_hline(y=1.0, line_dash="dash", line_color="orange",
+                                   annotation_text="M=1.0 (acceptable)", annotation_position="right")
+                fig_stab_smp.update_layout(
+                    title=f"geNorm M-value — {translations[language_code]['patient_group']} {j+1} Reference Genes",
+                    yaxis_title="M-value (lower = more stable)",
+                    height=280
                 )
+                st.plotly_chart(fig_stab_smp, use_container_width=True)
 
-                if control_normal and sample_normal:
-                    lev_sym = "✅" if equal_variance else "⚠️"
-                    st.markdown(
-                        f"{translations[language_code]['stat_levene_title']}  \n"
-                        f"- F={levene_test.statistic:.4f}, p={levene_test.pvalue:.4f} "
-                        f"{lev_sym} {translations[language_code]['stat_equal_var'] if equal_variance else translations[language_code]['stat_unequal_var']}"
+                # ── Stability warnings (patient) ──────────────────────────────────
+                if unstable_smp:
+                    unstable_names = ", ".join([f"Ref Gene {r+1}" for r in unstable_smp])
+                    st.warning(
+                        f"⚠️ **Unstable reference gene(s) detected in "
+                        f"{translations[language_code]['patient_group']} {j+1}: {unstable_names}**\n\n"
+                        f"geNorm M-value ≥ 1.0 indicates considerable expression variability across "
+                        f"samples in this group, which may compromise normalization reliability.\n\n"
+                        f"**Analysis will continue**, but interpret results with caution.\n\n"
+                        f"**Recommendations:**\n"
+                        f"- Check for sample-to-sample variation, outliers, or data entry errors\n"
+                        f"- Validate {unstable_names} in this sample group before drawing conclusions\n"
+                        f"- A mismatch between control and patient group stability may itself indicate "
+                        f"a biological or technical difference worth investigating\n"
+                        f"- Consider replacing {unstable_names} with a validated, tissue-appropriate "
+                        f"reference gene (e.g. from literature or HouseKeeper database)"
+                    )
+                elif borderline_smp:
+                    borderline_names = ", ".join([f"Ref Gene {r+1}" for r in borderline_smp])
+                    st.info(
+                        f"ℹ️ **Borderline stability in "
+                        f"{translations[language_code]['patient_group']} {j+1}: {borderline_names}** (M = 0.5–1.0)\n\n"
+                        f"Stability is within MIQE acceptable range. Consider adding a third reference "
+                        f"gene to confirm robustness of normalization."
                     )
                 else:
-                    st.markdown(translations[language_code]["stat_levene_skipped"])
+                    st.success(
+                        f"✅ All reference genes in "
+                        f"{translations[language_code]['patient_group']} {j+1} are stable (M < 0.5)."
+                    )
 
-                if not control_normal or not sample_normal:
-                    reason = translations[language_code]["stat_reason_nonnormal"]
-                elif equal_variance:
-                    reason = translations[language_code]["stat_reason_normal_equal"]
+            # ── Normalization factor & ΔCt ────────────────────────────────────────
+            # Re-sync lengths after any outlier removal
+            min_sample_len = min(len(sample_target_ct_values), *[len(a) for a in smp_ref_arrays])
+            sample_target_ct_values = sample_target_ct_values[:min_sample_len]
+            smp_ref_arrays = [a[:min_sample_len] for a in smp_ref_arrays]
+
+            smp_norm_factor = geometric_mean_ct(smp_ref_arrays)
+            sample_delta_ct = sample_target_ct_values - smp_norm_factor
+            sample_reference_ct_values = smp_ref_arrays[0]
+
+            average_sample_delta_ct = np.mean(sample_delta_ct) if len(sample_delta_ct) > 0 else None
+
+            sample_counter = 1
+            for idx in range(min_sample_len):
+                row = {
+                    translations[language_code]["sample_number"]: sample_counter,
+                    translations[language_code]["target_gene"]: f"{translations[language_code]['target_gene']} {i+1}",
+                    "Grup": f"{translations[language_code]['patient_group']} {j+1}",
+                    translations[language_code]["target_ct"]: sample_target_ct_values[idx],
+                    translations[language_code]["reference_ct"]: round(smp_norm_factor[idx], 4),
+                    translations[language_code]["delta_ct_patient"]: round(sample_delta_ct[idx], 4),
+                    "Outlier Excluded": "No"
+                }
+                if num_ref_genes > 1:
+                    for r, arr in enumerate(smp_ref_arrays):
+                        row[f"Ref Gene {r+1} Ct"] = arr[idx]
+                input_values_table.append(row)
+                sample_counter += 1
+
+            # Log excluded outliers as flagged rows
+            for ex_idx in smp_excluded_target:
+                input_values_table.append({
+                    translations[language_code]["sample_number"]: f"{ex_idx + 1} ⚠️",
+                    translations[language_code]["target_gene"]: f"{translations[language_code]['target_gene']} {i+1}",
+                    "Grup": f"{translations[language_code]['patient_group']} {j+1}",
+                    translations[language_code]["target_ct"]: "EXCLUDED",
+                    translations[language_code]["reference_ct"]: "EXCLUDED",
+                    translations[language_code]["delta_ct_patient"]: "EXCLUDED",
+                    "Outlier Excluded": f"Yes ({outlier_method})"
+                })
+
+            # ΔΔCt ve Gen Ekspresyon Değişimi Hesaplama
+            if average_control_delta_ct is not None and average_sample_delta_ct is not None:
+                delta_delta_ct = average_sample_delta_ct - average_control_delta_ct
+                expression_change = 2 ** (-delta_delta_ct)
+
+                # ── Pfaffl Calculation ──────────────────────────────────────────
+                eff = gene_efficiencies.get(i, {"target_E": 2.0, "ref_E": 2.0})
+                E_target = eff["target_E"]
+                E_ref = eff["ref_E"]
+
+                avg_ctrl_target = np.mean(control_target_ct_values)
+                avg_ctrl_ref    = np.mean(ctrl_norm_factor)
+                avg_smp_target  = np.mean(sample_target_ct_values)
+                avg_smp_ref     = np.mean(smp_norm_factor)
+
+                delta_ct_target_pfaffl = avg_ctrl_target - avg_smp_target
+                delta_ct_ref_pfaffl    = avg_ctrl_ref    - avg_smp_ref
+
+                pfaffl_ratio = (E_target ** delta_ct_target_pfaffl) / (E_ref ** delta_ct_ref_pfaffl)
+                # ────────────────────────────────────────────────────────────────
+            
+                if expression_change == 1:
+                    regulation_status = translations[language_code]["no_change"]
+                elif expression_change > 1:
+                    regulation_status = translations[language_code]["upregulated"]
                 else:
-                    reason = translations[language_code]["stat_reason_normal_unequal"]
+                    regulation_status = translations[language_code]["downregulated"]
 
-                st.success(
-                    f"{translations[language_code]['stat_selected_test']} {test_method}  \n"
-                    f"{translations[language_code]['stat_reason']} {reason}  \n"
-                    f"{translations[language_code]['stat_result']} p = {test_pvalue:.4f} → **{significance}**"
-                )
+                # Pfaffl regulation
+                if pfaffl_ratio > 1:
+                    pfaffl_regulation = translations[language_code]["upregulated"]
+                elif pfaffl_ratio < 1:
+                    pfaffl_regulation = translations[language_code]["downregulated"]
+                else:
+                    pfaffl_regulation = translations[language_code]["no_change"]
 
-                if num_patient_groups >= 2:
-                    st.caption(translations[language_code]["stat_multigroup_note"])
-            # ─────────────────────────────────────────────────────────────
+                # ── Method comparison display ─────────────────────────────────
+                st.markdown(f"#### {translations[language_code]['method_comparison']} — {translations[language_code]['target_gene']} {i+1} / {translations[language_code]['patient_group']} {j+1}")
+                comp_col1, comp_col2 = st.columns(2)
+                with comp_col1:
+                    st.metric(
+                        label=translations[language_code]["classic_ddct"],
+                        value=f"{expression_change:.4f}",
+                        delta=regulation_status
+                    )
+                with comp_col2:
+                    st.metric(
+                        label=translations[language_code]["pfaffl_ratio"],
+                        value=f"{pfaffl_ratio:.4f}",
+                        delta=pfaffl_regulation
+                    )
+                # ─────────────────────────────────────────────────────────────
 
-            stats_data.append({
-                translations[language_code]["target_gene"]:   f"{translations[language_code]['target_gene']} {i+1}",
-                translations[language_code]["patient_group"]: f"{translations[language_code]['patient_group']} {j+1}",
-                translations[language_code]["test_type"]:     test_type,
-                translations[language_code]["test_method"]:   test_method,
-                translations[language_code]["test_pvalue"]:   test_pvalue,
-                translations[language_code]["significance"]:  significance,
-                "Comparison": f"Control vs {translations[language_code]['patient_group']} {j+1}"
-            })
+                # ── Per-group pairwise stats (control vs this patient group) ────
+                shapiro_control = stats.shapiro(control_delta_ct)
+                shapiro_sample  = stats.shapiro(sample_delta_ct)
+                levene_test     = stats.levene(control_delta_ct, sample_delta_ct)
 
-            data.append({
-                translations[language_code]["target_gene"]:         f"{translations[language_code]['target_gene']} {i+1}",
-                translations[language_code]["patient_group"]:       f"{translations[language_code]['patient_group']} {j+1}",
-                translations[language_code]["delta_delta_ct"]:      delta_delta_ct,
-                translations[language_code]["gene_expression_change"]: expression_change,
-                translations[language_code]["pfaffl_ratio"]:        pfaffl_ratio,
-                "E target":                                          round(E_target, 4),
-                "E ref":                                             round(E_ref, 4),
-                translations[language_code]["regulation_status"]:   regulation_status,
-                translations[language_code]["delta_ct_control"]:    average_control_delta_ct,
-                translations[language_code]["delta_ct_patient"]:    average_sample_delta_ct
-            })
+                control_normal = shapiro_control.pvalue > 0.05
+                sample_normal  = shapiro_sample.pvalue  > 0.05
+                equal_variance = levene_test.pvalue     > 0.05
+
+                if control_normal and sample_normal:
+                    if equal_variance:
+                        test_pvalue = stats.ttest_ind(control_delta_ct, sample_delta_ct).pvalue
+                        test_method = translations[language_code]["t_test"]
+                    else:
+                        test_pvalue = stats.ttest_ind(control_delta_ct, sample_delta_ct, equal_var=False).pvalue
+                        test_method = translations[language_code]["welch_t_test"]
+                    test_type = translations[language_code]["parametric"]
+                else:
+                    test_pvalue = stats.mannwhitneyu(control_delta_ct, sample_delta_ct).pvalue
+                    test_method = translations[language_code]["mann_whitney_u_test"]
+                    test_type   = translations[language_code]["non_parametric"]
+
+                significance = translations[language_code]["significant"] if test_pvalue < 0.05 \
+                               else translations[language_code]["insignificant"]
+
+                # ── Decision pathway display ──────────────────────────────────
+                with st.expander(
+                    f"{translations[language_code]['stat_decision_title']} — "
+                    f"{translations[language_code]['target_gene']} {i+1} / "
+                    f"{translations[language_code]['patient_group']} {j+1}",
+                    expanded=False
+                ):
+                    st.markdown(translations[language_code]["stat_decision_steps"])
+
+                    sw_ctrl_sym = "✅" if control_normal else "❌"
+                    sw_smp_sym  = "✅" if sample_normal  else "❌"
+                    st.markdown(
+                        f"{translations[language_code]['stat_shapiro_title']}  \n"
+                        f"- {translations[language_code]['control_group']}: W={shapiro_control.statistic:.4f}, "
+                        f"p={shapiro_control.pvalue:.4f} {sw_ctrl_sym} "
+                        f"{translations[language_code]['stat_normal'] if control_normal else translations[language_code]['stat_nonnormal']}  \n"
+                        f"- {translations[language_code]['patient_group']} {j+1}: "
+                        f"W={shapiro_sample.statistic:.4f}, "
+                        f"p={shapiro_sample.pvalue:.4f} {sw_smp_sym} "
+                        f"{translations[language_code]['stat_normal'] if sample_normal else translations[language_code]['stat_nonnormal']}"
+                    )
+
+                    if control_normal and sample_normal:
+                        lev_sym = "✅" if equal_variance else "⚠️"
+                        st.markdown(
+                            f"{translations[language_code]['stat_levene_title']}  \n"
+                            f"- F={levene_test.statistic:.4f}, p={levene_test.pvalue:.4f} "
+                            f"{lev_sym} {translations[language_code]['stat_equal_var'] if equal_variance else translations[language_code]['stat_unequal_var']}"
+                        )
+                    else:
+                        st.markdown(translations[language_code]["stat_levene_skipped"])
+
+                    if not control_normal or not sample_normal:
+                        reason = translations[language_code]["stat_reason_nonnormal"]
+                    elif equal_variance:
+                        reason = translations[language_code]["stat_reason_normal_equal"]
+                    else:
+                        reason = translations[language_code]["stat_reason_normal_unequal"]
+
+                    st.success(
+                        f"{translations[language_code]['stat_selected_test']} {test_method}  \n"
+                        f"{translations[language_code]['stat_reason']} {reason}  \n"
+                        f"{translations[language_code]['stat_result']} p = {test_pvalue:.4f} → **{significance}**"
+                    )
+
+                    if num_patient_groups >= 2:
+                        st.caption(translations[language_code]["stat_multigroup_note"])
+                # ─────────────────────────────────────────────────────────────
+
+                stats_data.append({
+                    translations[language_code]["target_gene"]:   f"{translations[language_code]['target_gene']} {i+1}",
+                    translations[language_code]["patient_group"]: f"{translations[language_code]['patient_group']} {j+1}",
+                    translations[language_code]["test_type"]:     test_type,
+                    translations[language_code]["test_method"]:   test_method,
+                    translations[language_code]["test_pvalue"]:   test_pvalue,
+                    translations[language_code]["significance"]:  significance,
+                    "Comparison": f"Control vs {translations[language_code]['patient_group']} {j+1}"
+                })
+
+                data.append({
+                    translations[language_code]["target_gene"]:         f"{translations[language_code]['target_gene']} {i+1}",
+                    translations[language_code]["patient_group"]:       f"{translations[language_code]['patient_group']} {j+1}",
+                    translations[language_code]["delta_delta_ct"]:      delta_delta_ct,
+                    translations[language_code]["gene_expression_change"]: expression_change,
+                    translations[language_code]["pfaffl_ratio"]:        pfaffl_ratio,
+                    "E target":                                          round(E_target, 4),
+                    "E ref":                                             round(E_ref, 4),
+                    translations[language_code]["regulation_status"]:   regulation_status,
+                    translations[language_code]["delta_ct_control"]:    average_control_delta_ct,
+                    translations[language_code]["delta_ct_patient"]:    average_sample_delta_ct
+                })
 
 # ─── MULTI-GROUP ANALYSIS (3+ patient groups per target gene) ────────────────
 # Collect all ΔCt arrays per target gene for omnibus testing
@@ -2648,13 +2581,20 @@ for i in range(num_target_genes):
         "note":          None
     })
 
-# ── Display multi-group results ───────────────────────────────────────────────
-if any(r["n_groups"] >= 3 for r in multigroup_results):
-    st.markdown("---")
-    st.markdown(translations[language_code]["multigroup_title"])
+# ─────────────────────────────────────────────────────────────────────────────
 
-    with st.expander(translations[language_code]["multigroup_expander"], expanded=False):
-        st.markdown("""
+# ═══════════════════════════════════════════════════════════════════════════════
+# SEKME 2: SONUÇLAR
+# ═══════════════════════════════════════════════════════════════════════════════
+with tab_results:
+
+    # ── Multi-group display ───────────────────────────────────────────────────
+    if any(r["n_groups"] >= 3 for r in multigroup_results):
+        st.markdown("---")
+        st.markdown(translations[language_code]["multigroup_title"])
+
+        with st.expander(translations[language_code]["multigroup_expander"], expanded=False):
+            st.markdown("""
 **When is multi-group analysis applied?**  
 Automatically activated when **≥ 3 groups** (control + 2 or more patient groups) are present for a target gene.  
 This addresses the limitation of pairwise-only testing, which inflates Type I error when multiple comparisons are made without correction.
@@ -2675,91 +2615,90 @@ This addresses the limitation of pairwise-only testing, which inflates Type I er
 **Reference:** Dunn OJ. *J Am Stat Assoc* 1961; Benjamini & Hochberg. *J R Stat Soc B* 1995.
 """)
 
-    for res in multigroup_results:
-        if res["n_groups"] < 3:
-            continue
+        for res in multigroup_results:
+            if res["n_groups"] < 3:
+                continue
 
-        st.markdown(f"### 🧬 {res['gene']} — {res['n_groups']} {translations[language_code]['patient_group'].replace('🩸 ', '')}")
+            st.markdown(f"### 🧬 {res['gene']} — {res['n_groups']} {translations[language_code]['patient_group'].replace('🩸 ', '')}")
 
-        if res["normality_ok"] and res["variance_ok"]:
-            st.success(translations[language_code]["multigroup_decision_normal_equal"])
-        elif res["normality_ok"] and not res["variance_ok"]:
-            st.warning(translations[language_code]["multigroup_decision_normal_unequal"])
-        else:
-            st.warning(translations[language_code]["multigroup_decision_nonnormal"])
+            if res["normality_ok"] and res["variance_ok"]:
+                st.success(translations[language_code]["multigroup_decision_normal_equal"])
+            elif res["normality_ok"] and not res["variance_ok"]:
+                st.warning(translations[language_code]["multigroup_decision_normal_unequal"])
+            else:
+                st.warning(translations[language_code]["multigroup_decision_nonnormal"])
 
-        omni_col1, omni_col2, omni_col3 = st.columns(3)
-        omni_col1.metric(translations[language_code]["multigroup_omnibus_test"], res["omnibus_test"])
-        omni_col2.metric(translations[language_code]["multigroup_pvalue"], f"{res['omnibus_p']:.4f}")
-        omni_col3.metric(translations[language_code]["multigroup_result"], res["omnibus_sig"])
+            omni_col1, omni_col2, omni_col3 = st.columns(3)
+            omni_col1.metric(translations[language_code]["multigroup_omnibus_test"], res["omnibus_test"])
+            omni_col2.metric(translations[language_code]["multigroup_pvalue"], f"{res['omnibus_p']:.4f}")
+            omni_col3.metric(translations[language_code]["multigroup_result"], res["omnibus_sig"])
 
-        if res["omnibus_p"] >= 0.05:
-            st.info(translations[language_code]["multigroup_omnibus_ns"])
+            if res["omnibus_p"] >= 0.05:
+                st.info(translations[language_code]["multigroup_omnibus_ns"])
 
-        st.markdown(f"{translations[language_code]['multigroup_posthoc_label']} {res['posthoc_method']} — Bonferroni & FDR")
-        ph_df = pd.DataFrame(res["posthoc_rows"])
-        st.dataframe(ph_df, use_container_width=True)
+            st.markdown(f"{translations[language_code]['multigroup_posthoc_label']} {res['posthoc_method']} — Bonferroni & FDR")
+            ph_df = pd.DataFrame(res["posthoc_rows"])
+            st.dataframe(ph_df, use_container_width=True)
 
-        fig_ph = go.Figure()
-        comparisons = [r["Comparison"] for r in res["posthoc_rows"]]
-        fig_ph.add_trace(go.Bar(name="Raw p", x=comparisons, y=[r["Raw p"] for r in res["posthoc_rows"]], marker_color="#4C72B0"))
-        fig_ph.add_trace(go.Bar(name="Bonferroni p", x=comparisons, y=[r["Bonferroni p"] for r in res["posthoc_rows"]], marker_color="#DD8452"))
-        fig_ph.add_trace(go.Bar(name="FDR p (B-H)", x=comparisons, y=[r["FDR p (B-H)"] for r in res["posthoc_rows"]], marker_color="#55A868"))
-        fig_ph.add_hline(y=0.05, line_dash="dash", line_color="red", annotation_text="α = 0.05", annotation_position="right")
-        fig_ph.update_layout(barmode="group", title=f"{res['gene']} — Post-hoc p-values", yaxis_title="p-value", height=350)
-        st.plotly_chart(fig_ph, use_container_width=True)
+            fig_ph = go.Figure()
+            comparisons = [r["Comparison"] for r in res["posthoc_rows"]]
+            fig_ph.add_trace(go.Bar(name="Raw p", x=comparisons, y=[r["Raw p"] for r in res["posthoc_rows"]], marker_color="#4C72B0"))
+            fig_ph.add_trace(go.Bar(name="Bonferroni p", x=comparisons, y=[r["Bonferroni p"] for r in res["posthoc_rows"]], marker_color="#DD8452"))
+            fig_ph.add_trace(go.Bar(name="FDR p (B-H)", x=comparisons, y=[r["FDR p (B-H)"] for r in res["posthoc_rows"]], marker_color="#55A868"))
+            fig_ph.add_hline(y=0.05, line_dash="dash", line_color="red", annotation_text="a = 0.05", annotation_position="right")
+            fig_ph.update_layout(barmode="group", title=f"{res['gene']} — Post-hoc p-values", yaxis_title="p-value", height=350)
+            st.plotly_chart(fig_ph, use_container_width=True)
 
-        ph_csv = ph_df.to_csv(index=False).encode("utf-8")
+            ph_csv = ph_df.to_csv(index=False).encode("utf-8")
+            st.download_button(
+                label=f"{translations[language_code]['multigroup_dl_button']} {res['gene']}",
+                data=ph_csv,
+                file_name=f"posthoc_{res['gene'].replace(' ', '_')}.csv",
+                mime="text/csv",
+                key=f"ph_dl_{res['gene']}"
+            )
+
+    elif num_patient_groups >= 2 and multigroup_results:
+        st.markdown("---")
+        st.info(translations[language_code]["multigroup_2group_note"])
+
+
+    if input_values_table: 
+        st.subheader(f" {translations[language_code]['gr_tbl']}")
+        input_df = pd.DataFrame(input_values_table) 
+        st.write(input_df) 
+
+        csv = input_df.to_csv(index=False).encode("utf-8")  
         st.download_button(
-            label=f"{translations[language_code]['multigroup_dl_button']} {res['gene']}",
-            data=ph_csv,
-            file_name=f"posthoc_{res['gene'].replace(' ', '_')}.csv",
-            mime="text/csv",
-            key=f"ph_dl_{res['gene']}"
-        )
+            label=translations[language_code]['download_csv'],
+            data=csv, file_name="giris_verileri.csv", mime="text/csv") 
 
-elif num_patient_groups >= 2 and multigroup_results:
-    st.markdown("---")
-    st.info(translations[language_code]["multigroup_2group_note"])
-# ─────────────────────────────────────────────────────────────────────────────
+    # Sonuçlar Tablosunu Göster
+    if data:
+        st.subheader(f" {translations[language_code]['nil_mine']}")
+        df = pd.DataFrame(data)
+        st.write(df)
 
-# Giriş Verileri Tablosunu Göster
-if input_values_table: 
-    st.subheader(f" {translations[language_code]['gr_tbl']}")
-    input_df = pd.DataFrame(input_values_table) 
-    st.write(input_df) 
+    # İstatistik Sonuçları
+    if stats_data:
+        st.subheader(f" {translations[language_code]['statistical_results']}")
+        stats_df = pd.DataFrame(stats_data)
+        st.write(stats_df)
+        
+        csv_stats = stats_df.to_csv(index=False).encode("utf-8")
+        st.download_button(
+            label=translations[language_code]['download_csv'],
+            data=csv_stats,
+            file_name="istatistik_sonuclari.csv",
+            mime="text/csv")
 
-    csv = input_df.to_csv(index=False).encode("utf-8")  
-    st.download_button(
-        label=translations[language_code]['download_csv'],
-        data=csv, file_name="giris_verileri.csv", mime="text/csv") 
+    # ─── MULTI-GENE P-VALUE CORRECTION ───────────────────────────────────────────
+    if stats_data and num_target_genes >= 2:
+        st.markdown("---")
+        st.markdown(translations[language_code]["multigene_title"])
 
-# Sonuçlar Tablosunu Göster
-if data:
-    st.subheader(f" {translations[language_code]['nil_mine']}")
-    df = pd.DataFrame(data)
-    st.write(df)
-
-# İstatistik Sonuçları
-if stats_data:
-    st.subheader(f" {translations[language_code]['statistical_results']}")
-    stats_df = pd.DataFrame(stats_data)
-    st.write(stats_df)
-    
-    csv_stats = stats_df.to_csv(index=False).encode("utf-8")
-    st.download_button(
-        label=translations[language_code]['download_csv'],
-        data=csv_stats,
-        file_name="istatistik_sonuclari.csv",
-        mime="text/csv")
-
-# ─── MULTI-GENE P-VALUE CORRECTION ───────────────────────────────────────────
-if stats_data and num_target_genes >= 2:
-    st.markdown("---")
-    st.markdown(translations[language_code]["multigene_title"])
-
-    with st.expander(translations[language_code]["multigene_expander"], expanded=False):
-        st.markdown("""
+        with st.expander(translations[language_code]["multigene_expander"], expanded=False):
+            st.markdown("""
 When testing **multiple target genes** simultaneously, the probability of obtaining 
 at least one false positive increases with the number of tests performed 
 (family-wise error inflation). For example, testing 5 genes at α = 0.05 gives a 
@@ -2776,196 +2715,195 @@ at least one false positive increases with the number of tests performed
 Ge Y et al. *Bioinformatics* 2003; Storey JD. *J R Stat Soc B* 2002.
 """)
 
-    pval_key  = translations[language_code]["test_pvalue"]
-    gene_key  = translations[language_code]["target_gene"]
-    group_key = translations[language_code]["patient_group"]
+        pval_key  = translations[language_code]["test_pvalue"]
+        gene_key  = translations[language_code]["target_gene"]
+        group_key = translations[language_code]["patient_group"]
 
-    correction_rows = [
-        {
-            "Gene":   r[gene_key],
-            "Group":  r[group_key],
-            "Raw p":  r[pval_key],
-            "Test":   r.get(translations[language_code]["test_method"], "—"),
-        }
-        for r in stats_data
-        if r.get(pval_key) is not None
-    ]
+        correction_rows = [
+            {
+                "Gene":   r[gene_key],
+                "Group":  r[group_key],
+                "Raw p":  r[pval_key],
+                "Test":   r.get(translations[language_code]["test_method"], "—"),
+            }
+            for r in stats_data
+            if r.get(pval_key) is not None
+        ]
 
-    if not correction_rows:
-        st.info(translations[language_code]["multigene_no_data"])
-    else:
-        n_tests   = len(correction_rows)
-        raw_pvals = [r["Raw p"] for r in correction_rows]
+        if not correction_rows:
+            st.info(translations[language_code]["multigene_no_data"])
+        else:
+            n_tests   = len(correction_rows)
+            raw_pvals = [r["Raw p"] for r in correction_rows]
 
-        bonf = [min(p * n_tests, 1.0) for p in raw_pvals]
+            bonf = [min(p * n_tests, 1.0) for p in raw_pvals]
 
-        ranked = sorted(range(n_tests), key=lambda k: raw_pvals[k])
-        fdr    = [1.0] * n_tests
-        for rank, idx in enumerate(ranked):
-            fdr[idx] = min(raw_pvals[idx] * n_tests / (rank + 1), 1.0)
-        for k in range(n_tests - 2, -1, -1):
-            fdr[ranked[k]] = min(fdr[ranked[k]], fdr[ranked[k + 1]])
+            ranked = sorted(range(n_tests), key=lambda k: raw_pvals[k])
+            fdr    = [1.0] * n_tests
+            for rank, idx in enumerate(ranked):
+                fdr[idx] = min(raw_pvals[idx] * n_tests / (rank + 1), 1.0)
+            for k in range(n_tests - 2, -1, -1):
+                fdr[ranked[k]] = min(fdr[ranked[k]], fdr[ranked[k + 1]])
 
-        for idx, row in enumerate(correction_rows):
-            row["Bonferroni p"]     = round(bonf[idx], 4)
-            row["FDR p (B-H)"]      = round(fdr[idx],  4)
-            row["Sig (raw)"]        = "✅" if raw_pvals[idx] < 0.05 else "—"
-            row["Sig (Bonferroni)"] = "✅" if bonf[idx]      < 0.05 else "—"
-            row["Sig (FDR)"]        = "✅" if fdr[idx]        < 0.05 else "—"
+            for idx, row in enumerate(correction_rows):
+                row["Bonferroni p"]     = round(bonf[idx], 4)
+                row["FDR p (B-H)"]      = round(fdr[idx],  4)
+                row["Sig (raw)"]        = "✅" if raw_pvals[idx] < 0.05 else "—"
+                row["Sig (Bonferroni)"] = "✅" if bonf[idx]      < 0.05 else "—"
+                row["Sig (FDR)"]        = "✅" if fdr[idx]        < 0.05 else "—"
 
-        corr_df = pd.DataFrame(correction_rows)
-        st.dataframe(corr_df, use_container_width=True)
+            corr_df = pd.DataFrame(correction_rows)
+            st.dataframe(corr_df, use_container_width=True)
 
-        n_raw_sig  = sum(1 for p in raw_pvals if p < 0.05)
-        n_bonf_sig = sum(1 for p in bonf       if p < 0.05)
-        n_fdr_sig  = sum(1 for p in fdr         if p < 0.05)
+            n_raw_sig  = sum(1 for p in raw_pvals if p < 0.05)
+            n_bonf_sig = sum(1 for p in bonf       if p < 0.05)
+            n_fdr_sig  = sum(1 for p in fdr         if p < 0.05)
 
-        sum_col1, sum_col2, sum_col3 = st.columns(3)
-        sum_col1.metric(translations[language_code]["multigene_sig_raw"],  f"{n_raw_sig} / {n_tests}")
-        sum_col2.metric(translations[language_code]["multigene_sig_bonf"], f"{n_bonf_sig} / {n_tests}")
-        sum_col3.metric(translations[language_code]["multigene_sig_fdr"],  f"{n_fdr_sig} / {n_tests}")
+            sum_col1, sum_col2, sum_col3 = st.columns(3)
+            sum_col1.metric(translations[language_code]["multigene_sig_raw"],  f"{n_raw_sig} / {n_tests}")
+            sum_col2.metric(translations[language_code]["multigene_sig_bonf"], f"{n_bonf_sig} / {n_tests}")
+            sum_col3.metric(translations[language_code]["multigene_sig_fdr"],  f"{n_fdr_sig} / {n_tests}")
 
-        if n_raw_sig > n_fdr_sig:
-            st.warning(translations[language_code]["multigene_warning"].format(lost=n_raw_sig - n_fdr_sig))
-        elif n_raw_sig == n_fdr_sig and n_raw_sig > 0:
-            st.success(translations[language_code]["multigene_success"].format(n=n_raw_sig))
-        elif n_raw_sig == 0:
-            st.info(translations[language_code]["multigene_no_sig"])
+            if n_raw_sig > n_fdr_sig:
+                st.warning(translations[language_code]["multigene_warning"].format(lost=n_raw_sig - n_fdr_sig))
+            elif n_raw_sig == n_fdr_sig and n_raw_sig > 0:
+                st.success(translations[language_code]["multigene_success"].format(n=n_raw_sig))
+            elif n_raw_sig == 0:
+                st.info(translations[language_code]["multigene_no_sig"])
 
-        fig_corr = go.Figure()
-        labels = [f"{r['Gene']} / {r['Group']}" for r in correction_rows]
-        fig_corr.add_trace(go.Bar(name="Raw p",        x=labels, y=raw_pvals, marker_color="#4C72B0"))
-        fig_corr.add_trace(go.Bar(name="Bonferroni p", x=labels, y=bonf,      marker_color="#DD8452"))
-        fig_corr.add_trace(go.Bar(name="FDR p (B-H)",  x=labels, y=fdr,       marker_color="#55A868"))
-        fig_corr.add_hline(y=0.05, line_dash="dash", line_color="red", annotation_text="α = 0.05", annotation_position="right")
-        fig_corr.update_layout(
-            barmode="group",
-            title=translations[language_code]["multigene_chart_title"],
-            yaxis_title="p-value",
-            xaxis_title=f"{translations[language_code]['target_gene']} / {translations[language_code]['patient_group']}",
-            height=380
-        )
-        st.plotly_chart(fig_corr, use_container_width=True)
+            fig_corr = go.Figure()
+            labels = [f"{r['Gene']} / {r['Group']}" for r in correction_rows]
+            fig_corr.add_trace(go.Bar(name="Raw p",        x=labels, y=raw_pvals, marker_color="#4C72B0"))
+            fig_corr.add_trace(go.Bar(name="Bonferroni p", x=labels, y=bonf,      marker_color="#DD8452"))
+            fig_corr.add_trace(go.Bar(name="FDR p (B-H)",  x=labels, y=fdr,       marker_color="#55A868"))
+            fig_corr.add_hline(y=0.05, line_dash="dash", line_color="red", annotation_text="a = 0.05", annotation_position="right")
+            fig_corr.update_layout(
+                barmode="group",
+                title=translations[language_code]["multigene_chart_title"],
+                yaxis_title="p-value",
+                xaxis_title=f"{translations[language_code]['target_gene']} / {translations[language_code]['patient_group']}",
+                height=380
+            )
+            st.plotly_chart(fig_corr, use_container_width=True)
 
-        corr_csv = corr_df.to_csv(index=False).encode("utf-8")
-        st.download_button(
-            label=translations[language_code]["multigene_dl_button"],
-            data=corr_csv,
-            file_name="multi_gene_correction.csv",
-            mime="text/csv",
-            key="multigene_corr_dl"
-        )
+            corr_csv = corr_df.to_csv(index=False).encode("utf-8")
+            st.download_button(
+                label=translations[language_code]["multigene_dl_button"],
+                data=corr_csv,
+                file_name="multi_gene_correction.csv",
+                mime="text/csv",
+                key="multigene_corr_dl"
+            )
 
-elif stats_data and num_target_genes == 1:
+    elif stats_data and num_target_genes == 1:
+        st.markdown("---")
+        st.info(translations[language_code]["multigene_1gene_note"])
+
+    # ── ΔCt Dağılım Grafikleri ────────────────────────────────────────────────
     st.markdown("---")
-    st.info(translations[language_code]["multigene_1gene_note"])
-# ─────────────────────────────────────────────────────────────────────────────
+    for i in range(num_target_genes):
+        st.subheader(f"{translations[language_code]['target_gene']} {i+1} - {translations[language_code]['distribution_graph']}")
 
-# Grafik oluşturma
-for i in range(num_target_genes):
-    st.subheader(f"{translations[language_code]['target_gene']} {i+1} - {translations[language_code]['distribution_graph']}")
-
-    control_target_ct_values = [
-        d[translations[language_code]["target_ct"]] 
-        for d in input_values_table
-        if d["Grup"] == translations[language_code]["control_group"] and
-           d[translations[language_code]["target_gene"]] == f"{translations[language_code]['target_gene']} {i+1}" and
-           d.get(translations[language_code]["target_ct"]) not in ("EXCLUDED", None) and
-           d.get("Outlier Excluded", "No") == "No"
-    ]
-
-    control_reference_ct_values = [
-        d[translations[language_code]["reference_ct"]] 
-        for d in input_values_table
-        if d["Grup"] == translations[language_code]["control_group"] and
-           d[translations[language_code]["target_gene"]] == f"{translations[language_code]['target_gene']} {i+1}" and
-           d.get(translations[language_code]["reference_ct"]) not in ("EXCLUDED", None) and
-           d.get("Outlier Excluded", "No") == "No"
-    ]
-
-    if len(control_target_ct_values) == 0 or len(control_reference_ct_values) == 0:
-        st.error(f" {translations[language_code]['error_missing_control_data'].format(i=i+1)}")
-        continue
-
-    control_delta_ct = np.array(control_target_ct_values, dtype=float) - np.array(control_reference_ct_values, dtype=float)
-    average_control_delta_ct = np.mean(control_delta_ct)
-
-    fig = go.Figure()
-
-    fig.add_trace(go.Scatter(
-        x=[0.8, 1.2],  
-        y=[average_control_delta_ct, average_control_delta_ct],  
-        mode='lines',
-        line=dict(color='black', width=4),
-        name=translations[language_code]["control_group_avg"]
-    ))
-
-    for j in range(num_patient_groups):
-        sample_delta_ct_values = [
-            float(d[translations[language_code]["delta_ct_patient"]])
-            for d in input_values_table 
-            if d["Grup"] == f"{translations[language_code]['patient_group']} {j+1}" and 
+        control_target_ct_values = [
+            d[translations[language_code]["target_ct"]] 
+            for d in input_values_table
+            if d["Grup"] == translations[language_code]["control_group"] and
                d[translations[language_code]["target_gene"]] == f"{translations[language_code]['target_gene']} {i+1}" and
-               d.get(translations[language_code]["delta_ct_patient"]) not in ("EXCLUDED", None) and
+               d.get(translations[language_code]["target_ct"]) not in ("EXCLUDED", None) and
                d.get("Outlier Excluded", "No") == "No"
         ]
 
-        if not sample_delta_ct_values:
-            continue  
+        control_reference_ct_values = [
+            d[translations[language_code]["reference_ct"]] 
+            for d in input_values_table
+            if d["Grup"] == translations[language_code]["control_group"] and
+               d[translations[language_code]["target_gene"]] == f"{translations[language_code]['target_gene']} {i+1}" and
+               d.get(translations[language_code]["reference_ct"]) not in ("EXCLUDED", None) and
+               d.get("Outlier Excluded", "No") == "No"
+        ]
 
-        average_sample_delta_ct = np.mean(sample_delta_ct_values)
+        if len(control_target_ct_values) == 0 or len(control_reference_ct_values) == 0:
+            st.error(f" {translations[language_code]['error_missing_control_data'].format(i=i+1)}")
+            continue
+
+        control_delta_ct = np.array(control_target_ct_values, dtype=float) - np.array(control_reference_ct_values, dtype=float)
+        average_control_delta_ct = np.mean(control_delta_ct)
+
+        fig = go.Figure()
         fig.add_trace(go.Scatter(
-            x=[(j + 1.8), (j + 2.2)],  
-            y=[average_sample_delta_ct, average_sample_delta_ct],  
+            x=[0.8, 1.2],
+            y=[average_control_delta_ct, average_control_delta_ct],
             mode='lines',
             line=dict(color='black', width=4),
-            name=f"{translations[language_code]['patient_group']} {j+1} {translations[language_code]['avg']}"
+            name=translations[language_code]["control_group_avg"]
         ))
 
-    fig.add_trace(go.Scatter(
-        x=np.ones(len(control_delta_ct)) + np.random.uniform(-0.05, 0.05, len(control_delta_ct)),
-        y=control_delta_ct,
-        mode='markers',  
-        name=translations[language_code]["control_group"],
-        marker=dict(color='blue'),
-        text=[f"{translations[language_code]['control']} {value:.2f}, {translations[language_code]['sample']} {idx+1}" for idx, value in enumerate(control_delta_ct)],
-        hoverinfo='text'
-    ))
-
-    for j in range(num_patient_groups):
-        sample_delta_ct_values = [
-            float(d[translations[language_code]["delta_ct_patient"]])
-            for d in input_values_table 
-            if d["Grup"] == f"{translations[language_code]['patient_group']} {j+1}" and 
-               d[translations[language_code]["target_gene"]] == f"{translations[language_code]['target_gene']} {i+1}" and
-               d.get(translations[language_code]["delta_ct_patient"]) not in ("EXCLUDED", None) and
-               d.get("Outlier Excluded", "No") == "No"
-        ]
-
-        if not sample_delta_ct_values:
-            continue  
+        for j in range(num_patient_groups):
+            sample_delta_ct_values = [
+                float(d[translations[language_code]["delta_ct_patient"]])
+                for d in input_values_table 
+                if d["Grup"] == f"{translations[language_code]['patient_group']} {j+1}" and 
+                   d[translations[language_code]["target_gene"]] == f"{translations[language_code]['target_gene']} {i+1}" and
+                   d.get(translations[language_code]["delta_ct_patient"]) not in ("EXCLUDED", None) and
+                   d.get("Outlier Excluded", "No") == "No"
+            ]
+            if not sample_delta_ct_values:
+                continue
+            average_sample_delta_ct = np.mean(sample_delta_ct_values)
+            fig.add_trace(go.Scatter(
+                x=[(j + 1.8), (j + 2.2)],
+                y=[average_sample_delta_ct, average_sample_delta_ct],
+                mode='lines',
+                line=dict(color='black', width=4),
+                name=f"{translations[language_code]['patient_group']} {j+1} {translations[language_code]['avg']}"
+            ))
 
         fig.add_trace(go.Scatter(
-            x=np.ones(len(sample_delta_ct_values)) * (j + 2) + np.random.uniform(-0.05, 0.05, len(sample_delta_ct_values)),
-            y=sample_delta_ct_values,
-            mode='markers',  
-            name=f"{translations[language_code]['patient_group']} {j+1}",
-            marker=dict(color='red'),
-            text=[f"{translations[language_code]['patient']} {value:.2f}, {translations[language_code]['sample']} {idx+1}" for idx, value in enumerate(sample_delta_ct_values)],
+            x=np.ones(len(control_delta_ct)) + np.random.uniform(-0.05, 0.05, len(control_delta_ct)),
+            y=control_delta_ct,
+            mode='markers',
+            name=translations[language_code]["control_group"],
+            marker=dict(color='blue'),
+            text=[f"{translations[language_code]['control']} {value:.2f}, {translations[language_code]['sample']} {idx+1}" for idx, value in enumerate(control_delta_ct)],
             hoverinfo='text'
         ))
 
-    fig.update_layout(
-        title=f"{translations[language_code]['target_gene']} {i+1} - {translations[language_code]['delta_ct_distribution']}",
-        xaxis=dict(
-            tickvals=[1] + [j + 2 for j in range(num_patient_groups)],
-            ticktext=[translations[language_code]['control_group']] + [f"{translations[language_code]['patient_group']} {j+1}" for j in range(num_patient_groups)],
-            title=translations[language_code]['x_axis_title']
-        ),
-        yaxis=dict(title=translations[language_code]['delta_ct_value']),
-        showlegend=True
-    )
-    st.plotly_chart(fig)
+        for j in range(num_patient_groups):
+            sample_delta_ct_values = [
+                float(d[translations[language_code]["delta_ct_patient"]])
+                for d in input_values_table 
+                if d["Grup"] == f"{translations[language_code]['patient_group']} {j+1}" and 
+                   d[translations[language_code]["target_gene"]] == f"{translations[language_code]['target_gene']} {i+1}" and
+                   d.get(translations[language_code]["delta_ct_patient"]) not in ("EXCLUDED", None) and
+                   d.get("Outlier Excluded", "No") == "No"
+            ]
+            if not sample_delta_ct_values:
+                continue
+            fig.add_trace(go.Scatter(
+                x=np.ones(len(sample_delta_ct_values)) * (j + 2) + np.random.uniform(-0.05, 0.05, len(sample_delta_ct_values)),
+                y=sample_delta_ct_values,
+                mode='markers',
+                name=f"{translations[language_code]['patient_group']} {j+1}",
+                marker=dict(color='red'),
+                text=[f"{translations[language_code]['patient']} {value:.2f}, {translations[language_code]['sample']} {idx+1}" for idx, value in enumerate(sample_delta_ct_values)],
+                hoverinfo='text'
+            ))
+
+        fig.update_layout(
+            title=f"{translations[language_code]['target_gene']} {i+1} - {translations[language_code]['delta_ct_distribution']}",
+            xaxis=dict(
+                tickvals=[1] + [j + 2 for j in range(num_patient_groups)],
+                ticktext=[translations[language_code]['control_group']] + [f"{translations[language_code]['patient_group']} {j+1}" for j in range(num_patient_groups)],
+                title=translations[language_code]['x_axis_title']
+            ),
+            yaxis=dict(title=translations[language_code]['delta_ct_value']),
+            showlegend=True
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SEKME 3: RAPOR
+# ═══════════════════════════════════════════════════════════════════════════════
 
 # PDF rapor oluşturma kısmı
 def get_font_path():
@@ -3093,12 +3031,22 @@ def create_pdf(results, stats, input_df, language_code):
     buffer.seek(0)
     return buffer
 
-if st.button(f"📥 {translations[language_code]['generate_pdf']}"):
-    if input_values_table:
-        pdf_buffer = create_pdf(data, stats_data, pd.DataFrame(input_values_table), language_code)
-        st.download_button(label=f"{translations[language_code]['pdf_report']}", data=pdf_buffer, file_name="gen_ekspresyon_raporu.pdf", mime="application/pdf")
+with tab_report:
+    st.markdown(f"### 📄 {translations[language_code]['pdf_report']}")
+    st.markdown("---")
+    if not input_values_table:
+        st.info(translations[language_code]["error_no_data"])
     else:
-        st.error(translations[language_code]["error_no_data"])
+        st.success(f"✅ {len(input_values_table)} kayıt hazır — PDF oluşturabilirsiniz.")
+        if st.button(f"📥 {translations[language_code]['generate_pdf']}", key="pdf_btn"):
+            pdf_buffer = create_pdf(data, stats_data, pd.DataFrame(input_values_table), language_code)
+            st.download_button(
+                label=f"⬇️ {translations[language_code]['pdf_report']}",
+                data=pdf_buffer,
+                file_name="gen_ekspresyon_raporu.pdf",
+                mime="application/pdf",
+                key="pdf_dl"
+            )
 
 st.markdown(f"<h4 style='font-size: 12px; font-family: Arial, sans-serif; color: #555;'><a href='mailto:mailtoburhanettin@gmail.com' style='color: #555; text-decoration: none;'>{translations[language_code]['subtitle']}</a></h4>", unsafe_allow_html=True)
 
