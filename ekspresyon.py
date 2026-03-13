@@ -380,6 +380,60 @@ translations = {
         "sc_xaxis": "log₁₀(Konsantrasyon)",
         "sc_data_points": "Veri noktaları",
         "sc_copy_hint": "💡 Aşağıdaki etkinlik girdilerine eğim **{slope:.4f}** veya E değeri **{e:.4f}** kopyalayın.",
+        "sc_description": """\
+**Standart Eğri Hesaplayıcı nasıl kullanılır:**
+
+Seri dilüsyon Ct değerlerinizi aşağıya girin. Hesaplayıcı doğrusal regresyon uygulayarak eğim, R² ve amplifikasyon etkinliğini otomatik hesaplar.
+
+**Kullanım:**  
+1. Her primer için seri dilüsyonlarda qPCR çalıştırın (örn. seyreltilmemiş, 1:10, 1:100, 1:1000, 1:10000)  
+2. Her dilüsyon için ortalama Ct değerini girin  
+3. Eğim, E ve R² değerlerini okuyun  
+""",
+        "ref_multi_description": """\
+**Geometrik ortalama normalizasyonu** (Vandesompele et al. 2002)  
+Normalizasyon faktörü (NF), her örnek için tüm referans genlerinin Ct değerlerinin aritmetik ortalamasıdır;  
+bu da ifade düzeylerinin geometrik ortalamasına karşılık gelir.  
+`NF_örnek = ortalama(Ct_ref1, Ct_ref2, ..., Ct_refN)` her örnek için  
+`ΔCt = Ct_hedef − NF`
+
+**geNorm M-değeri** (stabilite skoru)  
+Her referans gen için M, diğer tüm referans genlerine karşı log-oranlarının ortalama standart sapmasıdır.  
+**Düşük M = daha kararlı.** MIQE tavsiye edilen eşik: M < 0,5 (katı) veya M < 1,0 (kabul edilebilir).
+
+**CV (Varyasyon Katsayısı)**  
+`CV = (SS / ortalama) × 100%` tüm örneklerdeki ham Ct değerlerinin.  
+Düşük CV, daha az varyasyon ve referans olarak daha iyi kararlılık anlamına gelir.
+
+**Referans:** Vandesompele J et al. *Genome Biology* 2002; Bustin SA et al. *Clin Chem* 2009 (MIQE).
+""",
+        "outlier_description": """\
+**qPCR'de aykırı değer tespiti neden önemlidir?**
+
+Teknik değişkenlik qPCR'ye özgüdür: pipetleme hataları, hava kabarcığı oluşumu, inhibitör taşınması veya RNA kalite farklılıkları, replikat grubunun geri kalanıyla istatistiksel olarak uyumsuz Ct değerleri üretebilir.  
+Bu tür değerlerin dahil edilmesi varyansı şişirir, ortalamaları saptırır ve yanlış sonuçlara yol açabilir — özellikle küçük örneklem büyüklüklüeri olan klinik veri setlerinde.
+
+**Bu kısıtlamanın kritik hale geldiği durumlar:**
+- Küçük gruplar (n < 5): tek bir hatalı Ct ortalamayı önemli ölçüde kaydırır
+- Yüksek biyolojik değişkenlik (örn. tümör heterojenliği, klinik kohortlar)
+- Bir replikatın diğerlerinden > 0,5 Ct sapma gösterdiği teknik triplıkatlar
+- Ct > 35 olan düşük bolluklu hedefler, gürültünün baskın olduğu durumlar
+
+**Grubbs testi** *(Grubbs 1969)*  
+Normallik varsayar. En uç değerin istatistiksel olarak anlamlı bir aykırı değer olup olmadığını test eder (p < α). Başka aykırı değer bulunmayana kadar tekrarlanır.  
+En iyi: tek bir deneysel gruptan replikat Ct değerleri için.
+
+**IQR yöntemi** *(Tukey 1977)*  
+Parametrik olmayan. Q1 − k×IQR veya Q3 + k×IQR dışındaki değerleri işaretler.  
+En iyi: daha büyük gruplar veya normal olmayan dağılımlar için.
+
+**Önemli:** Aykırı değer dışlama **biyolojik veya teknik gerekçe** gerektirir.  
+Bu araç adayları işaretler — nihai karar her zaman araştırmacıya aittir.  
+Tüm dışlamalar kaydedilir ve PDF çıktısında raporlanır.
+
+**Referanslar:** Grubbs FE. *Technometrics* 1969; Tukey JW. *Exploratory Data Analysis* 1977;  
+Bustin SA et al. *Clin Chem* 2009 (MIQE kılavuzları).
+""",
     },
 
     "en": {
@@ -556,6 +610,63 @@ translations = {
         "sc_xaxis": "log₁₀(Concentration)",
         "sc_data_points": "Data points",
         "sc_copy_hint": "💡 Copy slope **{slope:.4f}** or E value **{e:.4f}** into the efficiency inputs below.",
+        "sc_description": """\
+Enter your serial dilution Ct values below. The calculator will fit a linear regression,
+compute the slope, R², and amplification efficiency automatically.
+
+**How to use:**  
+1. Run qPCR on serial dilutions (e.g. undiluted, 1:10, 1:100, 1:1000, 1:10000)  
+2. Enter the mean Ct for each dilution below  
+3. Read off slope, E, and R²  
+""",
+        "ref_multi_description": """\
+**Geometric mean normalization** (Vandesompele et al. 2002)  
+The normalization factor (NF) is the arithmetic mean of Ct values across all reference genes per sample,
+which corresponds to the geometric mean of their expression levels.  
+`NF_sample = mean(Ct_ref1, Ct_ref2, ..., Ct_refN)` for each sample  
+`ΔCt = Ct_target − NF`
+
+**geNorm M-value** (stability score)  
+For each reference gene, M = average standard deviation of log-ratios against all other reference genes.  
+**Lower M = more stable.** MIQE-recommended threshold: M < 0.5 (strict) or M < 1.0 (acceptable).
+
+**CV (Coefficient of Variation)**  
+`CV = (SD / mean) × 100%` of raw Ct values across all samples.  
+Lower CV indicates less variation and better stability as a reference.
+
+**Reference:** Vandesompele J et al. *Genome Biology* 2002; Bustin SA et al. *Clin Chem* 2009 (MIQE).
+""",
+        "outlier_description": """\
+**Why outlier detection matters in qPCR**
+
+Technical variability is inherent to qPCR: pipetting errors, bubble formation, 
+inhibitor carry-over, or RNA quality variation can produce Ct values that are 
+statistically inconsistent with the rest of a replicate group. 
+Including such values inflates variance, biases means, and can lead to false 
+conclusions — particularly in clinical datasets with small sample sizes.
+
+**When this limitation becomes critical:**
+- Small groups (n < 5): a single erroneous Ct shifts the mean substantially
+- High biological variability (e.g. tumour heterogeneity, clinical cohorts)
+- Technical triplicates where one replicate diverges > 0.5 Ct from the others
+- Low-abundance targets with Ct > 35, where noise dominates
+
+**Grubbs test** *(Grubbs 1969)*  
+Assumes normality. Tests whether the most extreme value is a statistically 
+significant outlier (p < α). Iterates until no further outliers are found.  
+Best for: replicate Ct values from a single experimental group.
+
+**IQR method** *(Tukey 1977)*  
+Non-parametric. Flags values outside Q1 − k×IQR or Q3 + k×IQR.  
+Best for: larger groups or non-normal distributions.
+
+**Important:** Outlier exclusion requires **biological or technical justification**. 
+This tool flags candidates — the final decision always rests with the researcher.  
+All exclusions are logged and reported in the PDF output.
+
+**References:** Grubbs FE. *Technometrics* 1969; Tukey JW. *Exploratory Data Analysis* 1977;  
+Bustin SA et al. *Clin Chem* 2009 (MIQE guidelines).
+""",
     },
 
     "de": {
@@ -732,6 +843,58 @@ translations = {
         "sc_xaxis": "log₁₀(Konzentration)",
         "sc_data_points": "Datenpunkte",
         "sc_copy_hint": "💡 Steigung **{slope:.4f}** oder E-Wert **{e:.4f}** in die Effizienz-Eingaben unten kopieren.",
+        "sc_description": """\
+Geben Sie die Ct-Werte Ihrer seriellen Verdünnung unten ein. Der Rechner passt eine lineare Regression an und berechnet Steigung, R² und Amplifikationseffizienz automatisch.
+
+**Verwendung:**  
+1. Führen Sie qPCR auf seriellen Verdünnungen durch (z.B. unverdünnt, 1:10, 1:100, 1:1000, 1:10000)  
+2. Geben Sie den mittleren Ct-Wert für jede Verdünnung ein  
+3. Lesen Sie Steigung, E und R² ab  
+""",
+        "ref_multi_description": """\
+**Geometrische Mittelnormalisierung** (Vandesompele et al. 2002)  
+Der Normalisierungsfaktor (NF) ist das arithmetische Mittel der Ct-Werte über alle Referenzgene pro Probe,  
+was dem geometrischen Mittel ihrer Expressionsniveaus entspricht.  
+`NF_Probe = Mittel(Ct_ref1, Ct_ref2, ..., Ct_refN)` für jede Probe  
+`ΔCt = Ct_Ziel − NF`
+
+**geNorm M-Wert** (Stabilitätsscore)  
+Für jedes Referenzgen ist M die durchschnittliche Standardabweichung der Log-Verhältnisse gegenüber allen anderen Referenzgenen.  
+**Niedrigerer M = stabiler.** MIQE-empfohlener Schwellenwert: M < 0,5 (streng) oder M < 1,0 (akzeptabel).
+
+**CV (Variationskoeffizient)**  
+`CV = (SD / Mittel) × 100%` der rohen Ct-Werte über alle Proben.  
+Niedrigerer CV weist auf weniger Variation und bessere Stabilität als Referenz hin.
+
+**Referenz:** Vandesompele J et al. *Genome Biology* 2002; Bustin SA et al. *Clin Chem* 2009 (MIQE).
+""",
+        "outlier_description": """\
+**Warum Ausreißererkennung in qPCR wichtig ist**
+
+Technische Variabilität ist qPCR inhärent: Pipettierfehler, Blasenbildung, Inhibitor-Verschleppung oder RNA-Qualitätsschwankungen können Ct-Werte erzeugen, die statistisch inkonsistent mit dem Rest einer Replikatgruppe sind.  
+Das Einschließen solcher Werte erhöht die Varianz, verzerrt Mittelwerte und kann zu falschen Schlussfolgerungen führen — besonders in klinischen Datensätzen mit kleinen Stichprobengrößen.
+
+**Wann diese Einschränkung kritisch wird:**
+- Kleine Gruppen (n < 5): ein einziger fehlerhafter Ct verschiebt den Mittelwert erheblich
+- Hohe biologische Variabilität (z.B. Tumorheterogenität, klinische Kohorten)
+- Technische Triplikate, bei denen ein Replikat > 0,5 Ct von den anderen abweicht
+- Targets mit geringer Abundanz mit Ct > 35, wo Rauschen dominiert
+
+**Grubbs-Test** *(Grubbs 1969)*  
+Setzt Normalverteilung voraus. Testet, ob der extremste Wert ein statistisch signifikanter Ausreißer ist (p < α). Iteriert, bis keine weiteren Ausreißer gefunden werden.  
+Am besten für: Replikat-Ct-Werte aus einer einzelnen experimentellen Gruppe.
+
+**IQR-Methode** *(Tukey 1977)*  
+Nicht-parametrisch. Markiert Werte außerhalb Q1 − k×IQR oder Q3 + k×IQR.  
+Am besten für: größere Gruppen oder nicht-normale Verteilungen.
+
+**Wichtig:** Ausreißerausschluss erfordert **biologische oder technische Begründung**.  
+Dieses Tool markiert Kandidaten — die endgültige Entscheidung liegt immer beim Forscher.  
+Alle Ausschlüsse werden protokolliert und im PDF-Bericht gemeldet.
+
+**Referenzen:** Grubbs FE. *Technometrics* 1969; Tukey JW. *Exploratory Data Analysis* 1977;  
+Bustin SA et al. *Clin Chem* 2009 (MIQE-Richtlinien).
+""",
     },
 
     "fr": {
@@ -908,6 +1071,58 @@ translations = {
         "sc_xaxis": "log₁₀(Concentration)",
         "sc_data_points": "Points de données",
         "sc_copy_hint": "💡 Copiez la pente **{slope:.4f}** ou la valeur E **{e:.4f}** dans les champs d'efficacité ci-dessous.",
+        "sc_description": """\
+Entrez vos valeurs Ct de dilution en série ci-dessous. Le calculateur ajustera une régression linéaire et calculera automatiquement la pente, R² et l'efficacité d'amplification.
+
+**Comment utiliser :**  
+1. Effectuez la qPCR sur des dilutions en série (ex. non dilué, 1:10, 1:100, 1:1000, 1:10000)  
+2. Entrez la valeur Ct moyenne pour chaque dilution  
+3. Lisez la pente, E et R²  
+""",
+        "ref_multi_description": """\
+**Normalisation par moyenne géométrique** (Vandesompele et al. 2002)  
+Le facteur de normalisation (NF) est la moyenne arithmétique des valeurs Ct de tous les gènes de référence par échantillon,  
+ce qui correspond à la moyenne géométrique de leurs niveaux d'expression.  
+`NF_échantillon = moyenne(Ct_ref1, Ct_ref2, ..., Ct_refN)` pour chaque échantillon  
+`ΔCt = Ct_cible − NF`
+
+**Valeur M de geNorm** (score de stabilité)  
+Pour chaque gène de référence, M = écart-type moyen des log-ratios par rapport à tous les autres gènes de référence.  
+**M plus bas = plus stable.** Seuil recommandé MIQE : M < 0,5 (strict) ou M < 1,0 (acceptable).
+
+**CV (Coefficient de Variation)**  
+`CV = (ET / moyenne) × 100%` des valeurs Ct brutes sur tous les échantillons.  
+Un CV plus faible indique moins de variation et une meilleure stabilité comme référence.
+
+**Référence :** Vandesompele J et al. *Genome Biology* 2002 ; Bustin SA et al. *Clin Chem* 2009 (MIQE).
+""",
+        "outlier_description": """\
+**Pourquoi la détection des valeurs aberrantes est importante en qPCR**
+
+La variabilité technique est inhérente à la qPCR : erreurs de pipetage, formation de bulles, contamination par des inhibiteurs ou variation de la qualité de l'ARN peuvent produire des valeurs Ct statistiquement incohérentes avec le reste d'un groupe de réplicats.  
+L'inclusion de telles valeurs gonfle la variance, biaise les moyennes et peut conduire à de fausses conclusions — particulièrement dans les jeux de données cliniques avec de petits effectifs.
+
+**Quand cette limitation devient critique :**
+- Petits groupes (n < 5) : un seul Ct erroné déplace substantiellement la moyenne
+- Variabilité biologique élevée (ex. hétérogénéité tumorale, cohortes cliniques)
+- Triplicats techniques où un réplicat diverge de > 0,5 Ct des autres
+- Cibles à faible abondance avec Ct > 35, où le bruit domine
+
+**Test de Grubbs** *(Grubbs 1969)*  
+Suppose la normalité. Teste si la valeur la plus extrême est un outlier statistiquement significatif (p < α). Itère jusqu'à ce qu'aucun autre outlier ne soit trouvé.  
+Meilleur pour : valeurs Ct répliquées d'un seul groupe expérimental.
+
+**Méthode IQR** *(Tukey 1977)*  
+Non paramétrique. Signale les valeurs en dehors de Q1 − k×IQR ou Q3 + k×IQR.  
+Meilleur pour : groupes plus importants ou distributions non normales.
+
+**Important :** L'exclusion des outliers nécessite une **justification biologique ou technique**.  
+Cet outil signale des candidats — la décision finale appartient toujours au chercheur.  
+Toutes les exclusions sont enregistrées et rapportées dans le rapport PDF.
+
+**Références :** Grubbs FE. *Technometrics* 1969 ; Tukey JW. *Exploratory Data Analysis* 1977 ;  
+Bustin SA et al. *Clin Chem* 2009 (directives MIQE).
+""",
     },
 
     "es": {
@@ -1084,6 +1299,58 @@ translations = {
         "sc_xaxis": "log₁₀(Concentración)",
         "sc_data_points": "Puntos de datos",
         "sc_copy_hint": "💡 Copie la pendiente **{slope:.4f}** o el valor E **{e:.4f}** en los campos de eficiencia abajo.",
+        "sc_description": """\
+Ingrese sus valores Ct de dilución en serie a continuación. La calculadora ajustará una regresión lineal y calculará automáticamente la pendiente, R² y la eficiencia de amplificación.
+
+**Cómo usar:**  
+1. Realice qPCR en diluciones seriadas (ej. sin diluir, 1:10, 1:100, 1:1000, 1:10000)  
+2. Ingrese el Ct medio para cada dilución  
+3. Lea la pendiente, E y R²  
+""",
+        "ref_multi_description": """\
+**Normalización por media geométrica** (Vandesompele et al. 2002)  
+El factor de normalización (NF) es la media aritmética de los valores Ct de todos los genes de referencia por muestra,  
+lo que corresponde a la media geométrica de sus niveles de expresión.  
+`NF_muestra = media(Ct_ref1, Ct_ref2, ..., Ct_refN)` para cada muestra  
+`ΔCt = Ct_objetivo − NF`
+
+**Valor M de geNorm** (puntuación de estabilidad)  
+Para cada gen de referencia, M = desviación estándar media de los log-ratios contra todos los demás genes de referencia.  
+**M más bajo = más estable.** Umbral recomendado MIQE: M < 0,5 (estricto) o M < 1,0 (aceptable).
+
+**CV (Coeficiente de Variación)**  
+`CV = (DE / media) × 100%` de los valores Ct brutos en todas las muestras.  
+Un CV más bajo indica menos variación y mejor estabilidad como referencia.
+
+**Referencia:** Vandesompele J et al. *Genome Biology* 2002; Bustin SA et al. *Clin Chem* 2009 (MIQE).
+""",
+        "outlier_description": """\
+**Por qué la detección de valores atípicos es importante en qPCR**
+
+La variabilidad técnica es inherente a la qPCR: errores de pipeteo, formación de burbujas, arrastre de inhibidores o variación en la calidad del ARN pueden producir valores Ct estadísticamente inconsistentes con el resto de un grupo de réplicas.  
+Incluir tales valores infla la varianza, sesga las medias y puede llevar a conclusiones falsas — particularmente en conjuntos de datos clínicos con tamaños de muestra pequeños.
+
+**Cuándo esta limitación se vuelve crítica:**
+- Grupos pequeños (n < 5): un único Ct erróneo desplaza sustancialmente la media
+- Alta variabilidad biológica (ej. heterogeneidad tumoral, cohortes clínicas)
+- Triplicados técnicos donde una réplica diverge > 0,5 Ct de las demás
+- Objetivos de baja abundancia con Ct > 35, donde el ruido domina
+
+**Prueba de Grubbs** *(Grubbs 1969)*  
+Asume normalidad. Prueba si el valor más extremo es un outlier estadísticamente significativo (p < α). Itera hasta que no se encuentren más outliers.  
+Mejor para: valores Ct replicados de un único grupo experimental.
+
+**Método IQR** *(Tukey 1977)*  
+No paramétrico. Señala valores fuera de Q1 − k×IQR o Q3 + k×IQR.  
+Mejor para: grupos más grandes o distribuciones no normales.
+
+**Importante:** La exclusión de outliers requiere **justificación biológica o técnica**.  
+Esta herramienta señala candidatos — la decisión final siempre recae en el investigador.  
+Todas las exclusiones se registran y reportan en el PDF.
+
+**Referencias:** Grubbs FE. *Technometrics* 1969; Tukey JW. *Exploratory Data Analysis* 1977;  
+Bustin SA et al. *Clin Chem* 2009 (directrices MIQE).
+""",
     },
 
     "ar": {
@@ -1260,6 +1527,58 @@ translations = {
         "sc_xaxis": "log₁₀(التركيز)",
         "sc_data_points": "نقاط البيانات",
         "sc_copy_hint": "💡 انسخ الميل **{slope:.4f}** أو قيمة E **{e:.4f}** في حقول الكفاءة أدناه.",
+        "sc_description": """\
+أدخل قيم Ct لتخفيفاتك التسلسلية أدناه. سيطبق الحاسب انحداراً خطياً ويحسب الميل وR² وكفاءة التضخيم تلقائياً.
+
+**كيفية الاستخدام:**  
+1. قم بتشغيل qPCR على تخفيفات تسلسلية (مثل غير مخفف، 1:10، 1:100، 1:1000، 1:10000)  
+2. أدخل متوسط Ct لكل تخفيف  
+3. اقرأ الميل وE وR²  
+""",
+        "ref_multi_description": """\
+**التطبيع بالوسط الهندسي** (Vandesompele et al. 2002)  
+عامل التطبيع (NF) هو المتوسط الحسابي لقيم Ct عبر جميع الجينات المرجعية لكل عينة،  
+وهو ما يتوافق مع الوسط الهندسي لمستويات تعبيرها.  
+`NF_عينة = متوسط(Ct_ref1, Ct_ref2, ..., Ct_refN)` لكل عينة  
+`ΔCt = Ct_المستهدف − NF`
+
+**قيمة M لـ geNorm** (درجة الاستقرار)  
+لكل جين مرجعي، M = متوسط الانحراف المعياري للنسب اللوغاريتمية مقابل جميع الجينات المرجعية الأخرى.  
+**M أقل = أكثر استقراراً.** العتبة الموصى بها من MIQE: M < 0.5 (صارم) أو M < 1.0 (مقبول).
+
+**CV (معامل الاختلاف)**  
+`CV = (الانحراف المعياري / المتوسط) × 100%` لقيم Ct الخام عبر جميع العينات.  
+CV أقل يشير إلى تباين أقل واستقرار أفضل كمرجع.
+
+**مرجع:** Vandesompele J et al. *Genome Biology* 2002; Bustin SA et al. *Clin Chem* 2009 (MIQE).
+""",
+        "outlier_description": """\
+**لماذا يهم اكتشاف القيم الشاذة في qPCR**
+
+التباين التقني متأصل في qPCR: أخطاء السحب بالماصة، وتكوين الفقاعات، وانتقال المثبطات، أو تباين جودة RNA يمكن أن تنتج قيم Ct غير متسقة إحصائياً مع بقية مجموعة الطبعات.  
+تضمين هذه القيم يضخم التباين، ويحيز المتوسطات، ويمكن أن يؤدي إلى استنتاجات خاطئة — خاصة في مجموعات البيانات السريرية ذات الأحجام الصغيرة.
+
+**عندما تصبح هذه القيود حرجة:**
+- مجموعات صغيرة (n < 5): Ct واحد خاطئ يزيح المتوسط بشكل كبير
+- تباين بيولوجي عالٍ (مثل عدم تجانس الورم، الدراسات السريرية)
+- طبعات ثلاثية تقنية حيث تنحرف طبعة واحدة > 0.5 Ct عن الأخريات
+- أهداف منخفضة الوفرة مع Ct > 35، حيث يسود الضوضاء
+
+**اختبار Grubbs** *(Grubbs 1969)*  
+يفترض التوزيع الطبيعي. يختبر ما إذا كانت القيمة الأكثر تطرفاً تمثل قيمة شاذة ذات دلالة إحصائية (p < α). يتكرر حتى لا يجد المزيد من القيم الشاذة.  
+الأفضل لـ: قيم Ct المكررة من مجموعة تجريبية واحدة.
+
+**طريقة IQR** *(Tukey 1977)*  
+غير معلمية. تعلم القيم خارج Q1 − k×IQR أو Q3 + k×IQR.  
+الأفضل لـ: مجموعات أكبر أو توزيعات غير طبيعية.
+
+**مهم:** يتطلب استبعاد القيم الشاذة **مبرراً بيولوجياً أو تقنياً**.  
+تُعلم هذه الأداة المرشحين — القرار النهائي يعود دائماً للباحث.  
+يتم تسجيل جميع الاستبعادات والإبلاغ عنها في تقرير PDF.
+
+**المراجع:** Grubbs FE. *Technometrics* 1969; Tukey JW. *Exploratory Data Analysis* 1977;  
+Bustin SA et al. *Clin Chem* 2009 (إرشادات MIQE).
+""",
     }
 }
 
@@ -1302,15 +1621,7 @@ st.info(translations[language_code]["efficiency_note"])
 
 # ─── STANDARD CURVE CALCULATOR ───────────────────────────────────────────────
 with st.expander(translations[language_code]["sc_expander"], expanded=False):
-    st.markdown("""
-Enter your serial dilution Ct values below. The calculator will fit a linear regression,
-compute the slope, R², and amplification efficiency automatically.
-
-**How to use:**  
-1. Run qPCR on serial dilutions (e.g. undiluted, 1:10, 1:100, 1:1000, 1:10000)  
-2. Enter the mean Ct for each dilution below  
-3. Read off slope, E, and R²  
-""")
+    st.markdown(translations[language_code]["sc_description"])
 
     sc_col1, sc_col2 = st.columns(2)
     with sc_col1:
@@ -1639,23 +1950,7 @@ with ref_warn_col:
 
 if num_ref_genes > 1:
     with st.expander(translations[language_code]["ref_gene_expander"], expanded=False):
-        st.markdown("""
-**Geometric mean normalization** (Vandesompele et al. 2002)  
-The normalization factor (NF) is the arithmetic mean of Ct values across all reference genes per sample,
-which corresponds to the geometric mean of their expression levels.  
-`NF_sample = mean(Ct_ref1, Ct_ref2, ..., Ct_refN)` for each sample  
-`ΔCt = Ct_target − NF`
-
-**geNorm M-value** (stability score)  
-For each reference gene, M = average standard deviation of log-ratios against all other reference genes.  
-**Lower M = more stable.** MIQE-recommended threshold: M < 0.5 (strict) or M < 1.0 (acceptable).
-
-**CV (Coefficient of Variation)**  
-`CV = (SD / mean) × 100%` of raw Ct values across all samples.  
-Lower CV indicates less variation and better stability as a reference.
-
-**Reference:** Vandesompele J et al. *Genome Biology* 2002; Bustin SA et al. *Clin Chem* 2009 (MIQE).
-""")
+        st.markdown(translations[language_code]["ref_multi_description"])
 
 st.markdown("---")
 # ─────────────────────────────────────────────────────────────────────────────
@@ -1698,37 +1993,7 @@ with out_col3:
         grubbs_alpha = 0.05
 
 with st.expander(translations[language_code]["outlier_expander"], expanded=False):
-    st.markdown("""
-**Why outlier detection matters in qPCR**
-
-Technical variability is inherent to qPCR: pipetting errors, bubble formation, 
-inhibitor carry-over, or RNA quality variation can produce Ct values that are 
-statistically inconsistent with the rest of a replicate group. 
-Including such values inflates variance, biases means, and can lead to false 
-conclusions — particularly in clinical datasets with small sample sizes.
-
-**When this limitation becomes critical:**
-- Small groups (n < 5): a single erroneous Ct shifts the mean substantially
-- High biological variability (e.g. tumour heterogeneity, clinical cohorts)
-- Technical triplicates where one replicate diverges > 0.5 Ct from the others
-- Low-abundance targets with Ct > 35, where noise dominates
-
-**Grubbs test** *(Grubbs 1969)*  
-Assumes normality. Tests whether the most extreme value is a statistically 
-significant outlier (p < α). Iterates until no further outliers are found.  
-Best for: replicate Ct values from a single experimental group.
-
-**IQR method** *(Tukey 1977)*  
-Non-parametric. Flags values outside Q1 − k×IQR or Q3 + k×IQR.  
-Best for: larger groups or non-normal distributions.
-
-**Important:** Outlier exclusion requires **biological or technical justification**. 
-This tool flags candidates — the final decision always rests with the researcher.  
-All exclusions are logged and reported in the PDF output.
-
-**References:** Grubbs FE. *Technometrics* 1969; Tukey JW. *Exploratory Data Analysis* 1977;  
-Bustin SA et al. *Clin Chem* 2009 (MIQE guidelines).
-""")
+    st.markdown(translations[language_code]["outlier_description"])
 
 st.markdown("---")
 # ─────────────────────────────────────────────────────────────────────────────
