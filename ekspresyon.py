@@ -1823,9 +1823,38 @@ tab_data, tab_results, tab_report = st.tabs([
     f"📄 {translations[language_code].get('tab_report', 'Rapor')}",
 ])
 
+# ─── HELPER FUNCTIONS ─────────────────────────────────────────────────────────
+def parse_input_data(input_data):
+    values = [x.replace(",", ".").strip() for x in input_data.split() if x.strip()]
+    return np.array([float(x) for x in values if x])
+
+def compute_genorm_m(ref_ct_matrix):
+    """
+    ref_ct_matrix: 2D numpy array, shape (n_refs, n_samples)
+    Returns M-values for each reference gene (lower = more stable).
+    Vandesompele et al. 2002 algorithm.
+    """
+    n_refs, n_samples = ref_ct_matrix.shape
+    if n_refs < 2:
+        return np.array([0.0])
+    m_values = []
+    for i in range(n_refs):
+        pairwise_vars = []
+        for j in range(n_refs):
+            if i == j:
+                continue
+            ratio = ref_ct_matrix[i] - ref_ct_matrix[j]
+            pairwise_vars.append(np.std(ratio, ddof=1) if len(ratio) > 1 else 0.0)
+        m_values.append(np.mean(pairwise_vars))
+    return np.array(m_values)
+
+def compute_cv(ct_values):
+    """Coefficient of variation (%) for a 1D array of Ct values."""
+    if len(ct_values) < 2 or np.mean(ct_values) == 0:
+        return 0.0
+    return (np.std(ct_values, ddof=1) / np.mean(ct_values)) * 100
 
 
-def geometric_mean_ct(ct_arrays):
     """
     Compute per-sample geometric mean of multiple reference genes.
     ct_arrays: list of 1D arrays (each = one ref gene, all same length n_samples)
