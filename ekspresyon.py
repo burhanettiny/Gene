@@ -1602,215 +1602,6 @@ Bustin SA et al. *Clin Chem* 2009 (إرشادات MIQE).
 
                   
 # ═══════════════════════════════════════════════════════════════════════════════
-# SIDEBAR — Tüm ayarlar
-# ═══════════════════════════════════════════════════════════════════════════════
-st.sidebar.markdown("---")
-st.sidebar.markdown(f"### ⚙️ {translations[language_code]['patient_data_header']}")
-
-num_target_genes = st.sidebar.number_input(translations[language_code]["num_target_genes"], min_value=1, step=1, key="gene_count")
-num_patient_groups = st.sidebar.number_input(translations[language_code]["num_patient_groups"], min_value=1, step=1, key="patient_count")
-
-# ─── EFFICIENCY VALIDATION SECTION (SIDEBAR) ──────────────────────────────────
-st.sidebar.markdown("---")
-st.sidebar.markdown(f"#### {translations[language_code]['efficiency_header']}")
-
-with st.sidebar.expander("ℹ️", expanded=False):
-    st.markdown(
-        "**How to obtain your Efficiency (E) value:**\n\n"
-        "**Method 1 — Standard Curve** *(recommended)*  \n"
-        "Run qPCR on 4-5 serial dilutions (e.g. 10x each) for each primer.  \n"
-        "Your qPCR software will report a **slope** — enter it below, or use the Standard Curve Calculator.  \n"
-        "`E = 10^(-1 / slope)`\n\n"
-        "**Method 2 — Software tools**  \n"
-        "- LinRegPCR (free download)  \n"
-        "- qBase+, Bio-Rad CFX Maestro, QuantStudio\n\n"
-        "**Method 3 — Primer/Kit datasheet**  \n"
-        "Manufacturer often validates and publishes E for commercial primer sets.\n\n"
-        "**Acceptable range:** E = 1.8-2.2 (90-110%)  \n"
-        "**If |E_target - E_ref| > 10% use Pfaffl method**"
-    )
-
-st.info(translations[language_code]["efficiency_note"])
-
-# ─── STANDARD CURVE CALCULATOR (SIDEBAR) ──────────────────────────────────────
-st.sidebar.markdown("---")
-with st.sidebar.expander(translations[language_code]["sc_expander"], expanded=False):
-    st.markdown(translations[language_code]["sc_description"])
-
-    sc_gene_label = st.text_input(translations[language_code]["sc_gene_label"], value="Target Gene 1", key="sc_label")
-    sc_num_points = st.number_input(translations[language_code]["sc_num_points"], min_value=3, max_value=10, value=5, step=1, key="sc_npts")
-    st.markdown(translations[language_code]["sc_dilution_factor_label"])
-    sc_dilution_factor = st.number_input(translations[language_code]["sc_dilution_factor_input"], min_value=2, max_value=100, value=10, step=1, key="sc_dilfactor")
-    st.markdown(translations[language_code]["sc_start_conc_label"])
-    sc_start_conc = st.number_input(translations[language_code]["sc_start_conc_input"], min_value=0.0001, value=1.0, format="%.4f", key="sc_startconc")
-
-    st.markdown(translations[language_code]["sc_enter_ct"])
-    sc_ct_values = []
-    sc_log_concs = []
-    for pt in range(sc_num_points):
-        conc = sc_start_conc / (sc_dilution_factor ** pt)
-        log_c = np.log10(conc)
-        ct_val = st.number_input(
-            f"Dil. {pt+1} (log={log_c:.2f})",
-            value=18.0 + pt * 3.32,
-            step=0.01, format="%.2f",
-            key=f"sc_ct_{pt}"
-        )
-        sc_ct_values.append(ct_val)
-        sc_log_concs.append(log_c)
-
-    if st.button(translations[language_code]["sc_calc_button"], key="sc_calc"):
-        sc_log_concs_arr = np.array(sc_log_concs)
-        sc_ct_arr = np.array(sc_ct_values)
-        slope_val, intercept_val, r_val, p_val, se_val = stats.linregress(sc_log_concs_arr, sc_ct_arr)
-        r2 = r_val ** 2
-        E_calc = 10 ** (-1.0 / slope_val) if slope_val != 0 else float('nan')
-        E_pct = (E_calc - 1) * 100
-        st.metric(translations[language_code]["sc_slope"], f"{slope_val:.4f}")
-        st.metric(translations[language_code]["sc_e_value"], f"{E_calc:.4f}")
-        st.metric(translations[language_code]["sc_efficiency_pct"], f"{E_pct:.1f}%")
-        st.metric("R²", f"{r2:.4f}")
-        if 1.8 <= E_calc <= 2.2 and r2 >= 0.99:
-            st.success(translations[language_code]["sc_excellent"].format(e=E_calc, pct=E_pct, r2=r2))
-        elif 1.8 <= E_calc <= 2.2:
-            st.warning(translations[language_code]["sc_warning_r2"].format(pct=E_pct, r2=r2))
-        else:
-            st.error(translations[language_code]["sc_error_range"].format(e=E_calc, pct=E_pct))
-        st.info(translations[language_code]["sc_copy_hint"].format(slope=slope_val, e=E_calc))
-
-# ─────────────────────────────────────────────────────────────────────────────
-
-efficiency_method = st.sidebar.radio(
-    translations[language_code]["efficiency_method"],
-    options=[
-        translations[language_code]["efficiency_manual"],
-        translations[language_code]["efficiency_slope"]
-    ],
-    key="eff_method",
-    horizontal=True
-)
-
-efficiency_threshold = st.sidebar.number_input(
-    translations[language_code]["efficiency_threshold"],
-    min_value=1.0,
-    max_value=50.0,
-    value=10.0,
-    step=0.5,
-    key="eff_threshold",
-    help="Recommended: 10% (MIQE guidelines). If |E_target − E_ref| > this value, ΔΔCt may be unreliable."
-)
-
-# Store efficiency values per gene
-gene_efficiencies = {}  # {gene_index: {"target_E": float, "ref_E": float}}
-
-use_slope = (efficiency_method == translations[language_code]["efficiency_slope"])
-
-for i in range(num_target_genes):
-    with st.sidebar.expander(f"🔬 {translations[language_code]['target_gene']} {i+1} — Efficiency", expanded=(i==0)):
-        if use_slope:
-            target_slope = st.number_input(
-                translations[language_code]["efficiency_target_slope_label"].format(i=i+1),
-                value=-3.32, step=0.01, format="%.4f",
-                key=f"target_slope_{i}",
-                help="Enter slope from your qPCR software standard curve output. Typical range: −3.1 to −3.6"
-            )
-            target_E = 10 ** (-1.0 / target_slope) if target_slope != 0 else 2.0
-            st.markdown(f"**E (target) = {target_E:.4f}** ({(target_E - 1) * 100:.1f}%)")
-        else:
-            target_E = st.number_input(
-                translations[language_code]["efficiency_target_label"].format(i=i+1),
-                min_value=1.0, max_value=3.0, value=2.0, step=0.01, format="%.4f",
-                key=f"target_E_{i}",
-                help="E=2.0 = 100% (perfect). Acceptable range: 1.8–2.2."
-            )
-            st.markdown(f"**{(target_E - 1) * 100:.1f}%**")
-
-        if use_slope:
-            ref_slope = st.number_input(
-                translations[language_code]["efficiency_ref_slope_label"].format(i=i+1),
-                value=-3.32, step=0.01, format="%.4f",
-                key=f"ref_slope_{i}",
-                help="Enter slope from your qPCR software standard curve output for the reference gene."
-            )
-            ref_E = 10 ** (-1.0 / ref_slope) if ref_slope != 0 else 2.0
-            st.markdown(f"**E (ref) = {ref_E:.4f}** ({(ref_E - 1) * 100:.1f}%)")
-        else:
-            ref_E = st.number_input(
-                translations[language_code]["efficiency_ref_label"].format(i=i+1),
-                min_value=1.0, max_value=3.0, value=2.0, step=0.01, format="%.4f",
-                key=f"ref_E_{i}",
-                help="E=2.0 = 100% (perfect)."
-            )
-            st.markdown(f"**{(ref_E - 1) * 100:.1f}%**")
-
-        target_pct = (target_E - 1) * 100
-        ref_pct = (ref_E - 1) * 100
-        diff = abs(target_pct - ref_pct)
-
-        if diff <= efficiency_threshold:
-            st.success(translations[language_code]["efficiency_ok"].format(diff=diff))
-        else:
-            st.warning(translations[language_code]["efficiency_warning"].format(diff=diff))
-
-        gene_efficiencies[i] = {"target_E": target_E, "ref_E": ref_E}
-
-# ─── MULTI-REFERENCE GENE SETTINGS (SIDEBAR) ─────────────────────────────────
-st.sidebar.markdown("---")
-st.sidebar.markdown(translations[language_code]["ref_gene_section_title"])
-
-num_ref_genes = st.sidebar.number_input(
-    translations[language_code]["ref_gene_num_label"],
-    min_value=1, max_value=10, value=1, step=1,
-    key="num_ref_genes",
-    help=translations[language_code]["ref_gene_num_help"]
-)
-if num_ref_genes == 1:
-    st.sidebar.warning(translations[language_code]["ref_gene_1_warning"])
-else:
-    st.sidebar.success(translations[language_code]["ref_gene_multi_success"].format(n=num_ref_genes))
-
-if num_ref_genes > 1:
-    with st.sidebar.expander(translations[language_code]["ref_gene_expander"], expanded=False):
-        st.markdown(translations[language_code]["ref_multi_description"])
-
-# ─── OUTLIER DETECTION SETTINGS (SIDEBAR) ────────────────────────────────────
-st.sidebar.markdown("---")
-st.sidebar.markdown(translations[language_code]["outlier_section_title"])
-
-outlier_enabled = st.sidebar.checkbox(
-    translations[language_code]["outlier_enable"],
-    value=True,
-    key="outlier_enabled",
-    help=translations[language_code]["outlier_enable_help"]
-)
-outlier_method = st.sidebar.radio(
-    translations[language_code]["outlier_method_label"],
-    options=["Grubbs", "IQR"],
-    key="outlier_method",
-    horizontal=True,
-    help=translations[language_code]["outlier_method_help"]
-)
-if outlier_method == "Grubbs":
-    grubbs_alpha = st.sidebar.number_input(
-        translations[language_code]["outlier_alpha_label"],
-        min_value=0.01, max_value=0.10, value=0.05, step=0.01, format="%.2f",
-        key="grubbs_alpha",
-        help=translations[language_code]["outlier_alpha_help"]
-    )
-    iqr_multiplier = 1.5
-else:
-    iqr_multiplier = st.sidebar.number_input(
-        translations[language_code]["outlier_iqr_label"],
-        min_value=1.0, max_value=3.0, value=1.5, step=0.25, format="%.2f",
-        key="iqr_mult",
-        help=translations[language_code]["outlier_iqr_help"]
-    )
-    grubbs_alpha = 0.05
-
-with st.sidebar.expander(translations[language_code]["outlier_expander"], expanded=False):
-    st.markdown(translations[language_code]["outlier_description"])
-
-# ═══════════════════════════════════════════════════════════════════════════════
 # ANA ALAN — Başlık + 3 sekme
 # ═══════════════════════════════════════════════════════════════════════════════
 st.markdown(f"<h2 style='margin-bottom:0'>{translations[language_code]['title']}</h2>", unsafe_allow_html=True)
@@ -1970,6 +1761,171 @@ patient_group = translations[language_code]["patient_group"]
 # SEKME 1: VERİ GİRİŞİ  (tüm girişler bu tab içinde)
 # ═══════════════════════════════════════════════════════════════════════════════
 with tab_data:
+    st.markdown(f"### {translations[language_code]['patient_data_header']}")
+
+    # ── Temel parametreler ────────────────────────────────────────────────────
+    col_genes, col_groups = st.columns(2)
+    with col_genes:
+        num_target_genes = st.number_input(translations[language_code]["num_target_genes"], min_value=1, step=1, key="gene_count")
+    with col_groups:
+        num_patient_groups = st.number_input(translations[language_code]["num_patient_groups"], min_value=1, step=1, key="patient_count")
+
+    # ── Referans gen ayarları ─────────────────────────────────────────────────
+    st.markdown("---")
+    st.markdown(translations[language_code]["ref_gene_section_title"])
+    ref_col1, ref_col2 = st.columns([2, 3])
+    with ref_col1:
+        num_ref_genes = st.number_input(
+            translations[language_code]["ref_gene_num_label"],
+            min_value=1, max_value=10, value=1, step=1,
+            key="num_ref_genes",
+            help=translations[language_code]["ref_gene_num_help"]
+        )
+    with ref_col2:
+        if num_ref_genes == 1:
+            st.warning(translations[language_code]["ref_gene_1_warning"])
+        else:
+            st.success(translations[language_code]["ref_gene_multi_success"].format(n=num_ref_genes))
+    if num_ref_genes > 1:
+        with st.expander(translations[language_code]["ref_gene_expander"], expanded=False):
+            st.markdown(translations[language_code]["ref_multi_description"])
+
+    # ── Aykırı değer ayarları ─────────────────────────────────────────────────
+    st.markdown("---")
+    st.markdown(translations[language_code]["outlier_section_title"])
+    out_c1, out_c2, out_c3 = st.columns([2, 2, 3])
+    with out_c1:
+        outlier_enabled = st.checkbox(
+            translations[language_code]["outlier_enable"],
+            value=True, key="outlier_enabled",
+            help=translations[language_code]["outlier_enable_help"]
+        )
+    with out_c2:
+        outlier_method = st.radio(
+            translations[language_code]["outlier_method_label"],
+            options=["Grubbs", "IQR"], key="outlier_method",
+            horizontal=True, help=translations[language_code]["outlier_method_help"]
+        )
+    with out_c3:
+        if outlier_method == "Grubbs":
+            grubbs_alpha = st.number_input(
+                translations[language_code]["outlier_alpha_label"],
+                min_value=0.01, max_value=0.10, value=0.05, step=0.01, format="%.2f",
+                key="grubbs_alpha", help=translations[language_code]["outlier_alpha_help"]
+            )
+            iqr_multiplier = 1.5
+        else:
+            iqr_multiplier = st.number_input(
+                translations[language_code]["outlier_iqr_label"],
+                min_value=1.0, max_value=3.0, value=1.5, step=0.25, format="%.2f",
+                key="iqr_mult", help=translations[language_code]["outlier_iqr_help"]
+            )
+            grubbs_alpha = 0.05
+    with st.expander(translations[language_code]["outlier_expander"], expanded=False):
+        st.markdown(translations[language_code]["outlier_description"])
+
+    # ── Amplifikasyon verimliliği ─────────────────────────────────────────────
+    st.markdown("---")
+    st.markdown(f"#### {translations[language_code]['efficiency_header']}")
+    st.info(translations[language_code]["efficiency_note"])
+
+    with st.expander("ℹ️ How to obtain Efficiency (E)", expanded=False):
+        st.markdown(
+            "**Method 1 — Standard Curve** *(recommended)*  \n"
+            "Run qPCR on 4-5 serial dilutions (e.g. 10x each) for each primer.  \n"
+            "`E = 10^(-1 / slope)`\n\n"
+            "**Method 2 — Software tools:** LinRegPCR, qBase+, Bio-Rad CFX Maestro, QuantStudio\n\n"
+            "**Method 3 — Primer/Kit datasheet**  \n"
+            "**Acceptable range:** E = 1.8-2.2 (90-110%)"
+        )
+
+    eff_c1, eff_c2 = st.columns(2)
+    with eff_c1:
+        efficiency_method = st.radio(
+            translations[language_code]["efficiency_method"],
+            options=[translations[language_code]["efficiency_manual"], translations[language_code]["efficiency_slope"]],
+            key="eff_method", horizontal=True
+        )
+    with eff_c2:
+        efficiency_threshold = st.number_input(
+            translations[language_code]["efficiency_threshold"],
+            min_value=1.0, max_value=50.0, value=10.0, step=0.5, key="eff_threshold",
+            help="Recommended: 10% (MIQE guidelines)."
+        )
+
+    # ── Standart eğri hesaplayıcı ─────────────────────────────────────────────
+    with st.expander(translations[language_code]["sc_expander"], expanded=False):
+        st.markdown(translations[language_code]["sc_description"])
+        sc_c1, sc_c2 = st.columns(2)
+        with sc_c1:
+            sc_gene_label = st.text_input(translations[language_code]["sc_gene_label"], value="Target Gene 1", key="sc_label")
+            sc_num_points = st.number_input(translations[language_code]["sc_num_points"], min_value=3, max_value=10, value=5, step=1, key="sc_npts")
+        with sc_c2:
+            st.markdown(translations[language_code]["sc_dilution_factor_label"])
+            sc_dilution_factor = st.number_input(translations[language_code]["sc_dilution_factor_input"], min_value=2, max_value=100, value=10, step=1, key="sc_dilfactor")
+            st.markdown(translations[language_code]["sc_start_conc_label"])
+            sc_start_conc = st.number_input(translations[language_code]["sc_start_conc_input"], min_value=0.0001, value=1.0, format="%.4f", key="sc_startconc")
+        st.markdown(translations[language_code]["sc_enter_ct"])
+        sc_ct_cols = st.columns(min(sc_num_points, 5))
+        sc_ct_values = []
+        sc_log_concs = []
+        for pt in range(sc_num_points):
+            conc = sc_start_conc / (sc_dilution_factor ** pt)
+            log_c = np.log10(conc)
+            with sc_ct_cols[pt % 5]:
+                ct_val = st.number_input(f"Dil. {pt+1} (log={log_c:.2f})", value=18.0 + pt * 3.32, step=0.01, format="%.2f", key=f"sc_ct_{pt}")
+            sc_ct_values.append(ct_val)
+            sc_log_concs.append(log_c)
+        if st.button(translations[language_code]["sc_calc_button"], key="sc_calc"):
+            sc_log_concs_arr = np.array(sc_log_concs)
+            sc_ct_arr = np.array(sc_ct_values)
+            slope_val, intercept_val, r_val, p_val, se_val = stats.linregress(sc_log_concs_arr, sc_ct_arr)
+            r2 = r_val ** 2
+            E_calc = 10 ** (-1.0 / slope_val) if slope_val != 0 else float('nan')
+            E_pct = (E_calc - 1) * 100
+            rc1, rc2, rc3, rc4 = st.columns(4)
+            rc1.metric(translations[language_code]["sc_slope"], f"{slope_val:.4f}")
+            rc2.metric(translations[language_code]["sc_e_value"], f"{E_calc:.4f}")
+            rc3.metric(translations[language_code]["sc_efficiency_pct"], f"{E_pct:.1f}%")
+            rc4.metric("R²", f"{r2:.4f}")
+            if 1.8 <= E_calc <= 2.2 and r2 >= 0.99:
+                st.success(translations[language_code]["sc_excellent"].format(e=E_calc, pct=E_pct, r2=r2))
+            elif 1.8 <= E_calc <= 2.2:
+                st.warning(translations[language_code]["sc_warning_r2"].format(pct=E_pct, r2=r2))
+            else:
+                st.error(translations[language_code]["sc_error_range"].format(e=E_calc, pct=E_pct))
+            st.info(translations[language_code]["sc_copy_hint"].format(slope=slope_val, e=E_calc))
+
+    # ── Per-gen efficiency girişi ─────────────────────────────────────────────
+    gene_efficiencies = {}
+    use_slope = (efficiency_method == translations[language_code]["efficiency_slope"])
+    for i in range(num_target_genes):
+        with st.expander(f"🔬 {translations[language_code]['target_gene']} {i+1} — Efficiency", expanded=(i == 0)):
+            ec1, ec2 = st.columns(2)
+            with ec1:
+                if use_slope:
+                    target_slope = st.number_input(translations[language_code]["efficiency_target_slope_label"].format(i=i+1), value=-3.32, step=0.01, format="%.4f", key=f"target_slope_{i}")
+                    target_E = 10 ** (-1.0 / target_slope) if target_slope != 0 else 2.0
+                    st.markdown(f"**E (target) = {target_E:.4f}** ({(target_E-1)*100:.1f}%)")
+                else:
+                    target_E = st.number_input(translations[language_code]["efficiency_target_label"].format(i=i+1), min_value=1.0, max_value=3.0, value=2.0, step=0.01, format="%.4f", key=f"target_E_{i}")
+                    st.markdown(f"**{(target_E-1)*100:.1f}%**")
+            with ec2:
+                if use_slope:
+                    ref_slope = st.number_input(translations[language_code]["efficiency_ref_slope_label"].format(i=i+1), value=-3.32, step=0.01, format="%.4f", key=f"ref_slope_{i}")
+                    ref_E = 10 ** (-1.0 / ref_slope) if ref_slope != 0 else 2.0
+                    st.markdown(f"**E (ref) = {ref_E:.4f}** ({(ref_E-1)*100:.1f}%)")
+                else:
+                    ref_E = st.number_input(translations[language_code]["efficiency_ref_label"].format(i=i+1), min_value=1.0, max_value=3.0, value=2.0, step=0.01, format="%.4f", key=f"ref_E_{i}")
+                    st.markdown(f"**{(ref_E-1)*100:.1f}%**")
+            diff = abs((target_E-1)*100 - (ref_E-1)*100)
+            if diff <= efficiency_threshold:
+                st.success(translations[language_code]["efficiency_ok"].format(diff=diff))
+            else:
+                st.warning(translations[language_code]["efficiency_warning"].format(diff=diff))
+            gene_efficiencies[i] = {"target_E": target_E, "ref_E": ref_E}
+
+    st.markdown("---")
     st.markdown(f"### {translations[language_code]['patient_data_header']}")
 
     # Kontrol + Hasta Grubu Veri Giriş Döngüsü
