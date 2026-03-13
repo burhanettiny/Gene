@@ -73,116 +73,163 @@ instruction_clicked = st.sidebar.button("📘 Instruction ")
 
 if instruction_clicked or selected_language_name == "Instruction":
 
-    @st.dialog("📘 GeneQuantify User Guide")
+    @st.dialog("📘 GeneQuantify — User Guide", width="large")
     def show_guide():
         st.markdown("""
+<style>
+.guide-section { background:#f8f9fa; border-left:4px solid #2196F3; padding:10px 16px; border-radius:4px; margin-bottom:12px; }
+.guide-formula { background:#1e1e2e; color:#cdd6f4; font-family:monospace; padding:10px 14px; border-radius:6px; font-size:14px; margin:8px 0; }
+.guide-warn { background:#fff3cd; border-left:4px solid #ffc107; padding:8px 14px; border-radius:4px; }
+.guide-ok   { background:#d4edda; border-left:4px solid #28a745; padding:8px 14px; border-radius:4px; }
+</style>
+""", unsafe_allow_html=True)
 
-This guide explains how to properly format your qPCR data, perform ΔΔCt calculations, and interpret the results.
+        tab1, tab2, tab3, tab4, tab5 = st.tabs(["📥 Data Input", "🧮 Calculations", "📊 Statistics", "⚙️ Settings", "⚖️ Disclaimer"])
 
----
+        with tab1:
+            st.markdown("### 📥 Data Input Format")
+            st.info("GeneQuantify accepts Ct (Cq) values entered as a column — one value per line. Compatible with direct **Excel/spreadsheet copy–paste**.")
+            col1, col2 = st.columns(2)
+            with col1:
+                st.markdown("**✅ Correct format**")
+                st.code("23.15\n22.90\n25.20\n24.88\n23.45", language="text")
+            with col2:
+                st.markdown("**✅ Also accepted (comma as decimal)**")
+                st.code("23,15\n22,90\n25,20\n24,88\n23,45", language="text")
+            st.markdown("""
+**Guidelines:**
+- Minimum **3 replicates** recommended per group (required for outlier detection)
+- All groups for the same gene should have the **same number of replicates** (app auto-trims to shortest)
+- Enter one target gene and one reference gene per section
+- Multiple reference genes (geNorm normalization) can be enabled in the settings
+""")
+            st.markdown("### 📋 Example Study Design")
+            st.dataframe({
+                "Group": ["Control","Control","Control","Patient 1","Patient 1","Patient 1"],
+                "Target Ct": [23.1, 22.9, 25.2, 27.3, 28.1, 26.8],
+                "Reference Ct": [18.2, 17.9, 18.5, 18.3, 18.0, 18.6],
+            }, use_container_width=True)
 
-### 📌 Data Input Format
- 
-- Compatible with **Excel copy–paste**. Commas are converted automatically to dots.  
+        with tab2:
+            st.markdown("### 🧮 Calculation Methods")
+            st.markdown("#### 1. Classic ΔΔCt Method (Livak & Schmittgen, 2001)")
+            st.code("ΔCt        = Ct(target) − Ct(reference)\nΔΔCt       = ΔCt(sample) − ΔCt(control)\nFold Change = 2^(−ΔΔCt)", language="text")
+            st.markdown("""
+**Assumptions:**
+- Target and reference gene efficiencies are both ~100% (E ≈ 2.0)
+- Efficiency difference between target and reference < 10%
+- If these assumptions are violated, use the **Pfaffl method** instead
+""")
+            st.markdown("#### 2. Pfaffl Method (Pfaffl, 2001)")
+            st.code("Ratio = (E_target ^ ΔCt_target) / (E_ref ^ ΔCt_ref)\n\nwhere:\n  ΔCt_target = Ct_control(target) − Ct_sample(target)\n  ΔCt_ref    = Ct_control(ref)    − Ct_sample(ref)", language="text")
+            st.info("The Pfaffl method accounts for primer-specific efficiencies and is more accurate when E differs between genes.")
 
-**Example:**
+            st.markdown("#### 3. Amplification Efficiency (E)")
+            st.code("E = 10^(−1 / slope)\n\nPerfect efficiency: E = 2.0 (100%)\nAcceptable range:   E = 1.8 – 2.2  (90–110%)\nSlope range:        −3.10 to −3.58", language="text")
+            st.markdown("""
+**How to obtain E:**
+| Method | Description |
+|--------|-------------|
+| Standard Curve | Run 4–5 serial dilutions; qPCR software reports slope → use built-in calculator |
+| LinRegPCR | Free software; calculates E from raw fluorescence |
+| qBase+ / CFX Maestro | Automated E calculation |
+| Primer datasheet | Manufacturer-validated E for commercial kits |
+""")
+            st.markdown("#### 4. Multiple Reference Genes (geNorm, Vandesompele 2002)")
+            st.code("Normalization Factor (NF) = arithmetic mean of reference gene Ct values\nGeNorm M-value < 0.5  → Excellent stability\nGeNorm M-value 0.5–1.0 → Acceptable\nGeNorm M-value ≥ 1.0  → Unstable — consider excluding", language="text")
 
-23.1   
-22.9   
-25.2 
+        with tab3:
+            st.markdown("### 📊 Statistical Decision Pathway")
+            st.markdown("""
+The app automatically selects the appropriate statistical test:
 
----
+```
+Input ΔCt values
+      │
+      ▼
+Shapiro-Wilk normality test (p > 0.05 = normal)
+      │
+      ├── Both groups NORMAL ──▶ Levene's test (equal variance?)
+      │                               │
+      │                    ┌──────────┴──────────┐
+      │                  YES (p>0.05)           NO (p≤0.05)
+      │                    │                     │
+      │             Student's t-test       Welch's t-test
+      │
+      └── Any group NON-NORMAL ──▶ Mann-Whitney U test
+```
 
-### 📊 Example Excel Table
-| Group     | Cq | 
-|-----------|------|
-| Control 1 | 23.1 | 
-| Control 2 | 22.9 | 
-| Control 3 | 25.2 | 
+**Multi-group (≥3 groups):**
+```
+Normal + Equal variance     → One-way ANOVA → Tukey HSD post-hoc
+Normal + Unequal variance   → Welch ANOVA   → Games-Howell post-hoc
+Any non-normal              → Kruskal-Wallis → Dunn's test post-hoc
+```
+""")
+            st.markdown("### 🔢 Multiple Testing Correction")
+            st.markdown("""
+When analyzing **multiple target genes**, the false positive risk increases:
 
----
+| Method | Controls | Best for |
+|--------|----------|----------|
+| **Bonferroni** | Family-wise error rate (FWER) | Few genes, conservative |
+| **FDR (Benjamini-Hochberg)** | False discovery rate | Many genes, more power |
 
-### 🧮 Calculations
-1. **ΔCt** = Ct(target) – Ct(reference)  
-2. **ΔΔCt** = ΔCt(test) – ΔCt(control)  
-3. **Fold Change** = 2^(-ΔΔCt)  
+**Rule of thumb:** Report both. Use FDR for exploratory studies (≥5 genes), Bonferroni for confirmatory studies.
+""")
 
----
+        with tab4:
+            st.markdown("### ⚙️ Settings Guide")
+            st.markdown("""
+#### Gene & Group Count
+Set the number of target genes and patient groups before entering data.  
+Each target gene gets its own Ct input sections for control and each patient group.
 
-### 🔬 Amplification Efficiency — How to Obtain Your E Value
+#### Reference Genes
+- **1 reference gene:** Simpler, but less reliable normalization
+- **2+ reference genes:** Recommended (MIQE guidelines); geNorm stability automatically calculated
+- Reference genes should be stably expressed across all conditions
 
-The amplification efficiency (E) tells you how well your PCR reaction doubles the template each cycle.  
-**E = 2.0** means perfect doubling (100% efficiency).
+#### Outlier Detection
+| Setting | Description |
+|---------|-------------|
+| **Grubbs test** | Best for small samples (n=3–8); detects single extreme outliers |
+| **IQR method** | Better for larger samples; flags values outside Q1−k×IQR / Q3+k×IQR |
+| **Alpha (Grubbs)** | Significance threshold; 0.05 recommended |
+| **k multiplier (IQR)** | 1.5 = standard Tukey fence; 3.0 = extreme outliers only |
 
----
+> ⚠️ Outlier exclusion **requires biological or technical justification**. The app flags candidates — the researcher decides.
 
-#### 📌 Method 1 — Standard Curve (Most Common)
-Run qPCR on a serial dilution series (e.g. 5 points, 10× dilutions) for each primer pair.  
-Your qPCR software (Bio-Rad CFX Manager, Applied Biosystems QuantStudio, Roche LightCycler, etc.) will automatically report the **slope** and **E value** in the standard curve results tab.
+#### Efficiency Threshold
+If |E_target − E_ref| exceeds this threshold (default 10%), a warning is shown and Pfaffl method is recommended.
+""")
 
-| Dilution | log(Concentration) | Ct    |
-|----------|--------------------|-------|
-| 1:1      | 0                  | 18.2  |
-| 1:10     | -1                 | 21.5  |
-| 1:100    | -2                 | 24.8  |
-| 1:1000   | -3                 | 28.1  |
-| 1:10000  | -4                 | 31.4  |
+        with tab5:
+            st.markdown("### ⚖️ Disclaimer & Citation")
+            st.warning("""
+**For Research & Education Use Only**
 
-→ The software fits a regression line: **slope ≈ −3.32** → **E = 10^(−1/−3.32) ≈ 2.0 (100%)**  
-→ You can also use the **built-in Standard Curve Calculator** in this app (below the efficiency section).
+This application is intended for research, education, and preliminary laboratory analysis only.  
+It is **NOT** designed or validated for clinical diagnosis, treatment decisions, or patient management.
 
----
+**Users are responsible for:**
+- Verifying the accuracy of entered Ct data
+- Appropriate interpretation of results
+- Confirming findings using validated laboratory methods
 
-#### 📌 Method 2 — Software Tools
-- **LinRegPCR** (free): calculates E from raw fluorescence data  
-- **qBase+**: multi-reference normalisation with efficiency correction  
-- **Bio-Rad CFX Maestro / QuantStudio Design & Analysis**: report E directly
+The developers are **not liable** for any decisions, losses, or damages arising from application use.  
+All clinical decisions must be made by qualified professionals.
+""")
+            st.markdown("""
+**References:**
+- Livak KJ & Schmittgen TD. *Methods* 2001;25:402–408. (ΔΔCt method)
+- Pfaffl MW. *Nucleic Acids Res* 2001;29(9):e45. (Pfaffl method)
+- Vandesompele J et al. *Genome Biol* 2002;3(7). (geNorm)
+- Bustin SA et al. *Clin Chem* 2009;55(4):611–622. (MIQE guidelines)
+- Grubbs FE. *Technometrics* 1969;11(1):1–21. (Outlier detection)
+- Benjamini Y & Hochberg Y. *J R Stat Soc B* 1995;57(1):289–300. (FDR)
 
----
-
-#### 📌 Method 3 — Primer/Kit Datasheet
-Commercial primer sets often specify validated efficiency values.  
-Check the product datasheet or manufacturer's website.
-
----
-
-#### ✅ Acceptable Range
-| E Value | Efficiency | Status     |
-|---------|------------|------------|
-| 1.8–2.2 | 90–110%    | ✅ Accepted |
-| < 1.8   | < 90%      | ⚠️ Low      |
-| > 2.2   | > 110%     | ⚠️ High     |
-
-If target and reference efficiencies differ by **> 10%**, the classic ΔΔCt method is unreliable → use **Pfaffl method** instead.
-
----
-
-#### 🧮 Pfaffl Formula
-**Ratio = (E_target ^ ΔCt_target) / (E_ref ^ ΔCt_ref)**  
-where ΔCt = Ct_control − Ct_sample for each gene.
-
----
-
-### 📈 Statistical Tests
-- Shapiro–Wilk → checks normality  
-- Levene → checks homogeneity of variances  
-- Student's t-test / Welch → compare means  
-- Mann–Whitney U → non-parametric comparison  
-
----
-
-### 📄 Outputs
-- PDF report  
-- CSV file  
-- Plots and graphs
-
----
-
-### 📄 Disclaimer
-This application is intended for **research**, **education**, and **preliminary laboratory analysis** only. It is **NOT** designed or validated for clinical diagnosis, treatment decisions, or patient management. The developers do **not** guarantee: - Complete accuracy of calculations or statistical outputs - Compatibility with specific qPCR assays, kits, or platforms - Compliance with clinical laboratory standards - Correctness or validity of user-entered data Users are fully responsible for: - Verifying the accuracy of entered Ct data - Interpreting results appropriately - Confirming findings using validated laboratory methods The developers are **not liable** for any decisions, losses, or damages arising from application use. All clinical decisions must be made by qualified professionals. Contact: **mailtoburhanettin@gmail.com**
-
-
-
+**Contact:** mailtoburhanettin@gmail.com
 """)
 
     show_guide()
@@ -2890,101 +2937,486 @@ else:
 
 def create_pdf(results, stats, input_df, language_code):
     buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=letter)
+    doc = SimpleDocTemplate(
+        buffer, pagesize=letter,
+        leftMargin=50, rightMargin=50, topMargin=60, bottomMargin=50
+    )
     elements = []
-    
     styles = getSampleStyleSheet()
     font_name = REGISTERED_FONT
-    styles['Normal'].fontName = font_name
-    styles['Title'].fontName = font_name
-    styles['Heading2'].fontName = font_name
 
-    elements.append(Paragraph(translations[language_code]["report_title"], styles['Title']))
-    elements.append(Spacer(1, 12))
+    # ── Custom styles ────────────────────────────────────────────────────────
+    title_style = ParagraphStyle('ReportTitle', parent=styles['Title'],
+        fontName=font_name, fontSize=22, textColor=colors.HexColor('#1a237e'),
+        spaceAfter=6, alignment=1)
+    subtitle_style = ParagraphStyle('ReportSub', parent=styles['Normal'],
+        fontName=font_name, fontSize=10, textColor=colors.HexColor('#555555'),
+        spaceAfter=4, alignment=1)
+    h1_style = ParagraphStyle('H1', parent=styles['Heading1'],
+        fontName=font_name, fontSize=14, textColor=colors.HexColor('#1a237e'),
+        spaceBefore=18, spaceAfter=6,
+        borderPad=4, leading=18)
+    h2_style = ParagraphStyle('H2', parent=styles['Heading2'],
+        fontName=font_name, fontSize=12, textColor=colors.HexColor('#283593'),
+        spaceBefore=12, spaceAfter=4)
+    body_style = ParagraphStyle('Body', parent=styles['Normal'],
+        fontName=font_name, fontSize=9, leading=13, spaceAfter=4)
+    small_style = ParagraphStyle('Small', parent=styles['Normal'],
+        fontName=font_name, fontSize=8, leading=11, textColor=colors.HexColor('#444444'))
+    caption_style = ParagraphStyle('Caption', parent=styles['Normal'],
+        fontName=font_name, fontSize=8, textColor=colors.HexColor('#666666'),
+        alignment=1, spaceAfter=6)
+    info_style = ParagraphStyle('Info', parent=styles['Normal'],
+        fontName=font_name, fontSize=9, leading=13,
+        backColor=colors.HexColor('#e8f4fd'),
+        borderPad=6, leftIndent=8, rightIndent=8, spaceAfter=6)
+    warn_style = ParagraphStyle('Warn', parent=styles['Normal'],
+        fontName=font_name, fontSize=9, leading=13,
+        backColor=colors.HexColor('#fff8e1'),
+        borderPad=6, leftIndent=8, rightIndent=8, spaceAfter=6)
 
-    elements.append(Paragraph(translations[language_code]["input_data_table"], styles['Heading2']))
-    
-    table_data = [input_df.columns.tolist()] + input_df.values.tolist()
-    col_width = (letter[0] - 80) / len(input_df.columns)
-    table = Table(table_data, colWidths=[col_width] * len(input_df.columns))
-    
-    table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('FONTNAME', (0, 0), (-1, -1), font_name),
-        ('FONTSIZE', (0, 0), (-1, -1), 10),
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
-    ]))
-    
-    elements.append(table)
-    elements.append(Spacer(1, 12))
+    def hr():
+        from reportlab.platypus import HRFlowable
+        return HRFlowable(width="100%", thickness=0.5,
+                          color=colors.HexColor('#cccccc'), spaceAfter=8, spaceBefore=4)
 
-    # Efficiency section in PDF
-    elements.append(Paragraph(translations[language_code]["efficiency_header"], styles['Heading2']))
+    def section_box(title):
+        return Paragraph(f"<b>{title}</b>", h1_style)
+
+    def make_table(data_rows, col_widths=None, header=True):
+        if not data_rows:
+            return Spacer(1, 1)
+        tbl = Table(data_rows, colWidths=col_widths, repeatRows=1 if header else 0)
+        style = [
+            ('FONTNAME',    (0,0), (-1,-1), font_name),
+            ('FONTSIZE',    (0,0), (-1,-1), 8),
+            ('ALIGN',       (0,0), (-1,-1), 'CENTER'),
+            ('VALIGN',      (0,0), (-1,-1), 'MIDDLE'),
+            ('GRID',        (0,0), (-1,-1), 0.3, colors.HexColor('#cccccc')),
+            ('ROWBACKGROUNDS', (0,1), (-1,-1),
+             [colors.white, colors.HexColor('#f5f7ff')]),
+            ('TOPPADDING',  (0,0), (-1,-1), 4),
+            ('BOTTOMPADDING',(0,0),(-1,-1), 4),
+        ]
+        if header:
+            style += [
+                ('BACKGROUND',  (0,0), (-1,0), colors.HexColor('#1a237e')),
+                ('TEXTCOLOR',   (0,0), (-1,0), colors.white),
+                ('FONTNAME',    (0,0), (-1,0), font_name),
+                ('FONTSIZE',    (0,0), (-1,0), 8),
+            ]
+        tbl.setStyle(TableStyle(style))
+        return tbl
+
+    import datetime
+    now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+
+    # ══════════════════════════════════════════════════════════════════════════
+    # COVER PAGE
+    # ══════════════════════════════════════════════════════════════════════════
+    elements.append(Spacer(1, 40))
+    elements.append(Paragraph("GeneQuantify", title_style))
+    elements.append(Paragraph("qPCR Gene Expression Analysis Report", subtitle_style))
     elements.append(Spacer(1, 6))
-    for i, eff in gene_efficiencies.items():
-        e_target = eff["target_E"]
-        e_ref = eff["ref_E"]
-        t_pct = (e_target - 1) * 100
-        r_pct = (e_ref - 1) * 100
-        diff = abs(t_pct - r_pct)
-        status = "✓ OK" if diff <= efficiency_threshold else "⚠ WARNING"
-        eff_text = (
-            f"{translations[language_code]['target_gene']} {i+1}: "
-            f"E_target={e_target:.4f} ({t_pct:.1f}%), "
-            f"E_ref={e_ref:.4f} ({r_pct:.1f}%), "
-            f"Diff={diff:.1f}% — {status}"
-        )
-        elements.append(Paragraph(eff_text, styles['Normal']))
-        elements.append(Spacer(1, 4))
-    elements.append(Spacer(1, 12))
+    elements.append(Paragraph(f"Generated: {now}", subtitle_style))
+    elements.append(Spacer(1, 20))
+    elements.append(hr())
+    elements.append(Spacer(1, 10))
 
-    elements.append(Paragraph(translations[language_code]["results"], styles['Heading2']))
-    elements.append(Spacer(1, 12))
-    
-    for result in results:
-        classic = result.get(translations[language_code]['gene_expression_change'], 'N/A')
-        pfaffl  = result.get(translations[language_code]['pfaffl_ratio'], 'N/A')
-        classic_str = f"{classic:.4f}" if isinstance(classic, float) else str(classic)
-        pfaffl_str  = f"{pfaffl:.4f}"  if isinstance(pfaffl, float) else str(pfaffl)
-        text = (
-            f"{result[translations[language_code]['target_gene']]} - "
-            f"{result[translations[language_code]['patient_group']]} | "
-            f"ΔΔCt: {result[translations[language_code]['delta_delta_ct']]:.2f} | "
-            f"2^(-ΔΔCt): {classic_str} | "
-            f"Pfaffl: {pfaffl_str} | "
-            f"{result[translations[language_code]['regulation_status']]}"
-        )
-        elements.append(Paragraph(text, styles['Normal']))
-        elements.append(Spacer(1, 6))
-    
+    # Summary box
+    n_genes  = len(set(r.get(translations[language_code]['target_gene'], '') for r in results))
+    n_groups = len(set(r.get(translations[language_code]['patient_group'], '') for r in results))
+    n_samples = len(input_df)
+    n_excluded = sum(1 for _, row in input_df.iterrows()
+                     if str(row.get('Outlier Excluded', 'No')).startswith('Yes'))
+
+    summary_data = [
+        ['Parameter', 'Value'],
+        ['Target genes analyzed', str(n_genes)],
+        ['Patient groups', str(n_groups)],
+        ['Total samples (rows)', str(n_samples)],
+        ['Outlier-excluded samples', str(n_excluded)],
+        ['Statistical tests', f"{len(stats)} comparisons"],
+        ['Normalization method', 'geNorm NF' if num_ref_genes > 1 else 'Single reference gene'],
+        ['Calculation methods', 'Classic ΔΔCt + Pfaffl'],
+    ]
+    elements.append(make_table(summary_data, col_widths=[260, 200]))
+    elements.append(Spacer(1, 16))
+    elements.append(Paragraph(
+        "This report was generated automatically by GeneQuantify. All calculations follow MIQE guidelines "
+        "(Bustin et al., Clin Chem 2009). Results should be interpreted by a qualified researcher.",
+        small_style))
     elements.append(PageBreak())
-    
-    elements.append(Paragraph(translations[language_code]["statistical_results"], styles['Heading2']))
-    elements.append(Spacer(1, 12))
-    
-    for stat in stats:
-        text = (f"{stat[translations[language_code]['target_gene']]} - {stat[translations[language_code]['patient_group']]} | "
-                f"{translations[language_code]['test_method']}: {stat[translations[language_code]['test_method']]} | "
-                f"p: {stat[translations[language_code]['test_pvalue']]:.4f} | {stat[translations[language_code]['significance']]}")
-        elements.append(Paragraph(text, styles['Normal']))
-        elements.append(Spacer(1, 6))
-    
+
+    # ══════════════════════════════════════════════════════════════════════════
+    # SECTION 1 — METHODS & SETTINGS
+    # ══════════════════════════════════════════════════════════════════════════
+    elements.append(section_box("1. Methods and Analysis Settings"))
+    elements.append(hr())
+
+    elements.append(Paragraph("<b>1.1 Calculation Methods</b>", h2_style))
+    elements.append(Paragraph(
+        "Two complementary methods were applied for fold-change calculation:", body_style))
+    elements.append(Paragraph(
+        "<b>Classic ΔΔCt (Livak & Schmittgen, 2001):</b> "
+        "ΔCt = Ct(target) - Ct(reference);  "
+        "ΔΔCt = ΔCt(sample) - ΔCt(control);  "
+        "Fold Change = 2^(-ΔΔCt). "
+        "Assumes equal amplification efficiencies (E ≈ 2.0) for both target and reference genes.", body_style))
+    elements.append(Paragraph(
+        "<b>Pfaffl Method (Pfaffl, 2001):</b> "
+        "Ratio = (E_target ^ ΔCt_target) / (E_ref ^ ΔCt_ref). "
+        "Corrects for primer-specific efficiencies; recommended when efficiency difference > 10%.", body_style))
+
+    elements.append(Paragraph("<b>1.2 Normalization</b>", h2_style))
+    if num_ref_genes > 1:
+        elements.append(Paragraph(
+            f"Multiple reference genes (n={num_ref_genes}) were used. "
+            "Normalization factor (NF) was calculated as the arithmetic mean of reference gene Ct values "
+            "per sample, following the geNorm approach (Vandesompele et al., Genome Biol 2002). "
+            "geNorm M-values and coefficient of variation (CV%) were computed to verify reference gene stability.", body_style))
+    else:
+        elements.append(Paragraph(
+            "A single reference gene was used for normalization. "
+            "MIQE guidelines recommend using at least 2 reference genes for robust normalization. "
+            "Consider validating reference gene stability in future experiments.", body_style))
+
+    elements.append(Paragraph("<b>1.3 Amplification Efficiency</b>", h2_style))
+    eff_rows = [['Gene', 'E (target)', 'Eff% (target)', 'E (ref)', 'Eff% (ref)', 'Diff%', 'Status']]
+    for i, eff in gene_efficiencies.items():
+        e_t = eff["target_E"]; e_r = eff["ref_E"]
+        t_pct = (e_t - 1) * 100; r_pct = (e_r - 1) * 100
+        diff = abs(t_pct - r_pct)
+        status = "OK" if diff <= efficiency_threshold else "WARNING: use Pfaffl"
+        eff_rows.append([
+            f"Target Gene {i+1}",
+            f"{e_t:.4f}", f"{t_pct:.1f}%",
+            f"{e_r:.4f}", f"{r_pct:.1f}%",
+            f"{diff:.1f}%", status
+        ])
+    elements.append(make_table(eff_rows))
+    elements.append(Spacer(1, 6))
+    elements.append(Paragraph(
+        "Acceptable efficiency range: E = 1.8-2.2 (90-110%). "
+        f"Efficiency difference threshold applied: {efficiency_threshold}%.", small_style))
+
+    elements.append(Paragraph("<b>1.4 Outlier Detection</b>", h2_style))
+    if outlier_enabled:
+        if outlier_method == "Grubbs":
+            elements.append(Paragraph(
+                f"Grubbs test (Grubbs 1969) was applied at alpha = {grubbs_alpha}. "
+                "The test identifies the most extreme value in a dataset and tests whether it is a "
+                "significant outlier based on a t-distribution critical value. "
+                f"{n_excluded} sample(s) were flagged and confirmed for exclusion by the user.", body_style))
+        else:
+            elements.append(Paragraph(
+                f"IQR method (Tukey 1977) was applied with multiplier k = {iqr_multiplier}. "
+                "Values outside [Q1 - k*IQR, Q3 + k*IQR] were flagged as potential outliers. "
+                f"{n_excluded} sample(s) were flagged and confirmed for exclusion by the user.", body_style))
+        if n_excluded > 0:
+            elements.append(Paragraph(
+                "WARNING: Outlier exclusion requires biological or technical justification. "
+                "Excluded samples are flagged in the data table below.", warn_style))
+    else:
+        elements.append(Paragraph("Outlier detection was disabled for this analysis.", body_style))
+
     elements.append(PageBreak())
-    
-    elements.append(Paragraph(translations[language_code]["statistical_evaluation"], styles['Heading2']))
-    elements.append(Spacer(1, 12))
-    
-    explanation = translations[language_code]["statistical_explanation"]
-    
-    for line in explanation.split(". "):
-        elements.append(Paragraph(line.strip() + '.', styles['Normal']))
-        elements.append(Spacer(1, 6))
-    
+
+    # ══════════════════════════════════════════════════════════════════════════
+    # SECTION 2 — RAW DATA TABLE
+    # ══════════════════════════════════════════════════════════════════════════
+    elements.append(section_box("2. Input Data"))
+    elements.append(hr())
+    elements.append(Paragraph(
+        "Raw Ct values entered by the user, after outlier processing. "
+        "Rows marked 'Yes' in the Outlier Excluded column were removed from calculations.",
+        body_style))
+    elements.append(Spacer(1, 6))
+
+    cols = input_df.columns.tolist()
+    page_w = letter[0] - 100
+    col_w = page_w / len(cols)
+    tbl_data = [[Paragraph(str(c), ParagraphStyle('th', fontName=font_name, fontSize=7,
+                textColor=colors.white, alignment=1)) for c in cols]]
+    for _, row in input_df.iterrows():
+        is_excluded = str(row.get('Outlier Excluded', 'No')).startswith('Yes')
+        row_style = ParagraphStyle('td_exc', fontName=font_name, fontSize=7,
+                    textColor=colors.HexColor('#cc0000'), alignment=1) if is_excluded else \
+                    ParagraphStyle('td', fontName=font_name, fontSize=7, alignment=1)
+        tbl_data.append([Paragraph(str(v), row_style) for v in row.tolist()])
+    elements.append(make_table(tbl_data, col_widths=[col_w]*len(cols)))
+    elements.append(PageBreak())
+
+    # ══════════════════════════════════════════════════════════════════════════
+    # SECTION 3 — RESULTS
+    # ══════════════════════════════════════════════════════════════════════════
+    elements.append(section_box("3. Gene Expression Results"))
+    elements.append(hr())
+    elements.append(Paragraph(
+        "Fold change values calculated by both Classic ΔΔCt and Pfaffl methods. "
+        "Upregulation (fold change > 1) indicates higher expression in the patient group relative to control. "
+        "Downregulation (fold change < 1) indicates lower expression.", body_style))
+    elements.append(Spacer(1, 8))
+
+    res_rows = [['Target Gene', 'Group', 'ΔCt Control', 'ΔCt Sample',
+                 'ΔΔCt', '2^(-ΔΔCt)', 'Pfaffl Ratio', 'Regulation', 'E target', 'E ref']]
+    for r in results:
+        tg  = r.get(translations[language_code]['target_gene'], '')
+        pg  = r.get(translations[language_code]['patient_group'], '')
+        ddc = r.get(translations[language_code]['delta_delta_ct'], '')
+        fc  = r.get(translations[language_code]['gene_expression_change'], '')
+        pf  = r.get(translations[language_code]['pfaffl_ratio'], '')
+        reg = r.get(translations[language_code]['regulation_status'], '')
+        dcc = r.get(translations[language_code]['delta_ct_control'], '')
+        dcs = r.get(translations[language_code]['delta_ct_patient'], '')
+        et  = r.get('E target', '')
+        er  = r.get('E ref', '')
+        res_rows.append([
+            tg, pg,
+            f"{dcc:.4f}" if isinstance(dcc, float) else str(dcc),
+            f"{dcs:.4f}" if isinstance(dcs, float) else str(dcs),
+            f"{ddc:.4f}" if isinstance(ddc, float) else str(ddc),
+            f"{fc:.4f}"  if isinstance(fc, float)  else str(fc),
+            f"{pf:.4f}"  if isinstance(pf, float)  else str(pf),
+            str(reg), str(et), str(er)
+        ])
+    cw = (letter[0]-100)/10
+    elements.append(make_table(res_rows, col_widths=[cw]*10))
+    elements.append(Spacer(1, 8))
+
+    # ── Fold change bar chart ─────────────────────────────────────────────────
+    if results:
+        try:
+            fig_fc, ax_fc = plt.subplots(figsize=(7, 3.5))
+            labels_fc = [f"{r.get(translations[language_code]['target_gene'],'')} /\n{r.get(translations[language_code]['patient_group'],'')}" for r in results]
+            vals_2ddct = [r.get(translations[language_code]['gene_expression_change'], 0) for r in results]
+            vals_pfaffl= [r.get(translations[language_code]['pfaffl_ratio'], 0) for r in results]
+            x = range(len(labels_fc))
+            w = 0.35
+            bars1 = ax_fc.bar([i - w/2 for i in x], vals_2ddct,  width=w, label='2^(-ΔΔCt)', color='#3f51b5', alpha=0.85)
+            bars2 = ax_fc.bar([i + w/2 for i in x], vals_pfaffl, width=w, label='Pfaffl',    color='#e91e63', alpha=0.85)
+            ax_fc.axhline(y=1, color='black', linestyle='--', linewidth=0.8, alpha=0.6)
+            ax_fc.set_xticks(list(x)); ax_fc.set_xticklabels(labels_fc, fontsize=7)
+            ax_fc.set_ylabel('Fold Change', fontsize=9)
+            ax_fc.set_title('Gene Expression Fold Change (ΔΔCt vs Pfaffl)', fontsize=10, fontweight='bold')
+            ax_fc.legend(fontsize=8)
+            ax_fc.spines['top'].set_visible(False); ax_fc.spines['right'].set_visible(False)
+            for bar in bars1:
+                ax_fc.text(bar.get_x()+bar.get_width()/2, bar.get_height()+0.02,
+                           f'{bar.get_height():.2f}', ha='center', va='bottom', fontsize=6)
+            for bar in bars2:
+                ax_fc.text(bar.get_x()+bar.get_width()/2, bar.get_height()+0.02,
+                           f'{bar.get_height():.2f}', ha='center', va='bottom', fontsize=6)
+            plt.tight_layout()
+            img_buf = BytesIO(); plt.savefig(img_buf, format='png', dpi=150, bbox_inches='tight'); plt.close()
+            img_buf.seek(0)
+            elements.append(RLImage(img_buf, width=460, height=230))
+            elements.append(Paragraph("Figure 1. Fold change comparison between Classic ΔΔCt and Pfaffl methods. "
+                "Dashed line at y=1 indicates no change relative to control.", caption_style))
+        except Exception:
+            pass
+
+    elements.append(PageBreak())
+
+    # ══════════════════════════════════════════════════════════════════════════
+    # SECTION 4 — STATISTICAL RESULTS
+    # ══════════════════════════════════════════════════════════════════════════
+    elements.append(section_box("4. Statistical Analysis"))
+    elements.append(hr())
+    elements.append(Paragraph(
+        "Statistical significance of gene expression differences between control and patient groups. "
+        "Test selection was performed automatically based on normality (Shapiro-Wilk) and "
+        "variance homogeneity (Levene) testing. Significance threshold: p < 0.05.", body_style))
+    elements.append(Spacer(1, 8))
+
+    stat_rows = [['Target Gene', 'Comparison', 'Test Type', 'Test Method', 'p-value', 'Significance']]
+    for s in stats:
+        stat_rows.append([
+            str(s.get(translations[language_code]['target_gene'], '')),
+            str(s.get('Comparison', '')),
+            str(s.get(translations[language_code]['test_type'], '')),
+            str(s.get(translations[language_code]['test_method'], '')),
+            f"{s.get(translations[language_code]['test_pvalue'], 0):.4f}",
+            str(s.get(translations[language_code]['significance'], '')),
+        ])
+    cw6 = (letter[0]-100)/6
+    elements.append(make_table(stat_rows, col_widths=[cw6]*6))
+    elements.append(Spacer(1, 8))
+
+    # ── p-value bar chart ─────────────────────────────────────────────────────
+    if stats:
+        try:
+            fig_p, ax_p = plt.subplots(figsize=(7, 3))
+            labels_p = [f"{s.get(translations[language_code]['target_gene'],'')} /\n{s.get('Comparison','')}" for s in stats]
+            pvals = [s.get(translations[language_code]['test_pvalue'], 1) for s in stats]
+            colors_p = ['#e53935' if p < 0.05 else '#90a4ae' for p in pvals]
+            ax_p.barh(labels_p, pvals, color=colors_p, alpha=0.85)
+            ax_p.axvline(x=0.05, color='black', linestyle='--', linewidth=0.9)
+            ax_p.set_xlabel('p-value', fontsize=9)
+            ax_p.set_title('Statistical Test p-values (red = significant)', fontsize=10, fontweight='bold')
+            for i, v in enumerate(pvals):
+                ax_p.text(v + 0.005, i, f'{v:.4f}', va='center', fontsize=7)
+            ax_p.spines['top'].set_visible(False); ax_p.spines['right'].set_visible(False)
+            plt.tight_layout()
+            img_buf2 = BytesIO(); plt.savefig(img_buf2, format='png', dpi=150, bbox_inches='tight'); plt.close()
+            img_buf2.seek(0)
+            elements.append(RLImage(img_buf2, width=460, height=200))
+            elements.append(Paragraph("Figure 2. p-values for all pairwise comparisons. "
+                "Red bars indicate statistically significant results (p < 0.05). "
+                "Dashed line marks the significance threshold.", caption_style))
+        except Exception:
+            pass
+
+    elements.append(Spacer(1, 10))
+    elements.append(Paragraph("<b>Interpretation of Statistical Tests:</b>", h2_style))
+    elements.append(Paragraph(
+        "Student's t-test: Used when both groups follow normal distribution with equal variances. "
+        "Welch's t-test: Used when both groups are normal but variances are unequal. "
+        "Mann-Whitney U: Non-parametric test used when normality assumption is violated; "
+        "compares rank distributions rather than means. "
+        "A p-value < 0.05 indicates statistically significant differential expression.", body_style))
+    elements.append(PageBreak())
+
+    # ══════════════════════════════════════════════════════════════════════════
+    # SECTION 5 — DELTA CT DISTRIBUTIONS
+    # ══════════════════════════════════════════════════════════════════════════
+    elements.append(section_box("5. Delta Ct Distribution Plots"))
+    elements.append(hr())
+    elements.append(Paragraph(
+        "Distribution of ΔCt values for each target gene across groups. "
+        "Each point represents one biological replicate. "
+        "Horizontal bars show group means. Wider spread indicates higher biological variability.", body_style))
+    elements.append(Spacer(1, 8))
+
+    tg_key   = translations[language_code]["target_gene"]
+    grp_key  = translations[language_code]["delta_ct_patient"]
+    ctrl_key = translations[language_code]["delta_ct_control"]
+
+    for i in range(num_target_genes):
+        gene_label = f"{tg_key} {i+1}"
+        ctrl_vals = [
+            float(d[ctrl_key]) for d in input_values_table
+            if d.get(tg_key) == gene_label
+            and d.get("Grup") == translations[language_code]["control_group"]
+            and d.get(ctrl_key) not in ("EXCLUDED", None)
+            and d.get("Outlier Excluded", "No") == "No"
+        ]
+        if not ctrl_vals:
+            continue
+        try:
+            fig_d, ax_d = plt.subplots(figsize=(6, 3.2))
+            all_vals = [ctrl_vals]
+            all_labels = [translations[language_code]["control_group"]]
+            palette = ['#3f51b5', '#e91e63', '#009688', '#ff9800', '#9c27b0']
+            for j in range(num_patient_groups):
+                pg = f"{translations[language_code]['patient_group']} {j+1}"
+                svals = [
+                    float(d[grp_key]) for d in input_values_table
+                    if d.get(tg_key) == gene_label
+                    and d.get("Grup") == pg
+                    and d.get(grp_key) not in ("EXCLUDED", None)
+                    and d.get("Outlier Excluded", "No") == "No"
+                ]
+                if svals:
+                    all_vals.append(svals)
+                    all_labels.append(pg)
+            for k, (vals, lbl) in enumerate(zip(all_vals, all_labels)):
+                col = palette[k % len(palette)]
+                jitter = np.random.uniform(-0.08, 0.08, len(vals))
+                ax_d.scatter([k+1+j for j in jitter], vals, color=col, alpha=0.75, s=28, zorder=3)
+                ax_d.hlines(np.mean(vals), k+0.75, k+1.25, colors='black', linewidths=2, zorder=4)
+            ax_d.set_xticks(range(1, len(all_labels)+1))
+            ax_d.set_xticklabels(all_labels, fontsize=8)
+            ax_d.set_ylabel('ΔCt', fontsize=9)
+            ax_d.set_title(f'{gene_label} — ΔCt Distribution', fontsize=10, fontweight='bold')
+            ax_d.spines['top'].set_visible(False); ax_d.spines['right'].set_visible(False)
+            plt.tight_layout()
+            img_buf3 = BytesIO(); plt.savefig(img_buf3, format='png', dpi=150, bbox_inches='tight'); plt.close()
+            img_buf3.seek(0)
+            elements.append(RLImage(img_buf3, width=420, height=210))
+            elements.append(Paragraph(
+                f"Figure. ΔCt distribution for {gene_label}. "
+                "Points = individual replicates; horizontal bars = group means.", caption_style))
+            elements.append(Spacer(1, 10))
+        except Exception:
+            pass
+
+    elements.append(PageBreak())
+
+    # ══════════════════════════════════════════════════════════════════════════
+    # SECTION 6 — INTERPRETATION GUIDE
+    # ══════════════════════════════════════════════════════════════════════════
+    elements.append(section_box("6. How to Interpret Your Results"))
+    elements.append(hr())
+
+    elements.append(Paragraph("<b>6.1 Fold Change Interpretation</b>", h2_style))
+    interp_data = [
+        ['Fold Change', 'ΔΔCt', 'Interpretation', 'Biological Significance'],
+        ['>2.0',  '<-1.0', 'Strong upregulation',   'Consider biologically relevant'],
+        ['1.5-2.0','−1.0 to −0.58','Moderate upregulation','May be relevant; verify'],
+        ['1.0-1.5','−0.58 to 0','Weak upregulation',  'Likely not significant alone'],
+        ['1.0',   '0',     'No change',             'No differential expression'],
+        ['0.67-1.0','0 to 0.58','Weak downregulation','Likely not significant alone'],
+        ['0.5-0.67','0.58 to 1.0','Moderate downregulation','May be relevant; verify'],
+        ['<0.5',  '>1.0',  'Strong downregulation', 'Consider biologically relevant'],
+    ]
+    cw4 = (letter[0]-100)/4
+    elements.append(make_table(interp_data, col_widths=[cw4]*4))
+    elements.append(Spacer(1, 8))
+    elements.append(Paragraph(
+        "Note: Statistical significance (p < 0.05) and biological significance (fold change magnitude) "
+        "should be considered together. A statistically significant result with low fold change "
+        "may not be biologically meaningful, and vice versa.", info_style))
+
+    elements.append(Paragraph("<b>6.2 Choosing Between ΔΔCt and Pfaffl</b>", h2_style))
+    elements.append(Paragraph(
+        "Use Classic ΔΔCt when: Both target and reference gene efficiencies are within 90-110% "
+        "AND the difference between them is less than 10%. "
+        "Use Pfaffl when: Efficiency difference exceeds 10%, or when primer efficiencies "
+        "have been precisely measured and differ between genes. "
+        "In all cases, report both values and note which method was used as the primary result.", body_style))
+
+    elements.append(Paragraph("<b>6.3 Statistical Test Selection Rationale</b>", h2_style))
+    elements.append(Paragraph(
+        "The automatic test selection follows established guidelines: "
+        "Normality was assessed using the Shapiro-Wilk test (recommended for small samples, n < 50). "
+        "Variance homogeneity was assessed using Levene's test. "
+        "For parametric data with equal variances, Student's t-test provides maximum statistical power. "
+        "Welch's t-test is more robust when variances differ. "
+        "Mann-Whitney U is the appropriate non-parametric alternative when normality cannot be assumed.", body_style))
+
+    elements.append(Spacer(1, 10))
+
+    # ══════════════════════════════════════════════════════════════════════════
+    # SECTION 7 — REFERENCES & DISCLAIMER
+    # ══════════════════════════════════════════════════════════════════════════
+    elements.append(section_box("7. References"))
+    elements.append(hr())
+    refs = [
+        "Livak KJ & Schmittgen TD (2001). Analysis of relative gene expression data using real-time quantitative PCR and the 2(-ΔΔCt) method. Methods, 25(4), 402-408.",
+        "Pfaffl MW (2001). A new mathematical model for relative quantification in real-time RT-PCR. Nucleic Acids Research, 29(9), e45.",
+        "Vandesompele J et al. (2002). Accurate normalization of real-time quantitative RT-PCR data by geometric averaging of multiple internal control genes. Genome Biology, 3(7).",
+        "Bustin SA et al. (2009). The MIQE guidelines: minimum information for publication of quantitative real-time PCR experiments. Clinical Chemistry, 55(4), 611-622.",
+        "Grubbs FE (1969). Procedures for detecting outlying observations in samples. Technometrics, 11(1), 1-21.",
+        "Tukey JW (1977). Exploratory Data Analysis. Addison-Wesley.",
+        "Benjamini Y & Hochberg Y (1995). Controlling the false discovery rate. J Royal Stat Soc B, 57(1), 289-300.",
+    ]
+    for ref in refs:
+        elements.append(Paragraph(f"• {ref}", small_style))
+        elements.append(Spacer(1, 3))
+
+    elements.append(Spacer(1, 16))
+    elements.append(hr())
+    elements.append(Paragraph(
+        "GeneQuantify — For research and educational use only. "
+        "Not validated for clinical diagnostic purposes. "
+        f"Report generated: {now} | Contact: mailtoburhanettin@gmail.com",
+        small_style))
+
     doc.build(elements)
     buffer.seek(0)
     return buffer
+
 
 with tab_report:
     st.markdown(f"### 📄 {translations[language_code]['pdf_report']}")
