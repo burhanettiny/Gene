@@ -2484,7 +2484,7 @@ with tab_data:
                 yaxis_title="M-value (lower = more stable)",
                 height=280
             )
-            st.plotly_chart(fig_stab, use_container_width=True)
+            st.plotly_chart(fig_stab, use_container_width=True, key=f"stab_ctrl_{i}")
 
             # ── Stability warnings ────────────────────────────────────────────────
             if unstable_ctrl:
@@ -2658,7 +2658,7 @@ with tab_data:
                     yaxis_title="M-value (lower = more stable)",
                     height=280
                 )
-                st.plotly_chart(fig_stab_smp, use_container_width=True)
+                st.plotly_chart(fig_stab_smp, use_container_width=True, key=f"stab_smp_{i}_{j}")
 
                 # ── Stability warnings (patient) ──────────────────────────────────
                 if unstable_smp:
@@ -3112,7 +3112,7 @@ This addresses the limitation of pairwise-only testing, which inflates Type I er
             fig_ph.add_trace(go.Bar(name="FDR p (B-H)", x=comparisons, y=[r["FDR p (B-H)"] for r in res["posthoc_rows"]], marker_color="#55A868"))
             fig_ph.add_hline(y=0.05, line_dash="dash", line_color="red", annotation_text="a = 0.05", annotation_position="right")
             fig_ph.update_layout(barmode="group", title=f"{res['gene']} — Post-hoc p-values", yaxis_title="p-value", height=350)
-            st.plotly_chart(fig_ph, use_container_width=True)
+            st.plotly_chart(fig_ph, use_container_width=True, key=f"posthoc_{res['gene']}")
 
             ph_csv = ph_df.to_csv(index=False).encode("utf-8")
             st.download_button(
@@ -3147,7 +3147,8 @@ This addresses the limitation of pairwise-only testing, which inflates Type I er
         csv = input_df.to_csv(index=False).encode("utf-8")
         st.download_button(
             label=_T["download_csv"],
-            data=csv, file_name="giris_verileri.csv", mime="text/csv")
+            data=csv, file_name="giris_verileri.csv", mime="text/csv",
+            key="dl_input_csv")
 
     # Sonuçlar Tablosunu Göster
     if data:
@@ -3185,7 +3186,8 @@ This addresses the limitation of pairwise-only testing, which inflates Type I er
             label=_T["download_csv"],
             data=csv_stats,
             file_name="istatistik_sonuclari.csv",
-            mime="text/csv")
+            mime="text/csv",
+            key="dl_stats_csv")
 
     # ─── MULTI-GENE P-VALUE CORRECTION ───────────────────────────────────────────
     if stats_data and num_target_genes >= 2:
@@ -3279,7 +3281,7 @@ Ge Y et al. *Bioinformatics* 2003; Storey JD. *J R Stat Soc B* 2002.
                 xaxis_title=f"{translations[language_code]['target_gene']} / {translations[language_code]['patient_group']}",
                 height=380
             )
-            st.plotly_chart(fig_corr, use_container_width=True)
+            st.plotly_chart(fig_corr, use_container_width=True, key="multigene_corr_chart")
 
             corr_csv = corr_df.to_csv(index=False).encode("utf-8")
             st.download_button(
@@ -3350,7 +3352,7 @@ Ge Y et al. *Bioinformatics* 2003; Storey JD. *J R Stat Soc B* 2002.
             plot_bgcolor='white',
             yaxis=dict(gridcolor='#eeeeee'),
         )
-        st.plotly_chart(fig_multi, use_container_width=True)
+        st.plotly_chart(fig_multi, use_container_width=True, key="multigene_fc_chart")
 
         # Second chart: log2 fold change heatmap-style grouped bar
         if st.checkbox("Show log2 scale", key="multigene_log2"):
@@ -3381,7 +3383,7 @@ Ge Y et al. *Bioinformatics* 2003; Storey JD. *J R Stat Soc B* 2002.
                 height=420, plot_bgcolor='white',
                 yaxis=dict(gridcolor='#eeeeee', zeroline=True, zerolinecolor='black'),
             )
-            st.plotly_chart(fig_log, use_container_width=True)
+            st.plotly_chart(fig_log, use_container_width=True, key="multigene_fc_log2")
             st.caption("log2 > 0 = upregulated, log2 < 0 = downregulated, log2 = 0 = no change")
 
     # ── ΔCt Dağılım Grafikleri ────────────────────────────────────────────────
@@ -3484,7 +3486,7 @@ Ge Y et al. *Bioinformatics* 2003; Storey JD. *J R Stat Soc B* 2002.
             yaxis=dict(title=translations[language_code]['delta_ct_value']),
             showlegend=True
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True, key=f"dist_chart_{i}")
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # SEKME 3: RAPOR
