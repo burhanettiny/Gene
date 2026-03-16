@@ -2786,13 +2786,29 @@ with tab_data:
                 # ─────────────────────────────────────────────────────────────
 
                 # ── Per-group pairwise stats (control vs this patient group) ────
-                shapiro_control = stats.shapiro(control_delta_ct)
-                shapiro_sample  = stats.shapiro(sample_delta_ct)
-                levene_test     = stats.levene(control_delta_ct, sample_delta_ct)
+                n_ctrl = len(control_delta_ct)
+                n_smp  = len(sample_delta_ct)
 
-                control_normal = shapiro_control.pvalue > 0.05
-                sample_normal  = shapiro_sample.pvalue  > 0.05
-                equal_variance = levene_test.pvalue     > 0.05
+                # Shapiro-Wilk n<3 veya n>=3 ama n<8 için dejenere sonuç verebilir.
+                # n<8 ise testi atla ve parametrik varsay (MIQE önerisi: küçük n'de
+                # normallik varsayımı test edilemez, t-test daha güçlüdür).
+                # Scipy shapiro n=3'te p≈0.000 döndürerek yanlış karar vermesine yol açar.
+                _MIN_N_SHAPIRO = 8
+
+                if n_ctrl >= _MIN_N_SHAPIRO and n_smp >= _MIN_N_SHAPIRO:
+                    shapiro_control = stats.shapiro(control_delta_ct)
+                    shapiro_sample  = stats.shapiro(sample_delta_ct)
+                    control_normal  = shapiro_control.pvalue > 0.05
+                    sample_normal   = shapiro_sample.pvalue  > 0.05
+                else:
+                    # n küçük: Shapiro güvenilir değil — normallik varsay
+                    shapiro_control = type('SW', (), {'statistic': float('nan'), 'pvalue': float('nan')})()
+                    shapiro_sample  = type('SW', (), {'statistic': float('nan'), 'pvalue': float('nan')})()
+                    control_normal  = True
+                    sample_normal   = True
+
+                levene_test    = stats.levene(control_delta_ct, sample_delta_ct)
+                equal_variance = levene_test.pvalue > 0.05
 
                 if control_normal and sample_normal:
                     if equal_variance:
@@ -2803,7 +2819,8 @@ with tab_data:
                         test_method = translations[language_code]["welch_t_test"]
                     test_type = translations[language_code]["parametric"]
                 else:
-                    test_pvalue = stats.mannwhitneyu(control_delta_ct, sample_delta_ct).pvalue
+                    test_pvalue = stats.mannwhitneyu(control_delta_ct, sample_delta_ct,
+                                                      alternative='two-sided').pvalue
                     test_method = translations[language_code]["mann_whitney_u_test"]
                     test_type   = translations[language_code]["non_parametric"]
 
@@ -2821,16 +2838,25 @@ with tab_data:
 
                     sw_ctrl_sym = "✅" if control_normal else "❌"
                     sw_smp_sym  = "✅" if sample_normal  else "❌"
-                    st.markdown(
-                        f"{translations[language_code]['stat_shapiro_title']}  \n"
-                        f"- Control: W={shapiro_control.statistic:.4f}, "
-                        f"p={shapiro_control.pvalue:.4f} {sw_ctrl_sym} "
-                        f"{translations[language_code]['stat_normal'] if control_normal else translations[language_code]['stat_nonnormal']}  \n"
-                        f"- {translations[language_code]['patient_group']} {j+1}: "
-                        f"W={shapiro_sample.statistic:.4f}, "
-                        f"p={shapiro_sample.pvalue:.4f} {sw_smp_sym} "
-                        f"{translations[language_code]['stat_normal'] if sample_normal else translations[language_code]['stat_nonnormal']}"
-                    )
+
+                    if n_ctrl >= _MIN_N_SHAPIRO and n_smp >= _MIN_N_SHAPIRO:
+                        st.markdown(
+                            f"{translations[language_code]['stat_shapiro_title']}  \n"
+                            f"- Control: W={shapiro_control.statistic:.4f}, "
+                            f"p={shapiro_control.pvalue:.4f} {sw_ctrl_sym} "
+                            f"{translations[language_code]['stat_normal'] if control_normal else translations[language_code]['stat_nonnormal']}  \n"
+                            f"- {translations[language_code]['patient_group']} {j+1}: "
+                            f"W={shapiro_sample.statistic:.4f}, "
+                            f"p={shapiro_sample.pvalue:.4f} {sw_smp_sym} "
+                            f"{translations[language_code]['stat_normal'] if sample_normal else translations[language_code]['stat_nonnormal']}"
+                        )
+                    else:
+                        st.info(
+                            f"ℹ️ **Shapiro-Wilk atlandı** — n={min(n_ctrl, n_smp)} "
+                            f"(gerekli minimum: {_MIN_N_SHAPIRO}). "
+                            f"Küçük örneklemde Shapiro-Wilk güvenilir sonuç vermez; "
+                            f"normallik varsayılarak parametrik test uygulandı."
+                        )
 
                     if control_normal and sample_normal:
                         lev_sym = "✅" if equal_variance else "⚠️"
@@ -2933,7 +2959,10 @@ for i in range(num_target_genes):
         continue
 
     # ── Omnibus test selection ────────────────────────────────────────────────
-    normality_ok  = all(stats.shapiro(g).pvalue > 0.05 for g in all_groups if len(g) >= 3)
+    normality_ok  = all(
+        (len(g) < 8 or stats.shapiro(g).pvalue > 0.05)
+        for g in all_groups if len(g) >= 3
+    )
     levene_p      = stats.levene(*all_groups).pvalue if n_groups >= 2 else 1.0
     variance_ok   = levene_p > 0.05
 
