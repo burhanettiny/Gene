@@ -3886,7 +3886,7 @@ def create_pdf(results, stats, input_df, language_code):
     palette  = ['#3f51b5','#e91e63','#009688','#ff9800','#9c27b0']
 
     for i in range(num_target_genes):
-        gene_label = f"{tg_key_} {i+1}"
+        gene_label = f"Gene {i+1}"          # sabit değer — sütun adı değil
         try:
             fig_d, ax_d = plt.subplots(figsize=(6, 3.2))
             all_vals = []; all_labels = []
