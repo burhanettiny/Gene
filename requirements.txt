@@ -13,4 +13,3 @@ seaborn
 python-bidi
 arabic-reshaper
 kaleido>=0.2.1
-
