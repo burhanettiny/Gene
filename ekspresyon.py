@@ -3461,32 +3461,116 @@ Ge Y et al. *Bioinformatics* 2003; Storey JD. *J R Stat Soc B* 2002.
 # SEKME 3: RAPOR
 # ═══════════════════════════════════════════════════════════════════════════════
 
-# PDF Font: DejaVu Sans — tam Unicode / Türkçe karakter desteği
-_DEJAVU_REGULAR = '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'
-_DEJAVU_BOLD    = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'
+# ── PDF Font Sistemi ─────────────────────────────────────────────────────────
+# Streamlit Cloud için: packages.txt'e fonts-noto ve fonts-noto-extra ekleyin
+# requirements.txt'e: arabic-reshaper>=3.0.0  python-bidi>=0.4.2 ekleyin
+
+def _find_font(candidates):
+    """İlk bulunan geçerli font yolunu döndür."""
+    import glob as _glob
+    for p in candidates:
+        if os.path.exists(p):
+            return p
+    # Sistem genelinde TTF ara
+    all_ttf = _glob.glob('/usr/share/fonts/**/*.ttf', recursive=True)
+    return all_ttf[0] if all_ttf else None
+
+# Noto Sans: Türkçe, Fransızca, Almanca, İspanyolca
+_NOTO_REGULAR = _find_font([
+    '/usr/share/fonts/truetype/noto/NotoSans-Regular.ttf',
+    '/usr/share/fonts/opentype/noto/NotoSans-Regular.otf',
+    '/usr/share/fonts/truetype/freefont/FreeSans.ttf',          # Streamlit fallback
+    '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',          # son çare
+])
+_NOTO_BOLD = _find_font([
+    '/usr/share/fonts/truetype/noto/NotoSans-Bold.ttf',
+    '/usr/share/fonts/opentype/noto/NotoSans-Bold.otf',
+    '/usr/share/fonts/truetype/freefont/FreeSansBold.ttf',
+    '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
+])
+# Noto Sans Arabic: Arapça
+_NOTO_ARABIC = _find_font([
+    '/usr/share/fonts/truetype/noto/NotoSansArabic-Regular.ttf',
+    '/usr/share/fonts/truetype/noto/NotoNaskhArabic-Regular.ttf',
+    '/usr/share/fonts/opentype/noto/NotoSansArabic-Regular.otf',
+    '/usr/share/fonts/truetype/noto/NotoSans-Regular.ttf',      # fallback
+    '/usr/share/fonts/truetype/freefont/FreeSans.ttf',
+])
+_NOTO_ARABIC_BOLD = _find_font([
+    '/usr/share/fonts/truetype/noto/NotoSansArabic-Bold.ttf',
+    '/usr/share/fonts/truetype/noto/NotoNaskhArabic-Bold.ttf',
+    '/usr/share/fonts/truetype/noto/NotoSansArabic-Regular.ttf',
+    '/usr/share/fonts/truetype/freefont/FreeSansBold.ttf',
+])
+
+from reportlab.pdfbase.pdfmetrics import registerFontFamily as _regFamily
 
 try:
-    pdfmetrics.registerFont(TTFont('DejaVu',      _DEJAVU_REGULAR))
-    pdfmetrics.registerFont(TTFont('DejaVu-Bold', _DEJAVU_BOLD))
-    from reportlab.pdfbase.pdfmetrics import registerFontFamily
-    registerFontFamily('DejaVu', normal='DejaVu', bold='DejaVu-Bold',
-                       italic='DejaVu', boldItalic='DejaVu-Bold')
-    REGISTERED_FONT      = 'DejaVu'
-    REGISTERED_FONT_BOLD = 'DejaVu-Bold'
+    pdfmetrics.registerFont(TTFont('NotoSans',      _NOTO_REGULAR))
+    pdfmetrics.registerFont(TTFont('NotoSans-Bold', _NOTO_BOLD))
+    _regFamily('NotoSans', normal='NotoSans', bold='NotoSans-Bold',
+               italic='NotoSans', boldItalic='NotoSans-Bold')
+    PDF_FONT      = 'NotoSans'
+    PDF_FONT_BOLD = 'NotoSans-Bold'
 except Exception:
-    REGISTERED_FONT      = 'Helvetica'
-    REGISTERED_FONT_BOLD = 'Helvetica-Bold'
+    PDF_FONT      = 'Helvetica'
+    PDF_FONT_BOLD = 'Helvetica-Bold'
 
-def safe_str(text):
-    """Convert text to PDF-safe string: strip special chars that break ReportLab."""
+# Arapça için ayrı font kaydı
+_arabic_font_ok = False
+if _NOTO_ARABIC and _NOTO_ARABIC != _NOTO_REGULAR:
+    try:
+        pdfmetrics.registerFont(TTFont('NotoArabic',      _NOTO_ARABIC))
+        pdfmetrics.registerFont(TTFont('NotoArabic-Bold', _NOTO_ARABIC_BOLD or _NOTO_ARABIC))
+        _regFamily('NotoArabic', normal='NotoArabic', bold='NotoArabic-Bold',
+                   italic='NotoArabic', boldItalic='NotoArabic-Bold')
+        ARABIC_FONT      = 'NotoArabic'
+        ARABIC_FONT_BOLD = 'NotoArabic-Bold'
+        _arabic_font_ok  = True
+    except Exception:
+        pass
+
+if not _arabic_font_ok:
+    ARABIC_FONT      = PDF_FONT        # fallback: NotoSans veya Helvetica
+    ARABIC_FONT_BOLD = PDF_FONT_BOLD
+
+# Eski kod uyumluluğu için alias
+REGISTERED_FONT      = PDF_FONT
+REGISTERED_FONT_BOLD = PDF_FONT_BOLD
+
+# matplotlib da Noto kullan
+try:
+    import matplotlib as _mpl
+    _noto_name = 'Noto Sans' if 'NotoSans' in PDF_FONT else 'DejaVu Sans'
+    _mpl.rcParams['font.family'] = _noto_name
+    _mpl.rcParams['axes.unicode_minus'] = False
+except Exception:
+    pass
+
+def safe_str(text, lang='en'):
+    """PDF için metni hazırla: XML kaçış + Arapça reshape/bidi."""
     if not isinstance(text, str):
         text = str(text)
-    # Escape XML special chars for ReportLab Paragraph
-    text = text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
-    return text
+    if lang == 'ar':
+        try:
+            import arabic_reshaper
+            from bidi.algorithm import get_display
+            text = get_display(arabic_reshaper.reshape(text))
+        except ImportError:
+            pass  # paket yoksa olduğu gibi bırak
+    return text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+
+def get_pdf_fonts(lang):
+    """Dile göre (normal_font, bold_font) döndür."""
+    if lang == 'ar':
+        return ARABIC_FONT, ARABIC_FONT_BOLD
+    return PDF_FONT, PDF_FONT_BOLD
 
 def create_pdf(results, stats, input_df, language_code):
-    T = translations[language_code]  # shorthand
+    T   = translations[language_code]  # shorthand
+    RTL = language_code == 'ar'        # sağdan sola dil mi?
+    fn, fnb = get_pdf_fonts(language_code)
+
     buffer = BytesIO()
     doc = SimpleDocTemplate(
         buffer, pagesize=letter,
@@ -3494,45 +3578,47 @@ def create_pdf(results, stats, input_df, language_code):
     )
     elements = []
     styles = getSampleStyleSheet()
-    fn  = REGISTERED_FONT
-    fnb = REGISTERED_FONT_BOLD
 
-    title_style   = ParagraphStyle('RT',  parent=styles['Title'],   fontName=fnb, fontSize=20, textColor=colors.HexColor('#1a237e'), spaceAfter=6,  alignment=1)
-    sub_style     = ParagraphStyle('RS',  parent=styles['Normal'],  fontName=fn,  fontSize=10, textColor=colors.HexColor('#555555'), spaceAfter=4,  alignment=1)
-    h1_style      = ParagraphStyle('H1',  parent=styles['Heading1'],fontName=fnb, fontSize=13, textColor=colors.HexColor('#1a237e'), spaceBefore=16,spaceAfter=5)
-    h2_style      = ParagraphStyle('H2',  parent=styles['Heading2'],fontName=fnb, fontSize=11, textColor=colors.HexColor('#283593'), spaceBefore=10,spaceAfter=4)
-    body_style    = ParagraphStyle('BD',  parent=styles['Normal'],  fontName=fn,  fontSize=9,  leading=13, spaceAfter=4)
-    small_style   = ParagraphStyle('SM',  parent=styles['Normal'],  fontName=fn,  fontSize=8,  leading=11, textColor=colors.HexColor('#444444'))
+    # Metin hizalaması: Arapça için sağ, diğerleri için sol/orta
+    _body_align  = 2 if RTL else 0   # 0=left, 1=center, 2=right
+    _title_align = 1                  # başlıklar her zaman ortalı
+
+    title_style   = ParagraphStyle('RT',  parent=styles['Title'],   fontName=fnb, fontSize=20, textColor=colors.HexColor('#1a237e'), spaceAfter=6,  alignment=_title_align)
+    sub_style     = ParagraphStyle('RS',  parent=styles['Normal'],  fontName=fn,  fontSize=10, textColor=colors.HexColor('#555555'), spaceAfter=4,  alignment=_title_align)
+    h1_style      = ParagraphStyle('H1',  parent=styles['Heading1'],fontName=fnb, fontSize=13, textColor=colors.HexColor('#1a237e'), spaceBefore=16,spaceAfter=5,  alignment=_body_align)
+    h2_style      = ParagraphStyle('H2',  parent=styles['Heading2'],fontName=fnb, fontSize=11, textColor=colors.HexColor('#283593'), spaceBefore=10,spaceAfter=4,  alignment=_body_align)
+    body_style    = ParagraphStyle('BD',  parent=styles['Normal'],  fontName=fn,  fontSize=9,  leading=13, spaceAfter=4, alignment=_body_align)
+    small_style   = ParagraphStyle('SM',  parent=styles['Normal'],  fontName=fn,  fontSize=8,  leading=11, textColor=colors.HexColor('#444444'), alignment=_body_align)
     caption_style = ParagraphStyle('CA',  parent=styles['Normal'],  fontName=fn,  fontSize=8,  textColor=colors.HexColor('#666666'), alignment=1, spaceAfter=6)
-    info_style    = ParagraphStyle('IN',  parent=styles['Normal'],  fontName=fn,  fontSize=9,  leading=13, backColor=colors.HexColor('#e8f4fd'), borderPad=6, leftIndent=8, rightIndent=8, spaceAfter=6)
-    warn_style    = ParagraphStyle('WN',  parent=styles['Normal'],  fontName=fn,  fontSize=9,  leading=13, backColor=colors.HexColor('#fff8e1'), borderPad=6, leftIndent=8, rightIndent=8, spaceAfter=6)
+    info_style    = ParagraphStyle('IN',  parent=styles['Normal'],  fontName=fn,  fontSize=9,  leading=13, backColor=colors.HexColor('#e8f4fd'), borderPad=6, leftIndent=8, rightIndent=8, spaceAfter=6, alignment=_body_align)
+    warn_style    = ParagraphStyle('WN',  parent=styles['Normal'],  fontName=fn,  fontSize=9,  leading=13, backColor=colors.HexColor('#fff8e1'), borderPad=6, leftIndent=8, rightIndent=8, spaceAfter=6, alignment=_body_align)
 
     def hr():
         from reportlab.platypus import HRFlowable
         return HRFlowable(width="100%", thickness=0.5, color=colors.HexColor('#cccccc'), spaceAfter=8, spaceBefore=4)
 
     def s(key, **kw):
-        """Get translated string, format with kwargs, make PDF-safe."""
+        """Get translated string, format with kwargs, make PDF-safe + Arabic reshape."""
         txt = T.get(key, key)
         if kw:
             try: txt = txt.format(**kw)
             except Exception: pass
-        if not isinstance(txt, str): txt = str(txt)
-        return txt.replace('&','&amp;').replace('<','&lt;').replace('>','&gt;')
+        return safe_str(txt, lang=language_code)
 
     def make_table(rows, col_widths=None, header=True):
         if not rows: return Spacer(1,1)
-        # Convert all cells to Paragraph for font support
+        # Convert all cells to Paragraph for font support (with Arabic reshape)
         styled_rows = []
+        _cell_align = 2 if RTL else 1  # RTL: sağ hizalı, LTR: ortalı
         for ri, row in enumerate(rows):
             styled_row = []
             for cell in row:
-                cell_str = str(cell) if not isinstance(cell, str) else cell
-                cell_str = cell_str.replace('&','&amp;').replace('<','&lt;').replace('>','&gt;')
+                cell_str = safe_str(str(cell) if not isinstance(cell, str) else cell,
+                                    lang=language_code)
                 if ri == 0 and header:
                     p = Paragraph(cell_str, ParagraphStyle('TH', fontName=fnb, fontSize=7, textColor=colors.white, alignment=1))
                 else:
-                    p = Paragraph(cell_str, ParagraphStyle('TD', fontName=fn, fontSize=7, alignment=1))
+                    p = Paragraph(cell_str, ParagraphStyle('TD', fontName=fn, fontSize=7, alignment=_cell_align))
                 styled_row.append(p)
             styled_rows.append(styled_row)
         tbl = Table(styled_rows, colWidths=col_widths, repeatRows=1 if header else 0)
