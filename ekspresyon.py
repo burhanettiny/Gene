@@ -628,6 +628,7 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE kılavuzları).
         "input_data_table": "Input Data Table",
         "results": "Results",
         "statistical_results": "📈 Statistical Results",
+        "statistics": "Statistical Results",
         "statistical_evaluation": "Statistical Evaluation",
         "target_gene": "Target Gene",
         "patient_group": "🩸 Patient Group",
@@ -937,6 +938,7 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE guidelines).
         "input_data_table": "Eingabedatentabelle",
         "results": "Ergebnisse",
         "statistical_results": "📈 Statistische Ergebnisse",
+        "statistics": "Statistische Ergebnisse",
         "statistical_evaluation": "Statistische Auswertung",
         "target_gene": "Zielgen",
         "patient_group": "🩸 Patientengruppe",
@@ -1233,6 +1235,7 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE-Richtlinien).
         "input_data_table": "Tableau des Données d'Entrée",
         "results": "Résultats",
         "statistical_results": "📈 Résultats Statistiques",
+        "statistics": "Résultats statistiques",
         "statistical_evaluation": "Évaluation Statistique",
         "target_gene": "Gène Cible",
         "patient_group": "🩸 Groupe Patient",
@@ -1537,6 +1540,7 @@ Bustin SA et al. *Clin Chem* 2009 (directives MIQE).
         "input_data_table": "Tabla de Datos de Entrada",
         "results": "Resultados",
         "statistical_results": "📈 Resultados Estadísticos",
+        "statistics": "Resultados estadísticos",
         "statistical_evaluation": "Evaluación Estadística",
         "target_gene": "Gen Objetivo",
         "patient_group": "🩸 Grupo Paciente",
@@ -1841,6 +1845,7 @@ Bustin SA et al. *Clin Chem* 2009 (directrices MIQE).
         "input_data_table": "جدول بيانات الإدخال",
         "results": "النتائج",
         "statistical_results": "📈 النتائج الإحصائية",
+        "statistics": "النتائج الإحصائية",
         "statistical_evaluation": "التقييم الإحصائي",
         "target_gene": "الجين المستهدف",
         "patient_group": "🩸 مجموعة المرضى",
@@ -2197,7 +2202,7 @@ stats_data = []
 last_control_delta_ct = None
 last_gene_index = None
 
-control_group = translations[language_code]["control_group"]
+control_group = "Control"
 target_gene = translations[language_code]["target_gene"]
 reference_gene = translations[language_code]["reference_gene"]
 ct_value = translations[language_code]["ct_value"]
@@ -2377,12 +2382,12 @@ with tab_data:
     # Kontrol + Hasta Grubu Veri Giriş Döngüsü
     for i in range(num_target_genes):
         st.markdown(
-            f"<h4>{translations[language_code]['control_group']} {i+1} - {translations[language_code]['target_gene']} {i+1}</h4>",
+            f"<h4>Control {i+1} - {translations[language_code]['target_gene']} {i+1}</h4>",
             unsafe_allow_html=True
         )
 
         control_target_ct = st.text_area(
-            f"{translations[language_code]['control_group']} {i+1} - {translations[language_code]['target_gene']} {i+1} - {translations[language_code]['ct_value']}",
+            f"Control {i+1} - {translations[language_code]['target_gene']} {i+1} - {translations[language_code]['ct_value']}",
             key=f"control_target_ct_{i}"
         )
 
@@ -2394,7 +2399,7 @@ with tab_data:
         for r in range(num_ref_genes):
             ref_label = f"Ref Gene {r+1}" if num_ref_genes > 1 else translations[language_code]["reference_gene"]
             ctrl_ref_ct_raw = st.text_area(
-                f"{translations[language_code]['control_group']} {i+1} — {ref_label} {i+1} — {translations[language_code]['ct_value']}",
+                f"Control {i+1} — {ref_label} {i+1} — {translations[language_code]['ct_value']}",
                 key=f"control_reference_ct_{i}_{r}"
             )
             parsed = parse_input_data(ctrl_ref_ct_raw)
@@ -2526,12 +2531,12 @@ with tab_data:
 
         for idx in range(min_control_len):
             row = {
-                translations[language_code]["sample_number"]: sample_counter,
-                translations[language_code]["target_gene"]: f"{target_gene} {i+1}",
-                "Grup": translations[language_code]["control_group"],
-                translations[language_code]["target_ct"]: control_target_ct_values[idx],
-                translations[language_code]["reference_ct"]: round(ctrl_norm_factor[idx], 4),
-                translations[language_code]["delta_ct_control"]: round(control_delta_ct[idx], 4),
+                "__sample_num__": sample_counter,
+                "__target_gene__": f"{target_gene} {i+1}",
+                "Grup": "Control",
+                "__target_ct__": control_target_ct_values[idx],
+                "__ref_ct__": round(ctrl_norm_factor[idx], 4),
+                "__dct_ctrl__": round(control_delta_ct[idx], 4),
                 "Outlier Excluded": "No"
             }
             if num_ref_genes > 1:
@@ -2543,12 +2548,12 @@ with tab_data:
         # Log excluded outliers as separate flagged rows
         for ex_idx in ctrl_excluded_target:
             input_values_table.append({
-                translations[language_code]["sample_number"]: f"{ex_idx + 1} ⚠️",
-                translations[language_code]["target_gene"]: f"{target_gene} {i+1}",
-                "Grup": translations[language_code]["control_group"],
-                translations[language_code]["target_ct"]: "EXCLUDED",
-                translations[language_code]["reference_ct"]: "EXCLUDED",
-                translations[language_code]["delta_ct_control"]: "EXCLUDED",
+                "__sample_num__": f"{ex_idx + 1} ⚠️",
+                "__target_gene__": f"{target_gene} {i+1}",
+                "Grup": "Control",
+                "__target_ct__": "EXCLUDED",
+                "__ref_ct__": "EXCLUDED",
+                "__dct_ctrl__": "EXCLUDED",
                 "Outlier Excluded": f"Yes ({outlier_method})"
             })
 
@@ -2701,12 +2706,12 @@ with tab_data:
             sample_counter = 1
             for idx in range(min_sample_len):
                 row = {
-                    translations[language_code]["sample_number"]: sample_counter,
-                    translations[language_code]["target_gene"]: f"{translations[language_code]['target_gene']} {i+1}",
-                    "Grup": f"{translations[language_code]['patient_group']} {j+1}",
-                    translations[language_code]["target_ct"]: sample_target_ct_values[idx],
-                    translations[language_code]["reference_ct"]: round(smp_norm_factor[idx], 4),
-                    translations[language_code]["delta_ct_patient"]: round(sample_delta_ct[idx], 4),
+                    "__sample_num__": sample_counter,
+                    "__target_gene__": f"Gene {i+1}",
+                    "Grup": f"Group {j+1}",
+                    "__target_ct__": sample_target_ct_values[idx],
+                    "__ref_ct__": round(smp_norm_factor[idx], 4),
+                    "__dct_patient__": round(sample_delta_ct[idx], 4),
                     "Outlier Excluded": "No"
                 }
                 if num_ref_genes > 1:
@@ -2718,12 +2723,12 @@ with tab_data:
             # Log excluded outliers as flagged rows
             for ex_idx in smp_excluded_target:
                 input_values_table.append({
-                    translations[language_code]["sample_number"]: f"{ex_idx + 1} ⚠️",
-                    translations[language_code]["target_gene"]: f"{translations[language_code]['target_gene']} {i+1}",
-                    "Grup": f"{translations[language_code]['patient_group']} {j+1}",
-                    translations[language_code]["target_ct"]: "EXCLUDED",
-                    translations[language_code]["reference_ct"]: "EXCLUDED",
-                    translations[language_code]["delta_ct_patient"]: "EXCLUDED",
+                    "__sample_num__": f"{ex_idx + 1} ⚠️",
+                    "__target_gene__": f"Gene {i+1}",
+                    "Grup": f"Group {j+1}",
+                    "__target_ct__": "EXCLUDED",
+                    "__ref_ct__": "EXCLUDED",
+                    "__dct_patient__": "EXCLUDED",
                     "Outlier Excluded": f"Yes ({outlier_method})"
                 })
 
@@ -2809,7 +2814,7 @@ with tab_data:
                 with st.expander(
                     f"{translations[language_code]['stat_decision_title']} — "
                     f"{translations[language_code]['target_gene']} {i+1} / "
-                    f"{translations[language_code]['patient_group']} {j+1}",
+                    f"Group {j+1}",
                     expanded=False
                 ):
                     st.markdown(translations[language_code]["stat_decision_steps"])
@@ -2818,7 +2823,7 @@ with tab_data:
                     sw_smp_sym  = "✅" if sample_normal  else "❌"
                     st.markdown(
                         f"{translations[language_code]['stat_shapiro_title']}  \n"
-                        f"- {translations[language_code]['control_group']}: W={shapiro_control.statistic:.4f}, "
+                        f"- Control: W={shapiro_control.statistic:.4f}, "
                         f"p={shapiro_control.pvalue:.4f} {sw_ctrl_sym} "
                         f"{translations[language_code]['stat_normal'] if control_normal else translations[language_code]['stat_nonnormal']}  \n"
                         f"- {translations[language_code]['patient_group']} {j+1}: "
@@ -2855,26 +2860,26 @@ with tab_data:
                 # ─────────────────────────────────────────────────────────────
 
                 stats_data.append({
-                    translations[language_code]["target_gene"]:   f"{translations[language_code]['target_gene']} {i+1}",
-                    translations[language_code]["patient_group"]: f"{translations[language_code]['patient_group']} {j+1}",
-                    translations[language_code]["test_type"]:     test_type,
-                    translations[language_code]["test_method"]:   test_method,
-                    translations[language_code]["test_pvalue"]:   test_pvalue,
-                    translations[language_code]["significance"]:  significance,
-                    "Comparison": f"Control vs {translations[language_code]['patient_group']} {j+1}"
+                    "__target_gene__":   f"Gene {i+1}",
+                    "__patient_group__": f"Group {j+1}",
+                    "__test_type__":     test_type,
+                    "__test_method__":   test_method,
+                    "__pvalue__":   test_pvalue,
+                    "__significance__":  significance,
+                    "Comparison": f"Control vs Group {j+1}"
                 })
 
                 data.append({
-                    translations[language_code]["target_gene"]:         f"{translations[language_code]['target_gene']} {i+1}",
-                    translations[language_code]["patient_group"]:       f"{translations[language_code]['patient_group']} {j+1}",
-                    translations[language_code]["delta_delta_ct"]:      delta_delta_ct,
-                    translations[language_code]["gene_expression_change"]: expression_change,
-                    translations[language_code]["pfaffl_ratio"]:        pfaffl_ratio,
+                    "__target_gene__":         f"Gene {i+1}",
+                    "__patient_group__":       f"Group {j+1}",
+                    "__ddct__":      delta_delta_ct,
+                    "__fc__": expression_change,
+                    "__pfaffl__":        pfaffl_ratio,
                     "E target":                                          round(E_target, 4),
                     "E ref":                                             round(E_ref, 4),
-                    translations[language_code]["regulation_status"]:   regulation_status,
-                    translations[language_code]["delta_ct_control"]:    average_control_delta_ct,
-                    translations[language_code]["delta_ct_patient"]:    average_sample_delta_ct
+                    "__regulation__":   regulation_status,
+                    "__dct_ctrl__":    average_control_delta_ct,
+                    "__dct_patient__":    average_sample_delta_ct
                 })
 
 # ─── MULTI-GROUP ANALYSIS (3+ patient groups per target gene) ────────────────
@@ -2884,26 +2889,26 @@ multigroup_results = []   # records for display / PDF
 for i in range(num_target_genes):
     # Pull per-group ΔCt values from stats_data provenance via data dict
     # Re-derive from input_values_table (source of truth after outlier removal)
-    gene_label = f"{translations[language_code]['target_gene']} {i+1}"
+    gene_label = f"Gene {i+1}"
 
     ctrl_dct = [
-        float(d[translations[language_code]["delta_ct_control"]])
+        float(d["__dct_ctrl__"])
         for d in input_values_table
-        if d.get("Grup") == translations[language_code]["control_group"]
-        and d.get(translations[language_code]["target_gene"]) == gene_label
-        and d.get(translations[language_code]["delta_ct_control"]) not in ("EXCLUDED", None)
+        if d.get("Grup") == "Control"
+        and d.get("__target_gene__") == gene_label
+        and d.get("__dct_ctrl__") not in ("EXCLUDED", None)
         and d.get("Outlier Excluded", "No") == "No"
     ]
 
     patient_dcts = {}
     for j in range(num_patient_groups):
-        pg_label = f"{translations[language_code]['patient_group']} {j+1}"
+        pg_label = f"Group {j+1}"
         vals = [
-            float(d[translations[language_code]["delta_ct_patient"]])
+            float(d["__dct_patient__"])
             for d in input_values_table
             if d.get("Grup") == pg_label
-            and d.get(translations[language_code]["target_gene"]) == gene_label
-            and d.get(translations[language_code]["delta_ct_patient"]) not in ("EXCLUDED", None)
+            and d.get("__target_gene__") == gene_label
+            and d.get("__dct_patient__") not in ("EXCLUDED", None)
             and d.get("Outlier Excluded", "No") == "No"
         ]
         if vals:
@@ -2913,7 +2918,7 @@ for i in range(num_target_genes):
         continue
 
     all_groups      = [ctrl_dct] + list(patient_dcts.values())
-    all_group_names = [translations[language_code]["control_group"]] + list(patient_dcts.keys())
+    all_group_names = ["Control"] + list(patient_dcts.keys())
     n_groups        = len(all_groups)
 
     if n_groups < 3:
@@ -3094,31 +3099,61 @@ This addresses the limitation of pairwise-only testing, which inflates Type I er
         st.info(translations[language_code]["multigroup_2group_note"])
 
 
-    if input_values_table: 
+    if input_values_table:
         st.subheader(f" {translations[language_code]['gr_tbl']}")
-        input_df = pd.DataFrame(input_values_table) 
-        st.write(input_df) 
-
-        csv = input_df.to_csv(index=False).encode("utf-8")  
+        _T = translations[language_code]
+        # Rename fixed keys to translated column headers for display
+        _ivt_rename = {
+            "__sample_num__":   _T.get("sample_number", "Sample #"),
+            "__target_gene__":  _T.get("target_gene",   "Gene"),
+            "Grup":             _T.get("Grup",          "Group"),
+            "__target_ct__":    _T.get("target_ct",     "Target Ct"),
+            "__ref_ct__":       _T.get("reference_ct",  "Ref Ct"),
+            "__dct_ctrl__":     _T.get("delta_ct_control", "ΔCt Control"),
+            "__dct_patient__":  _T.get("delta_ct_patient", "ΔCt Patient"),
+            "Outlier Excluded": _T.get("pdf_outlier_col", "Outlier Excluded"),
+        }
+        input_df = pd.DataFrame(input_values_table).rename(columns=_ivt_rename)
+        st.write(input_df)
+        csv = input_df.to_csv(index=False).encode("utf-8")
         st.download_button(
-            label=translations[language_code]['download_csv'],
-            data=csv, file_name="giris_verileri.csv", mime="text/csv") 
+            label=_T["download_csv"],
+            data=csv, file_name="giris_verileri.csv", mime="text/csv")
 
     # Sonuçlar Tablosunu Göster
     if data:
         st.subheader(f" {translations[language_code]['nil_mine']}")
-        df = pd.DataFrame(data)
+        _T = translations[language_code]
+        _data_rename = {
+            "__target_gene__":  _T.get("target_gene",   "Gene"),
+            "__patient_group__":_T.get("patient_group", "Group"),
+            "__ddct__":         _T.get("delta_delta_ct","ΔΔCt"),
+            "__fc__":           _T.get("gene_expression_change", "2^(-ΔΔCt)"),
+            "__pfaffl__":       _T.get("pfaffl_ratio",  "Pfaffl"),
+            "__regulation__":   _T.get("regulation_status", "Regulation"),
+            "__dct_ctrl__":     _T.get("delta_ct_control", "ΔCt Control"),
+            "__dct_patient__":  _T.get("delta_ct_patient", "ΔCt Patient"),
+        }
+        df = pd.DataFrame(data).rename(columns=_data_rename)
         st.write(df)
 
     # İstatistik Sonuçları
     if stats_data:
         st.subheader(f" {translations[language_code]['statistical_results']}")
-        stats_df = pd.DataFrame(stats_data)
+        _T = translations[language_code]
+        _stats_rename = {
+            "__target_gene__":  _T.get("target_gene",  "Gene"),
+            "__patient_group__":_T.get("patient_group","Group"),
+            "__test_type__":    _T.get("test_type",    "Test Type"),
+            "__test_method__":  _T.get("test_method",  "Test Method"),
+            "__pvalue__":       _T.get("test_pvalue",  "p-value"),
+            "__significance__": _T.get("significance", "Significance"),
+        }
+        stats_df = pd.DataFrame(stats_data).rename(columns=_stats_rename)
         st.write(stats_df)
-        
         csv_stats = stats_df.to_csv(index=False).encode("utf-8")
         st.download_button(
-            label=translations[language_code]['download_csv'],
+            label=_T["download_csv"],
             data=csv_stats,
             file_name="istatistik_sonuclari.csv",
             mime="text/csv")
@@ -3146,16 +3181,16 @@ at least one false positive increases with the number of tests performed
 Ge Y et al. *Bioinformatics* 2003; Storey JD. *J R Stat Soc B* 2002.
 """)
 
-        pval_key  = translations[language_code]["test_pvalue"]
-        gene_key  = translations[language_code]["target_gene"]
-        group_key = translations[language_code]["patient_group"]
+        pval_key  = "__pvalue__"
+        gene_key  = "__target_gene__"
+        group_key = "__patient_group__"
 
         correction_rows = [
             {
                 "Gene":   r[gene_key],
                 "Group":  r[group_key],
                 "Raw p":  r[pval_key],
-                "Test":   r.get(translations[language_code]["test_method"], "—"),
+                "Test":   r.get("__test_method__", "—"),
             }
             for r in stats_data
             if r.get(pval_key) is not None
@@ -3236,11 +3271,11 @@ Ge Y et al. *Bioinformatics* 2003; Storey JD. *J R Stat Soc B* 2002.
         st.subheader(f"📊 {translations[language_code].get('multigene_fc_chart_title', 'Multi-Gene Expression Comparison')}")
 
         # Collect fold changes per gene per group
-        fc_key  = translations[language_code]["gene_expression_change"]
-        pf_key  = translations[language_code]["pfaffl_ratio"]
-        tg_key2 = translations[language_code]["target_gene"]
-        pg_key2 = translations[language_code]["patient_group"]
-        reg_key = translations[language_code]["regulation_status"]
+        fc_key  = "__fc__"
+        pf_key  = "__pfaffl__"
+        tg_key2 = "__target_gene__"
+        pg_key2 = "__patient_group__"
+        reg_key = "__regulation__"
 
         method_choice = st.radio(
             "Method",
@@ -3326,20 +3361,20 @@ Ge Y et al. *Bioinformatics* 2003; Storey JD. *J R Stat Soc B* 2002.
         st.subheader(f"{translations[language_code]['target_gene']} {i+1} - {translations[language_code]['distribution_graph']}")
 
         control_target_ct_values = [
-            d[translations[language_code]["target_ct"]] 
+            d["__target_ct__"] 
             for d in input_values_table
-            if d["Grup"] == translations[language_code]["control_group"] and
-               d[translations[language_code]["target_gene"]] == f"{translations[language_code]['target_gene']} {i+1}" and
-               d.get(translations[language_code]["target_ct"]) not in ("EXCLUDED", None) and
+            if d["Grup"] == "Control" and
+               d["__target_gene__"] == f"Gene {i+1}" and
+               d.get("__target_ct__") not in ("EXCLUDED", None) and
                d.get("Outlier Excluded", "No") == "No"
         ]
 
         control_reference_ct_values = [
-            d[translations[language_code]["reference_ct"]] 
+            d["__ref_ct__"] 
             for d in input_values_table
-            if d["Grup"] == translations[language_code]["control_group"] and
-               d[translations[language_code]["target_gene"]] == f"{translations[language_code]['target_gene']} {i+1}" and
-               d.get(translations[language_code]["reference_ct"]) not in ("EXCLUDED", None) and
+            if d["Grup"] == "Control" and
+               d["__target_gene__"] == f"Gene {i+1}" and
+               d.get("__ref_ct__") not in ("EXCLUDED", None) and
                d.get("Outlier Excluded", "No") == "No"
         ]
 
@@ -3361,11 +3396,11 @@ Ge Y et al. *Bioinformatics* 2003; Storey JD. *J R Stat Soc B* 2002.
 
         for j in range(num_patient_groups):
             sample_delta_ct_values = [
-                float(d[translations[language_code]["delta_ct_patient"]])
+                float(d["__dct_patient__"])
                 for d in input_values_table 
-                if d["Grup"] == f"{translations[language_code]['patient_group']} {j+1}" and 
-                   d[translations[language_code]["target_gene"]] == f"{translations[language_code]['target_gene']} {i+1}" and
-                   d.get(translations[language_code]["delta_ct_patient"]) not in ("EXCLUDED", None) and
+                if d["Grup"] == f"Group {j+1}" and 
+                   d["__target_gene__"] == f"Gene {i+1}" and
+                   d.get("__dct_patient__") not in ("EXCLUDED", None) and
                    d.get("Outlier Excluded", "No") == "No"
             ]
             if not sample_delta_ct_values:
@@ -3383,7 +3418,7 @@ Ge Y et al. *Bioinformatics* 2003; Storey JD. *J R Stat Soc B* 2002.
             x=np.ones(len(control_delta_ct)) + np.random.uniform(-0.05, 0.05, len(control_delta_ct)),
             y=control_delta_ct,
             mode='markers',
-            name=translations[language_code]["control_group"],
+            name="Control",
             marker=dict(color='blue'),
             text=[f"{translations[language_code]['control']} {value:.2f}, {translations[language_code]['sample']} {idx+1}" for idx, value in enumerate(control_delta_ct)],
             hoverinfo='text'
@@ -3391,11 +3426,11 @@ Ge Y et al. *Bioinformatics* 2003; Storey JD. *J R Stat Soc B* 2002.
 
         for j in range(num_patient_groups):
             sample_delta_ct_values = [
-                float(d[translations[language_code]["delta_ct_patient"]])
+                float(d["__dct_patient__"])
                 for d in input_values_table 
-                if d["Grup"] == f"{translations[language_code]['patient_group']} {j+1}" and 
-                   d[translations[language_code]["target_gene"]] == f"{translations[language_code]['target_gene']} {i+1}" and
-                   d.get(translations[language_code]["delta_ct_patient"]) not in ("EXCLUDED", None) and
+                if d["Grup"] == f"Group {j+1}" and 
+                   d["__target_gene__"] == f"Gene {i+1}" and
+                   d.get("__dct_patient__") not in ("EXCLUDED", None) and
                    d.get("Outlier Excluded", "No") == "No"
             ]
             if not sample_delta_ct_values:
@@ -3404,7 +3439,7 @@ Ge Y et al. *Bioinformatics* 2003; Storey JD. *J R Stat Soc B* 2002.
                 x=np.ones(len(sample_delta_ct_values)) * (j + 2) + np.random.uniform(-0.05, 0.05, len(sample_delta_ct_values)),
                 y=sample_delta_ct_values,
                 mode='markers',
-                name=f"{translations[language_code]['patient_group']} {j+1}",
+                name=f"Group {j+1}",
                 marker=dict(color='red'),
                 text=[f"{translations[language_code]['patient']} {value:.2f}, {translations[language_code]['sample']} {idx+1}" for idx, value in enumerate(sample_delta_ct_values)],
                 hoverinfo='text'
@@ -3414,7 +3449,7 @@ Ge Y et al. *Bioinformatics* 2003; Storey JD. *J R Stat Soc B* 2002.
             title=f"{translations[language_code]['target_gene']} {i+1} - {translations[language_code]['delta_ct_distribution']}",
             xaxis=dict(
                 tickvals=[1] + [j + 2 for j in range(num_patient_groups)],
-                ticktext=[translations[language_code]['control_group']] + [f"{translations[language_code]['patient_group']} {j+1}" for j in range(num_patient_groups)],
+                ticktext=["Control"] + [f"Group {j+1}" for j in range(num_patient_groups)],
                 title=translations[language_code]['x_axis_title']
             ),
             yaxis=dict(title=translations[language_code]['delta_ct_value']),
@@ -3528,8 +3563,8 @@ def create_pdf(results, stats, input_df, language_code):
     elements.append(hr())
     elements.append(Spacer(1, 10))
 
-    n_genes    = len(set(r.get(T['target_gene'], '') for r in results))
-    n_groups   = len(set(r.get(T['patient_group'], '') for r in results))
+    n_genes    = len(set(r.get("__target_gene__", '') for r in results))
+    n_groups   = len(set(r.get("__patient_group__", '') for r in results))
     n_samples  = len(input_df)
     n_excluded = sum(1 for _, row in input_df.iterrows()
                      if str(row.get('Outlier Excluded', 'No')).startswith('Yes'))
@@ -3628,21 +3663,21 @@ def create_pdf(results, stats, input_df, language_code):
     res_cols = T.get('pdf_res_cols', ['Gene','Group','ΔCt Ctrl','ΔCt Sample','ΔΔCt','2^(-ΔΔCt)','Pfaffl','Reg','Et','Er'])
     res_rows = [res_cols]
     for r in results:
-        ddc = r.get(T['delta_delta_ct'], '')
-        fc  = r.get(T['gene_expression_change'], '')
-        pf  = r.get(T['pfaffl_ratio'], '')
-        dcc = r.get(T['delta_ct_control'], '')
-        dcs = r.get(T['delta_ct_patient'], '')
+        ddc = r.get("__ddct__", '')
+        fc  = r.get("__fc__", '')
+        pf  = r.get("__pfaffl__", '')
+        dcc = r.get("__dct_ctrl__", '')
+        dcs = r.get("__dct_patient__", '')
         et  = r.get('E target', ''); er = r.get('E ref', '')
         res_rows.append([
-            str(r.get(T['target_gene'],'')),
-            str(r.get(T['patient_group'],'')),
+            str(r.get("__target_gene__",'')),
+            str(r.get("__patient_group__",'')),
             f"{dcc:.4f}" if isinstance(dcc, float) else str(dcc),
             f"{dcs:.4f}" if isinstance(dcs, float) else str(dcs),
             f"{ddc:.4f}" if isinstance(ddc, float) else str(ddc),
             f"{fc:.4f}"  if isinstance(fc,  float) else str(fc),
             f"{pf:.4f}"  if isinstance(pf,  float) else str(pf),
-            str(r.get(T['regulation_status'], s('pdf_nochange'))),
+            str(r.get("__regulation__", s('pdf_nochange'))),
             str(et), str(er)
         ])
     cw10 = (letter[0]-100)/10
@@ -3653,9 +3688,9 @@ def create_pdf(results, stats, input_df, language_code):
     if results:
         try:
             fig_fc, ax_fc = plt.subplots(figsize=(7, 3.5))
-            labels_fc = [f"{r.get(T['target_gene'],'')} /\n{r.get(T['patient_group'],'')}" for r in results]
-            vals_2  = [r.get(T['gene_expression_change'], 0) for r in results]
-            vals_pf = [r.get(T['pfaffl_ratio'], 0) for r in results]
+            labels_fc = [f"{r.get("__target_gene__",'')} /\n{r.get("__patient_group__",'')}" for r in results]
+            vals_2  = [r.get("__fc__", 0) for r in results]
+            vals_pf = [r.get("__pfaffl__", 0) for r in results]
             xr = range(len(labels_fc)); w = 0.35
             b1 = ax_fc.bar([i-w/2 for i in xr], vals_2,  width=w, label='2^(-ΔΔCt)', color='#3f51b5', alpha=0.85)
             b2 = ax_fc.bar([i+w/2 for i in xr], vals_pf, width=w, label='Pfaffl',    color='#e91e63', alpha=0.85)
@@ -3686,12 +3721,12 @@ def create_pdf(results, stats, input_df, language_code):
     stat_rows = [stat_cols]
     for st in stats:
         stat_rows.append([
-            str(st.get(T['target_gene'], '')),
+            str(st.get("__target_gene__", '')),
             str(st.get('Comparison', '')),
-            str(st.get(T['test_type'], '')),
-            str(st.get(T['test_method'], '')),
-            f"{st.get(T['test_pvalue'], 0):.4f}",
-            str(st.get(T['significance'], '')),
+            str(st.get("__test_type__", '')),
+            str(st.get("__test_method__", '')),
+            f"{st.get("__pvalue__", 0):.4f}",
+            str(st.get("__significance__", '')),
         ])
     cw6 = (letter[0]-100)/6
     elements.append(make_table(stat_rows, col_widths=[cw6]*6))
@@ -3701,8 +3736,8 @@ def create_pdf(results, stats, input_df, language_code):
     if stats:
         try:
             fig_p, ax_p = plt.subplots(figsize=(7, 3))
-            labels_p = [f"{st.get(T['target_gene'],'')} / {st.get('Comparison','')}" for st in stats]
-            pvals = [st.get(T['test_pvalue'], 1) for st in stats]
+            labels_p = [f"{st.get("__target_gene__",'')} / {st.get('Comparison','')}" for st in stats]
+            pvals = [st.get("__pvalue__", 1) for st in stats]
             bar_colors = ['#e53935' if p < 0.05 else '#90a4ae' for p in pvals]
             ax_p.barh(labels_p, pvals, color=bar_colors, alpha=0.85)
             ax_p.axvline(x=0.05, color='black', linestyle='--', linewidth=0.9)
@@ -3729,8 +3764,8 @@ def create_pdf(results, stats, input_df, language_code):
     elements.append(Paragraph(s('pdf_s5_body'), body_style))
     elements.append(Spacer(1, 8))
 
-    tg_key_  = T['target_gene']
-    dcp_key_ = T['delta_ct_patient']
+    tg_key_  = "__target_gene__"
+    dcp_key_ = "__dct_patient__"
     palette  = ['#3f51b5','#e91e63','#009688','#ff9800','#9c27b0']
 
     for i in range(num_target_genes):
@@ -3739,16 +3774,16 @@ def create_pdf(results, stats, input_df, language_code):
             fig_d, ax_d = plt.subplots(figsize=(6, 3.2))
             all_vals = []; all_labels = []
             ctrl_vals = [
-                float(d[T['delta_ct_control']]) for d in input_values_table
+                float(d["__dct_ctrl__"]) for d in input_values_table
                 if d.get(tg_key_) == gene_label
-                and d.get(T['delta_ct_control']) not in ("EXCLUDED", None)
+                and d.get("__dct_ctrl__") not in ("EXCLUDED", None)
                 and d.get("Outlier Excluded", "No") == "No"
             ]
             if ctrl_vals:
                 all_vals.append(ctrl_vals)
                 all_labels.append(T['control_group'])
             for j in range(num_patient_groups):
-                pg = f"{T['patient_group']} {j+1}"
+                pg = f"Group {j+1}"
                 sv = [float(d[dcp_key_]) for d in input_values_table
                       if d.get(tg_key_) == gene_label
                       and d.get("Grup") == pg
