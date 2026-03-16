@@ -2532,7 +2532,7 @@ with tab_data:
         for idx in range(min_control_len):
             row = {
                 "__sample_num__": sample_counter,
-                "__target_gene__": f"{target_gene} {i+1}",
+                "__target_gene__": f"Gene {i+1}",
                 "Grup": "Control",
                 "__target_ct__": control_target_ct_values[idx],
                 "__ref_ct__": round(ctrl_norm_factor[idx], 4),
@@ -2549,7 +2549,7 @@ with tab_data:
         for ex_idx in ctrl_excluded_target:
             input_values_table.append({
                 "__sample_num__": f"{ex_idx + 1} ⚠️",
-                "__target_gene__": f"{target_gene} {i+1}",
+                "__target_gene__": f"Gene {i+1}",
                 "Grup": "Control",
                 "__target_ct__": "EXCLUDED",
                 "__ref_ct__": "EXCLUDED",
