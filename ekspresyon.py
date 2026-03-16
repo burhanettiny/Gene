@@ -3636,20 +3636,29 @@ def create_pdf(results, stats, input_df, language_code):
             except Exception: pass
         return safe_str(txt, lang=language_code)
 
+    from reportlab.platypus import Flowable as _Flowable
+
     def make_table(rows, col_widths=None, header=True):
         if not rows: return Spacer(1,1)
-        # Convert all cells to Paragraph for font support (with Arabic reshape)
         styled_rows = []
-        _cell_align = 2 if RTL else 1  # RTL: sağ hizalı, LTR: ortalı
+        _cell_align = 2 if RTL else 1
         for ri, row in enumerate(rows):
             styled_row = []
             for cell in row:
-                cell_str = safe_str(str(cell) if not isinstance(cell, str) else cell,
-                                    lang=language_code)
+                # Hücre zaten ReportLab nesnesi ise (Paragraph vb.) olduğu gibi kullan
+                if isinstance(cell, _Flowable):
+                    styled_row.append(cell)
+                    continue
+                cell_str = safe_str(
+                    str(cell) if not isinstance(cell, str) else cell,
+                    lang=language_code
+                )
                 if ri == 0 and header:
-                    p = Paragraph(cell_str, ParagraphStyle('TH', fontName=fnb, fontSize=7, textColor=colors.white, alignment=1))
+                    p = Paragraph(cell_str, ParagraphStyle('TH', fontName=fnb, fontSize=7,
+                                  textColor=colors.white, alignment=1))
                 else:
-                    p = Paragraph(cell_str, ParagraphStyle('TD', fontName=fn, fontSize=7, alignment=_cell_align))
+                    p = Paragraph(cell_str, ParagraphStyle('TD', fontName=fn, fontSize=7,
+                                  alignment=_cell_align))
                 styled_row.append(p)
             styled_rows.append(styled_row)
         tbl = Table(styled_rows, colWidths=col_widths, repeatRows=1 if header else 0)
@@ -3754,20 +3763,23 @@ def create_pdf(results, stats, input_df, language_code):
         cols = input_df.columns.tolist()
         page_w = letter[0] - 100
         cw = page_w / max(len(cols), 1)
+
+        # Header satırı
         tbl_rows = [cols]
-        excl_col = T.get('pdf_outlier_col', 'Outlier Excluded')
+
         for _, row in input_df.iterrows():
-            row_vals = row.tolist()
             is_excl = str(row.get('Outlier Excluded', 'No')).startswith('Yes')
-            if is_excl:
-                styled = []
-                for v in row_vals:
-                    vs = str(v).replace('&','&amp;').replace('<','&lt;').replace('>','&gt;')
-                    styled.append(Paragraph(vs, ParagraphStyle('EX', fontName=fn, fontSize=7,
-                                  textColor=colors.HexColor('#cc0000'), alignment=1)))
-                tbl_rows.append(styled)
-            else:
-                tbl_rows.append(row_vals)
+            row_cells = []
+            for v in row.tolist():
+                cell_str = safe_str(str(v) if v is not None else '', lang=language_code)
+                style = ParagraphStyle(
+                    'EX' if is_excl else 'TD',
+                    fontName=fn, fontSize=7, alignment=1,
+                    textColor=colors.HexColor('#cc0000') if is_excl else colors.black
+                )
+                row_cells.append(Paragraph(cell_str, style))
+            tbl_rows.append(row_cells)
+
         elements.append(make_table(tbl_rows, col_widths=[cw]*len(cols)))
     elements.append(PageBreak())
 
