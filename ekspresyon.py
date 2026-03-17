@@ -564,6 +564,7 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE kılavuzları).
         "pdf_eff_warn": "UYARI: Pfaffl kullanın",
         "pdf_outlier_col": "Aykırı Değer Dışlandı",
         "pdf_contact": "İletişim: mailtoburhanettin@gmail.com",
+        "pdf_ready": "{n} kayıt hazır — PDF oluşturabilirsiniz.",
     },
 
     "en": {
@@ -874,6 +875,7 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE guidelines).
         "pdf_eff_warn": "WARNING: use Pfaffl",
         "pdf_outlier_col": "Outlier Excluded",
         "pdf_contact": "Contact: mailtoburhanettin@gmail.com",
+        "pdf_ready": "{n} records ready — you can generate the PDF.",
     },
 
     "de": {
@@ -1171,6 +1173,7 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE-Richtlinien).
         "pdf_eff_cols": ["Gen", "E (Ziel)", "Eff% (Ziel)", "E (Ref)", "Eff% (Ref)", "Diff%", "Status"],
         "pdf_eff_ok": "OK", "pdf_eff_warn": "WARNUNG: Pfaffl verwenden",
         "pdf_outlier_col": "Ausreißer ausgeschlossen", "pdf_contact": "Kontakt: mailtoburhanettin@gmail.com",
+        "pdf_ready": "{n} Einträge bereit — Sie können das PDF erstellen.",
     },
 
     "fr": {
@@ -1476,6 +1479,7 @@ Bustin SA et al. *Clin Chem* 2009 (directives MIQE).
         "pdf_eff_warn": "AVERTISSEMENT: utiliser Pfaffl",
         "pdf_outlier_col": "Valeur aberrante exclue",
         "pdf_contact": "Contact: mailtoburhanettin@gmail.com",
+        "pdf_ready": "{n} enregistrements prêts — vous pouvez générer le PDF.",
     },
 
     "es": {
@@ -1781,6 +1785,7 @@ Bustin SA et al. *Clin Chem* 2009 (directrices MIQE).
         "pdf_eff_warn": "ADVERTENCIA: usar Pfaffl",
         "pdf_outlier_col": "Valor atípico excluido",
         "pdf_contact": "Contacto: mailtoburhanettin@gmail.com",
+        "pdf_ready": "{n} registros listos — puede generar el PDF.",
     },
 
     "ar": {
@@ -2078,6 +2083,7 @@ Bustin SA et al. *Clin Chem* 2009 (إرشادات MIQE).
         "pdf_eff_cols": ["الجين", "E (الهدف)", "Eff% (الهدف)", "E (المرجع)", "Eff% (المرجع)", "الفارق%", "الحالة"],
         "pdf_eff_ok": "مقبول", "pdf_eff_warn": "تحذير: استخدم Pfaffl",
         "pdf_outlier_col": "قيمة شاذة مستبعدة", "pdf_contact": "التواصل: mailtoburhanettin@gmail.com",
+        "pdf_ready": "{n} سجلات جاهزة — يمكنك إنشاء تقرير PDF.",
     }
 }
 
@@ -3991,7 +3997,7 @@ with tab_report:
     if not input_values_table:
         st.info(translations[language_code]["error_no_data"])
     else:
-        st.success(f"✅ {len(input_values_table)} kayıt hazır — PDF oluşturabilirsiniz.")
+        st.success(f"✅ " + translations[language_code].get("pdf_ready", "{n} records ready").format(n=len(input_values_table)))
         if st.button(f"📥 {translations[language_code]['generate_pdf']}", key="pdf_btn"):
             pdf_buffer = create_pdf(data, stats_data, pd.DataFrame(input_values_table), language_code)
             st.download_button(
