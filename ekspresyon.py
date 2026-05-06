@@ -2462,7 +2462,17 @@ with tab_data:
             continue
 
         # Trim all arrays to common length
+        # REVIEWER RESPONSE (Comment 12): warn user if n differs between target and reference genes
         min_control_len = min(len(control_target_ct_values), *[len(a) for a in ctrl_ref_arrays])
+        all_ctrl_lengths = [len(control_target_ct_values)] + [len(a) for a in ctrl_ref_arrays]
+        if len(set(all_ctrl_lengths)) > 1:
+            st.warning(
+                f"⚠️ **Unequal replicate counts detected — Control Group {i+1}:**  \n"
+                + f"Target Gene: n={len(control_target_ct_values)}"
+                + "".join([f", Ref Gene {r+1}: n={len(ctrl_ref_arrays[r])}" for r in range(len(ctrl_ref_arrays))])
+                + f"  \nAnalysis will proceed using the **shortest common length (n={min_control_len})**.  \n"
+                + "Please verify your input data — mismatched replicates may indicate a data entry error."
+            )
         control_target_ct_values = control_target_ct_values[:min_control_len]
         ctrl_ref_arrays = [a[:min_control_len] for a in ctrl_ref_arrays]
 
@@ -2682,7 +2692,18 @@ with tab_data:
                 st.error(translations[language_code]["warning_patient_ct"].format(j=j+1))
                 continue
 
+            # REVIEWER RESPONSE (Comment 12): warn if n differs between target and reference genes
             min_sample_len = min(len(sample_target_ct_values), *[len(a) for a in smp_ref_arrays])
+            all_smp_lengths = [len(sample_target_ct_values)] + [len(a) for a in smp_ref_arrays]
+            if len(set(all_smp_lengths)) > 1:
+                st.warning(
+                    f"⚠️ **Unequal replicate counts detected — "
+                    f"{translations[language_code]['patient_group']} {j+1}, Gene {i+1}:**  \n"
+                    + f"Target Gene: n={len(sample_target_ct_values)}"
+                    + "".join([f", Ref Gene {r+1}: n={len(smp_ref_arrays[r])}" for r in range(len(smp_ref_arrays))])
+                    + f"  \nAnalysis will proceed using the **shortest common length (n={min_sample_len})**.  \n"
+                    + "Please verify your input data — mismatched replicates may indicate a data entry error."
+                )
             sample_target_ct_values = sample_target_ct_values[:min_sample_len]
             smp_ref_arrays = [a[:min_sample_len] for a in smp_ref_arrays]
 
