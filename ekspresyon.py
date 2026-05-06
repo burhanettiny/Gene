@@ -77,14 +77,6 @@ st.markdown("""
 
 st.sidebar.markdown("---")
 
-# ── REVIEWER RESPONSE (Reviewer 2): Add one-click example data loader ────────
-if st.sidebar.button(translations[language_code]["sidebar_load_example"]):
-    st.session_state["control_target_ct_0"] = "23.15\n22.90\n25.20\n24.88\n23.45"
-    st.session_state["control_reference_ct_0_0"] = "18.20\n17.90\n18.50\n18.30\n18.10"
-    st.session_state["sample_target_ct_0_0"] = "27.30\n28.10\n26.80\n27.60\n28.40"
-    st.session_state["sample_reference_ct_0_0_0"] = "18.30\n18.00\n18.60\n18.20\n18.40"
-    st.sidebar.success(translations[language_code]["sidebar_example_loaded"])
-
 st.sidebar.markdown("---")
 instruction_clicked = st.sidebar.button("📘 Instruction ")
 
@@ -2415,6 +2407,15 @@ Bustin SA et al. *Clin Chem* 2009 (إرشادات MIQE).
 # RDML / RDES SIDEBAR (burada language_code ve translations hazır)
 # ═══════════════════════════════════════════════════════════════════════════════
 _t = translations[language_code]
+
+# ── REVIEWER RESPONSE (Reviewer 2): One-click example data loader ─────────────
+st.sidebar.markdown("---")
+if st.sidebar.button(_t.get("sidebar_load_example", "📂 Load Example Data")):
+    st.session_state["control_target_ct_0"] = "23.15\n22.90\n25.20\n24.88\n23.45"
+    st.session_state["control_reference_ct_0_0"] = "18.20\n17.90\n18.50\n18.30\n18.10"
+    st.session_state["sample_target_ct_0_0"] = "27.30\n28.10\n26.80\n27.60\n28.40"
+    st.session_state["sample_reference_ct_0_0_0"] = "18.30\n18.00\n18.60\n18.20\n18.40"
+    st.sidebar.success(_t.get("sidebar_example_loaded", "✅ Example data loaded! Switch to Data Entry tab."))
 st.sidebar.markdown("---")
 with st.sidebar.expander(_t.get("rdml_expander", "📂 Import RDML / RDES File"), expanded=False):
     st.markdown(_t.get("rdml_description", "Upload an RDML or RDES file to auto-fill Cq values."))
@@ -4809,19 +4810,19 @@ with tab_report:
 st.markdown(f"<h4 style='font-size: 12px; font-family: Arial, sans-serif; color: #555;'><a href='mailto:mailtoburhanettin@gmail.com' style='color: #555; text-decoration: none;'>{translations[language_code]['subtitle']}</a></h4>", unsafe_allow_html=True)
 
 st.sidebar.markdown("---")
-st.sidebar.markdown(translations[language_code]["sidebar_desktop_title"])
+st.sidebar.markdown(_t.get("sidebar_desktop_title", "### 💻 Desktop Application"))
 st.sidebar.link_button(
-    translations[language_code]["sidebar_desktop_btn"],
+    _t.get("sidebar_desktop_btn", "⬇️ Download Desktop App"),
     "https://drive.google.com/file/d/1oGBPqLeS6JxWBdVSs47qgEfl0wiMI3Z9/view?usp=sharing",
     use_container_width=True
 )
 
 # ── REVIEWER RESPONSE (Reviewer 2): Open-source source code on GitHub ─────────
 st.sidebar.markdown("---")
-st.sidebar.markdown(translations[language_code]["sidebar_opensource_title"])
-st.sidebar.markdown(translations[language_code]["sidebar_opensource_body"])
+st.sidebar.markdown(_t.get("sidebar_opensource_title", "### 🔓 Open Source"))
+st.sidebar.markdown(_t.get("sidebar_opensource_body", "GeneQuantify is open source (GPL-3.0).  \nSource code available on GitHub:"))
 st.sidebar.link_button(
-    translations[language_code]["sidebar_github_btn"],
+    _t.get("sidebar_github_btn", "⭐ View Source on GitHub"),
     "https://github.com/byalcinkaya/GeneQuantify",
     use_container_width=True
 )
