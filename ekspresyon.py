@@ -91,6 +91,77 @@ if st.sidebar.button("📂 Load Example Data"):
     st.sidebar.success("✅ Example data loaded! Switch to Data Entry tab.")
 
 st.sidebar.markdown("---")
+
+# ── RDML / RDES FILE IMPORT ───────────────────────────────────────────────────
+with st.sidebar.expander("📂 Import RDML / RDES File", expanded=False):
+    st.markdown(
+        "Upload an **RDML** (`.rdml`) or **RDES** (`.tsv`/`.csv`/`.txt`) file "
+        "to auto-fill Cq values."
+    )
+    imported_file = st.file_uploader(
+        "Choose file",
+        type=["rdml", "tsv", "csv", "txt"],
+        key="rdml_rdes_uploader",
+        help="RDML: Bio-Rad CFX, Roche LightCycler, etc.  RDES: tab-separated spreadsheet format.",
+    )
+
+    if imported_file is not None:
+        file_bytes = imported_file.read()
+        fname = imported_file.name.lower()
+
+        if fname.endswith(".rdml"):
+            import_df, import_err = parse_rdml(file_bytes)
+            fmt_label = "RDML"
+        else:
+            import_df, import_err = parse_rdes(file_bytes)
+            fmt_label = "RDES"
+
+        if import_err:
+            st.error(f"❌ {fmt_label} parse error: {import_err}")
+            import_df = None
+
+        if import_df is not None:
+            st.success(f"✅ {fmt_label} file loaded — {len(import_df)} reactions found.")
+
+            # Show a preview
+            with st.expander("Preview parsed data", expanded=False):
+                st.dataframe(import_df, use_container_width=True)
+
+            # Samples detected
+            all_samples = sorted(import_df["Sample"].unique())
+            st.markdown("**Step 1 — Label your Control group**")
+            ctrl_label = st.text_input(
+                "Control sample name(s) (comma-separated substrings)",
+                value=", ".join([s for s in all_samples[:1]]),
+                key="rdml_ctrl_label",
+                help="Any sample whose name contains this text will be treated as Control."
+            )
+
+            st.markdown("**Step 2 — Label your Patient groups**")
+            n_pat_grps = st.number_input("Number of patient groups", min_value=1, max_value=10, value=1, step=1, key="rdml_n_pat")
+            patient_labels = []
+            for pg in range(int(n_pat_grps)):
+                default_pat = all_samples[pg + 1] if pg + 1 < len(all_samples) else ""
+                pat_lbl = st.text_input(
+                    f"Patient group {pg+1} sample name(s)",
+                    value=default_pat,
+                    key=f"rdml_pat_{pg}",
+                    help="Comma-separated substrings. All matching samples will be pooled into this group."
+                )
+                patient_labels.append(pat_lbl)
+
+            if st.button(f"✅ Apply {fmt_label} import to Data Entry", key="rdml_apply_btn"):
+                n_filled = apply_import_to_session(import_df, ctrl_label, patient_labels)
+                if n_filled > 0:
+                    st.success(f"✅ {n_filled} Cq values loaded into Data Entry tab! "
+                               "Switch to the Data Entry tab to review and adjust.")
+                else:
+                    st.warning(
+                        "⚠️ No values were mapped. Check that your control/patient "
+                        "labels match the sample names in the preview above."
+                    )
+
+st.sidebar.markdown("---")
 instruction_clicked = st.sidebar.button("📘 Instruction ")
 
 if instruction_clicked or selected_language_name == "Instruction":
@@ -2120,6 +2191,233 @@ tab_data, tab_results, tab_report = st.tabs([
 def parse_input_data(input_data):
     values = [x.replace(",", ".").strip() for x in input_data.split() if x.strip()]
     return np.array([float(x) for x in values if x])
+
+
+# ─── RDML PARSER ──────────────────────────────────────────────────────────────
+def parse_rdml(file_bytes):
+    """
+    Parse an RDML file (.rdml is a ZIP containing rdml_data.xml).
+    Returns a dict: {target_name: {'unkn': [cq,...], 'ref': [cq,...]}}
+    Also returns a flat DataFrame for inspection.
+    """
+    import zipfile, io
+    try:
+        import xml.etree.ElementTree as ET
+    except ImportError:
+        return None, "xml.etree.ElementTree not available"
+
+    rows = []
+    try:
+        with zipfile.ZipFile(io.BytesIO(file_bytes)) as zf:
+            xml_name = next((n for n in zf.namelist() if n.endswith(".xml")), None)
+            if xml_name is None:
+                return None, "No XML found inside RDML file."
+            with zf.open(xml_name) as xf:
+                tree = ET.parse(xf)
+        root = tree.getroot()
+
+        # RDML uses namespaces like {http://www.rdml.org/rdml_v1_2.rng}
+        ns_raw = root.tag.split("}")[0].lstrip("{") if "}" in root.tag else ""
+        ns = f"{{{ns_raw}}}" if ns_raw else ""
+
+        # Build lookup dicts for targets and samples
+        target_types = {}   # id -> type ('toi' or 'ref')
+        target_names = {}   # id -> name
+        for t in root.findall(f"{ns}target"):
+            tid  = t.get("id", "")
+            tname = t.findtext(f"{ns}commercialAssay") or tid
+            ttype = t.findtext(f"{ns}type") or "toi"
+            target_types[tid] = ttype
+            target_names[tid] = tname
+
+        sample_types = {}  # id -> type ('unkn', 'ntc', 'std', etc.)
+        for s in root.findall(f"{ns}sample"):
+            sid   = s.get("id", "")
+            stype = s.findtext(f"{ns}type") or "unkn"
+            sample_types[sid] = stype
+
+        for exp in root.findall(f"{ns}experiment"):
+            for run in exp.findall(f"{ns}run"):
+                for react in run.findall(f"{ns}react"):
+                    sample_id = react.findtext(f"{ns}sample") or react.get("id", "")
+                    stype = sample_types.get(sample_id, "unkn")
+                    for data_el in react.findall(f"{ns}data"):
+                        target_id = data_el.findtext(f"{ns}tar") or ""
+                        cq_text   = data_el.findtext(f"{ns}cq")
+                        try:
+                            cq = float(cq_text) if cq_text else None
+                        except ValueError:
+                            cq = None
+                        rows.append({
+                            "Sample":      sample_id,
+                            "SampleType":  stype,
+                            "Target":      target_names.get(target_id, target_id),
+                            "TargetType":  target_types.get(target_id, "toi"),
+                            "Cq":          cq,
+                        })
+
+    except zipfile.BadZipFile:
+        # Some RDML files are plain XML, not ZIP
+        try:
+            tree = ET.parse(io.BytesIO(file_bytes))
+            root = tree.getroot()
+            ns_raw = root.tag.split("}")[0].lstrip("{") if "}" in root.tag else ""
+            ns = f"{{{ns_raw}}}" if ns_raw else ""
+            target_types = {}
+            target_names = {}
+            for t in root.findall(f"{ns}target"):
+                tid   = t.get("id", "")
+                ttype = t.findtext(f"{ns}type") or "toi"
+                target_types[tid] = ttype
+                target_names[tid] = tid
+            sample_types = {}
+            for s in root.findall(f"{ns}sample"):
+                sid   = s.get("id", "")
+                stype = s.findtext(f"{ns}type") or "unkn"
+                sample_types[sid] = stype
+            for exp in root.findall(f"{ns}experiment"):
+                for run in exp.findall(f"{ns}run"):
+                    for react in run.findall(f"{ns}react"):
+                        sample_id = react.findtext(f"{ns}sample") or react.get("id", "")
+                        stype = sample_types.get(sample_id, "unkn")
+                        for data_el in react.findall(f"{ns}data"):
+                            target_id = data_el.findtext(f"{ns}tar") or ""
+                            cq_text   = data_el.findtext(f"{ns}cq")
+                            try:
+                                cq = float(cq_text) if cq_text else None
+                            except ValueError:
+                                cq = None
+                            rows.append({
+                                "Sample":     sample_id,
+                                "SampleType": stype,
+                                "Target":     target_names.get(target_id, target_id),
+                                "TargetType": target_types.get(target_id, "toi"),
+                                "Cq":         cq,
+                            })
+        except Exception as e:
+            return None, f"RDML parse error: {e}"
+    except Exception as e:
+        return None, f"RDML parse error: {e}"
+
+    if not rows:
+        return None, "No reaction data found in RDML file."
+
+    df = pd.DataFrame(rows)
+    return df, None
+
+
+# ─── RDES PARSER ──────────────────────────────────────────────────────────────
+def parse_rdes(file_bytes):
+    """
+    Parse an RDES file (tab-separated, .tsv / .csv / .txt).
+    Required columns: Well, Sample, Sample Type, Target, Target Type, Dye, Cq
+    Returns DataFrame with columns: Sample, SampleType, Target, TargetType, Cq
+    """
+    try:
+        content = file_bytes.decode("utf-8", errors="replace")
+        lines   = [l.rstrip("\r") for l in content.split("\n") if l.strip()]
+        if not lines:
+            return None, "Empty RDES file."
+
+        header = [h.strip() for h in lines[0].split("\t")]
+        required = ["Well", "Sample", "Sample Type", "Target", "Target Type", "Dye", "Cq"]
+        missing  = [c for c in required if c not in header]
+        if missing:
+            return None, f"RDES file missing required columns: {missing}"
+
+        rows = []
+        for line in lines[1:]:
+            if not line.strip():
+                continue
+            cells = line.split("\t")
+            row   = dict(zip(header, cells))
+            cq_raw = row.get("Cq", "").strip()
+            try:
+                cq = float(cq_raw.replace(",", ".")) if cq_raw and cq_raw != "-1.0" else None
+            except ValueError:
+                cq = None
+            rows.append({
+                "Sample":     row.get("Sample", "").strip(),
+                "SampleType": row.get("Sample Type", "unkn").strip(),
+                "Target":     row.get("Target", "").strip(),
+                "TargetType": row.get("Target Type", "toi").strip(),
+                "Cq":         cq,
+            })
+
+        if not rows:
+            return None, "No data rows found in RDES file."
+        return pd.DataFrame(rows), None
+
+    except Exception as e:
+        return None, f"RDES parse error: {e}"
+
+
+# ─── RDML/RDES → session_state mapper ─────────────────────────────────────────
+def apply_import_to_session(df, ctrl_sample_label, patient_labels):
+    """
+    Given a parsed DataFrame (columns: Sample, SampleType, Target, TargetType, Cq),
+    fill st.session_state keys that GeneQuantify's text_area widgets read from.
+
+    Mapping logic:
+      - Rows where SampleType in ('ntc','nac','ntp','std','opt') → skipped
+      - ctrl_sample_label: sample name(s) that belong to the control group
+        (comma-separated string; matches by substring if needed)
+      - patient_labels: list of sample names for each patient group
+      - TargetType == 'ref' → reference gene; 'toi' → target gene
+    """
+    if df is None:
+        return 0
+
+    # Clean: drop rows without a Cq value or with Cq == -1
+    df = df.dropna(subset=["Cq"]).copy()
+    df = df[df["Cq"] != -1.0]
+
+    ctrl_keywords = [s.strip() for s in ctrl_sample_label.split(",") if s.strip()]
+
+    def is_ctrl(sample_name):
+        return any(kw.lower() in sample_name.lower() for kw in ctrl_keywords)
+
+    # Separate target genes and reference genes
+    targets = sorted(df[df["TargetType"] == "toi"]["Target"].unique())
+    refs    = sorted(df[df["TargetType"] == "ref"]["Target"].unique())
+
+    count = 0
+    for gene_i, target_name in enumerate(targets):
+        tgt_df = df[(df["Target"] == target_name) & (df["TargetType"] == "toi")]
+
+        # Control group — target gene
+        ctrl_cqs = tgt_df[tgt_df["Sample"].apply(is_ctrl)]["Cq"].dropna().tolist()
+        if ctrl_cqs:
+            st.session_state[f"control_target_ct_{gene_i}"] = "\n".join(f"{v:.4f}" for v in ctrl_cqs)
+            count += len(ctrl_cqs)
+
+        # Control group — reference genes
+        for ref_i, ref_name in enumerate(refs):
+            ref_df = df[(df["Target"] == ref_name) & (df["TargetType"] == "ref")]
+            ctrl_ref_cqs = ref_df[ref_df["Sample"].apply(is_ctrl)]["Cq"].dropna().tolist()
+            if ctrl_ref_cqs:
+                st.session_state[f"control_reference_ct_{gene_i}_{ref_i}"] = "\n".join(f"{v:.4f}" for v in ctrl_ref_cqs)
+                count += len(ctrl_ref_cqs)
+
+        # Patient groups
+        for grp_i, pat_label in enumerate(patient_labels):
+            pat_keywords = [s.strip() for s in pat_label.split(",") if s.strip()]
+
+            def is_pat(sample_name, kws=pat_keywords):
+                return any(kw.lower() in sample_name.lower() for kw in kws)
+
+            pat_cqs = tgt_df[tgt_df["Sample"].apply(is_pat)]["Cq"].dropna().tolist()
+            if pat_cqs:
+                st.session_state[f"sample_target_ct_{gene_i}_{grp_i}"] = "\n".join(f"{v:.4f}" for v in pat_cqs)
+                count += len(pat_cqs)
+
+            for ref_i, ref_name in enumerate(refs):
+                ref_df = df[(df["Target"] == ref_name) & (df["TargetType"] == "ref")]
+                pat_ref_cqs = ref_df[ref_df["Sample"].apply(is_pat)]["Cq"].dropna().tolist()
+                if pat_ref_cqs:
+                    st.session_state[f"sample_reference_ct_{gene_i}_{grp_i}_{ref_i}"] = "\n".join(f"{v:.4f}" for v in pat_ref_cqs)
+                    count += len(pat_ref_cqs)
+    return count
 
 def compute_genorm_m(ref_ct_matrix):
     n_refs, n_samples = ref_ct_matrix.shape
