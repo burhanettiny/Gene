@@ -78,17 +78,12 @@ st.markdown("""
 st.sidebar.markdown("---")
 
 # ── REVIEWER RESPONSE (Reviewer 2): Add one-click example data loader ────────
-if st.sidebar.button("📂 Load Example Data"):
-    # Keys must match the key= parameters used in st.text_area below
-    # Control Target Gene 1 Ct values
+if st.sidebar.button(translations[language_code]["sidebar_load_example"]):
     st.session_state["control_target_ct_0"] = "23.15\n22.90\n25.20\n24.88\n23.45"
-    # Control Reference Gene 1 Ct values
     st.session_state["control_reference_ct_0_0"] = "18.20\n17.90\n18.50\n18.30\n18.10"
-    # Patient Group 1 Target Gene 1 Ct values
     st.session_state["sample_target_ct_0_0"] = "27.30\n28.10\n26.80\n27.60\n28.40"
-    # Patient Group 1 Reference Gene 1 Ct values
     st.session_state["sample_reference_ct_0_0_0"] = "18.30\n18.00\n18.60\n18.20\n18.40"
-    st.sidebar.success("✅ Example data loaded! Switch to Data Entry tab.")
+    st.sidebar.success(translations[language_code]["sidebar_example_loaded"])
 
 st.sidebar.markdown("---")
 instruction_clicked = st.sidebar.button("📘 Instruction ")
@@ -380,6 +375,40 @@ translations = {
         "outlier_expander": "ℹ️ qPCR'de aykırı değer tespiti hakkında",
         "outlier_excluded_no": "Hayır",
         "outlier_excluded_yes": "Evet",
+        # Outlier stage selector (Reviewer 1, Yorum 3)
+        "outlier_stage_label": "🔬 Aykırı Değer Uygulama Aşaması",
+        "outlier_stage_raw": "Ham Ct — normalizasyon öncesi (önerilen)",
+        "outlier_stage_dct": "ΔCt — normalizasyon sonrası (eski davranış)",
+        "outlier_stage_help": (
+            "**Ham Ct (önerilen):** Aykırı değerler, ΔCt hesaplanmadan önce ham Ct değerlerine "
+            "uygulanır. Her target ve referans gen için ayrı ayrı kontrol edilir. "
+            "Gürültülü replikatların normalizasyona sızması engellenir.\n\n"
+            "**ΔCt:** Aykırı değerler normalizasyon sonrası uygulanır (orijinal davranış)."
+        ),
+        # Distribution plot mode selector (Reviewer 1, Yorum 3 & 9)
+        "dist_plot_mode_label": "📊 Dağılım Grafiği — Görüntüleme Modu",
+        "dist_plot_rq":   "RQ (2^-ΔCt)  — önerilen",
+        "dist_plot_dct":  "ΔCt  — ham normalize değerler",
+        "dist_plot_ddct": "ΔΔCt  — kontrol ortalamasına göre",
+        "dist_plot_help": (
+            "**RQ (önerilen):** ΔCt → 2^(-ΔCt) dönüşümü. Yüksek değer = yüksek ekspresyon. "
+            "Yüksek ΔCt = düşük ekspresyon paradoksunu ortadan kaldırır.\n\n"
+            "**ΔCt:** Ham logaritmik değerler. Veri dağılımı ve normallik kontrolü için.\n\n"
+            "**ΔΔCt:** Her örneğin ΔCt'si eksi kontrol grubu ortalaması. Kontrole göre değişimi gösterir."
+        ),
+        "unequal_n_warning": (
+            "⚠️ **Eşit olmayan replikat sayısı — {group}:**  \n"
+            "{details}  \nAnaliz **en kısa ortak uzunluk (n={min_n})** kullanılarak devam edecek.  \n"
+            "Veri girişinizi kontrol edin — farklı n değerleri veri giriş hatası olabilir."
+        ),
+        # Sidebar
+        "sidebar_load_example": "📂 Örnek Veri Yükle",
+        "sidebar_example_loaded": "✅ Örnek veri yüklendi! Veri Girişi sekmesine geçin.",
+        "sidebar_desktop_title": "### 💻 Masaüstü Uygulaması",
+        "sidebar_desktop_btn": "⬇️ Masaüstü Uygulamasını İndir",
+        "sidebar_opensource_title": "### 🔓 Açık Kaynak",
+        "sidebar_opensource_body": "GeneQuantify açık kaynaklıdır (GPL-3.0).  \nKaynak kod GitHub'da mevcuttur:",
+        "sidebar_github_btn": "⭐ GitHub'da Kaynak Kodu Görüntüle",
         # Statistical decision
         "stat_decision_title": "🔬 İstatistiksel karar",
         "stat_decision_steps": "**Adım adım test seçimi:**",
@@ -711,6 +740,41 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE kılavuzları).
         "outlier_expander": "ℹ️ About outlier detection in qPCR",
         "outlier_excluded_no": "No",
         "outlier_excluded_yes": "Yes",
+        # Outlier stage selector
+        "outlier_stage_label": "🔬 Outlier Detection Stage",
+        "outlier_stage_raw": "Raw Ct — before normalization (recommended)",
+        "outlier_stage_dct": "ΔCt — after normalization (previous behaviour)",
+        "outlier_stage_help": (
+            "**Raw Ct (recommended):** Outliers are flagged on raw Ct values before ΔCt is computed. "
+            "Applied separately to target and each reference gene. Prevents noisy replicates from "
+            "propagating into the normalization step.\n\n"
+            "**ΔCt:** Outliers are flagged after normalization (original behaviour)."
+        ),
+        # Distribution plot mode selector
+        "dist_plot_mode_label": "📊 Distribution Plot — Display Mode",
+        "dist_plot_rq":   "RQ (2^-ΔCt)  — recommended",
+        "dist_plot_dct":  "ΔCt  — raw normalized values",
+        "dist_plot_ddct": "ΔΔCt  — relative to control mean",
+        "dist_plot_help": (
+            "**RQ (recommended):** Converts ΔCt to 2^(-ΔCt). Higher value = higher expression. "
+            "Avoids the counter-intuitive ΔCt paradox (high ΔCt = low expression).\n\n"
+            "**ΔCt:** Raw normalized values on a log scale. Useful for checking data spread and normality.\n\n"
+            "**ΔΔCt:** Each sample's ΔCt minus the control group mean ΔCt. "
+            "Shows expression change relative to control on a log scale."
+        ),
+        "unequal_n_warning": (
+            "⚠️ **Unequal replicate counts detected — {group}:**  \n"
+            "{details}  \nAnalysis will proceed using the **shortest common length (n={min_n})**.  \n"
+            "Please verify your input data — mismatched replicates may indicate a data entry error."
+        ),
+        # Sidebar
+        "sidebar_load_example": "📂 Load Example Data",
+        "sidebar_example_loaded": "✅ Example data loaded! Switch to Data Entry tab.",
+        "sidebar_desktop_title": "### 💻 Desktop Application",
+        "sidebar_desktop_btn": "⬇️ Download Desktop App",
+        "sidebar_opensource_title": "### 🔓 Open Source",
+        "sidebar_opensource_body": "GeneQuantify is open source (GPL-3.0).  \nSource code available on GitHub:",
+        "sidebar_github_btn": "⭐ View Source on GitHub",
         "stat_decision_title": "🔬 Statistical decision",
         "stat_decision_steps": "**Step-by-step test selection:**",
         "stat_shapiro_title": "**1. Shapiro-Wilk normality test**",
@@ -1040,6 +1104,40 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE guidelines).
         "outlier_expander": "ℹ️ Über Ausreißererkennung in qPCR",
         "outlier_excluded_no": "Nein",
         "outlier_excluded_yes": "Ja",
+        # Outlier stage selector
+        "outlier_stage_label": "🔬 Ausreißererkennung — Analysestufe",
+        "outlier_stage_raw": "Roh-Ct — vor Normalisierung (empfohlen)",
+        "outlier_stage_dct": "ΔCt — nach Normalisierung (bisheriges Verhalten)",
+        "outlier_stage_help": (
+            "**Roh-Ct (empfohlen):** Ausreißer werden vor der ΔCt-Berechnung erkannt. "
+            "Für Zielgen und jedes Referenzgen separat angewendet.\n\n"
+            "**ΔCt:** Ausreißer werden nach der Normalisierung erkannt (bisheriges Verhalten)."
+        ),
+        # Distribution plot mode selector
+        "dist_plot_mode_label": "📊 Verteilungsdiagramm — Anzeigemodus",
+        "dist_plot_rq":   "RQ (2^-ΔCt)  — empfohlen",
+        "dist_plot_dct":  "ΔCt  — rohe normalisierte Werte",
+        "dist_plot_ddct": "ΔΔCt  — relativ zum Kontrollmittelwert",
+        "dist_plot_help": (
+            "**RQ (empfohlen):** Konvertiert ΔCt zu 2^(-ΔCt). Höherer Wert = höhere Expression.\n\n"
+            "**ΔCt:** Rohe logarithmische Werte. Nützlich zur Überprüfung der Datenverteilung.\n\n"
+            "**ΔΔCt:** ΔCt jeder Probe minus dem Kontrollgruppenmittelwert."
+        ),
+        "unequal_n_warning": (
+            "⚠️ **Ungleiche Replikatanzahl erkannt — {group}:**  \n"
+            "{details}  \nAnalyse wird mit der **kürzesten gemeinsamen Länge (n={min_n})** fortgesetzt.  \n"
+            "Bitte überprüfen Sie Ihre Eingabedaten."
+        ),
+        # Sidebar
+        "sidebar_load_example": "📂 Beispieldaten laden",
+        "sidebar_example_loaded": "✅ Beispieldaten geladen! Wechseln Sie zur Dateneingabe-Registerkarte.",
+        "sidebar_desktop_title": "### 💻 Desktop-Anwendung",
+        "sidebar_desktop_btn": "⬇️ Desktop-App herunterladen",
+        "sidebar_opensource_title": "### 🔓 Open Source",
+        "sidebar_opensource_body": "GeneQuantify ist Open Source (GPL-3.0).  \nQuellcode auf GitHub verfügbar:",
+        "sidebar_github_btn": "⭐ Quellcode auf GitHub ansehen",
+        "outlier_excluded_no": "Nein",
+        "outlier_excluded_yes": "Ja",
         "stat_decision_title": "🔬 Statistische Entscheidung",
         "stat_decision_steps": "**Schrittweise Testauswahl:**",
         "stat_shapiro_title": "**1. Shapiro-Wilk-Normalitätstest**",
@@ -1354,6 +1452,40 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE-Richtlinien).
         "outlier_iqr_label": "Multiplicateur IQR (k)",
         "outlier_iqr_help": "k=1,5 = clôtures de Tukey standard. k=3,0 = uniquement les valeurs extrêmes.",
         "outlier_expander": "ℹ️ À propos de la détection des valeurs aberrantes en qPCR",
+        "outlier_excluded_no": "Non",
+        "outlier_excluded_yes": "Oui",
+        # Outlier stage selector
+        "outlier_stage_label": "🔬 Étape de détection des valeurs aberrantes",
+        "outlier_stage_raw": "Ct brut — avant normalisation (recommandé)",
+        "outlier_stage_dct": "ΔCt — après normalisation (comportement précédent)",
+        "outlier_stage_help": (
+            "**Ct brut (recommandé):** Les valeurs aberrantes sont détectées sur les valeurs Ct brutes "
+            "avant le calcul du ΔCt. Appliqué séparément au gène cible et à chaque gène de référence.\n\n"
+            "**ΔCt:** Détection après normalisation (comportement original)."
+        ),
+        # Distribution plot mode selector
+        "dist_plot_mode_label": "📊 Graphique de distribution — Mode d'affichage",
+        "dist_plot_rq":   "RQ (2^-ΔCt)  — recommandé",
+        "dist_plot_dct":  "ΔCt  — valeurs normalisées brutes",
+        "dist_plot_ddct": "ΔΔCt  — relatif à la moyenne du contrôle",
+        "dist_plot_help": (
+            "**RQ (recommandé):** Convertit ΔCt en 2^(-ΔCt). Valeur plus élevée = expression plus élevée.\n\n"
+            "**ΔCt:** Valeurs logarithmiques brutes. Utile pour vérifier la distribution des données.\n\n"
+            "**ΔΔCt:** ΔCt de chaque échantillon moins la moyenne du groupe contrôle."
+        ),
+        "unequal_n_warning": (
+            "⚠️ **Nombre de réplicats inégal détecté — {group}:**  \n"
+            "{details}  \nL'analyse utilisera la **longueur commune la plus courte (n={min_n})**.  \n"
+            "Veuillez vérifier vos données d'entrée."
+        ),
+        # Sidebar
+        "sidebar_load_example": "📂 Charger les données d'exemple",
+        "sidebar_example_loaded": "✅ Données d'exemple chargées ! Allez à l'onglet Saisie des données.",
+        "sidebar_desktop_title": "### 💻 Application de bureau",
+        "sidebar_desktop_btn": "⬇️ Télécharger l'application de bureau",
+        "sidebar_opensource_title": "### 🔓 Open Source",
+        "sidebar_opensource_body": "GeneQuantify est open source (GPL-3.0).  \nCode source disponible sur GitHub :",
+        "sidebar_github_btn": "⭐ Voir le code source sur GitHub",
         "outlier_excluded_no": "Non",
         "outlier_excluded_yes": "Oui",
         "stat_decision_title": "🔬 Décision statistique",
@@ -1680,6 +1812,40 @@ Bustin SA et al. *Clin Chem* 2009 (directives MIQE).
         "outlier_expander": "ℹ️ Sobre la detección de valores atípicos en qPCR",
         "outlier_excluded_no": "No",
         "outlier_excluded_yes": "Sí",
+        # Outlier stage selector
+        "outlier_stage_label": "🔬 Etapa de detección de valores atípicos",
+        "outlier_stage_raw": "Ct bruto — antes de la normalización (recomendado)",
+        "outlier_stage_dct": "ΔCt — después de la normalización (comportamiento anterior)",
+        "outlier_stage_help": (
+            "**Ct bruto (recomendado):** Los valores atípicos se detectan en los valores Ct brutos "
+            "antes del cálculo del ΔCt. Aplicado por separado al gen objetivo y a cada gen de referencia.\n\n"
+            "**ΔCt:** Detección después de la normalización (comportamiento original)."
+        ),
+        # Distribution plot mode selector
+        "dist_plot_mode_label": "📊 Gráfico de distribución — Modo de visualización",
+        "dist_plot_rq":   "RQ (2^-ΔCt)  — recomendado",
+        "dist_plot_dct":  "ΔCt  — valores normalizados brutos",
+        "dist_plot_ddct": "ΔΔCt  — relativo a la media del control",
+        "dist_plot_help": (
+            "**RQ (recomendado):** Convierte ΔCt a 2^(-ΔCt). Mayor valor = mayor expresión.\n\n"
+            "**ΔCt:** Valores logarítmicos brutos. Útil para verificar la distribución.\n\n"
+            "**ΔΔCt:** ΔCt de cada muestra menos la media del grupo control."
+        ),
+        "unequal_n_warning": (
+            "⚠️ **Recuentos de réplicas desiguales detectados — {group}:**  \n"
+            "{details}  \nEl análisis usará la **longitud común más corta (n={min_n})**.  \n"
+            "Verifique sus datos de entrada."
+        ),
+        # Sidebar
+        "sidebar_load_example": "📂 Cargar datos de ejemplo",
+        "sidebar_example_loaded": "✅ ¡Datos de ejemplo cargados! Cambie a la pestaña de entrada de datos.",
+        "sidebar_desktop_title": "### 💻 Aplicación de escritorio",
+        "sidebar_desktop_btn": "⬇️ Descargar aplicación de escritorio",
+        "sidebar_opensource_title": "### 🔓 Código abierto",
+        "sidebar_opensource_body": "GeneQuantify es de código abierto (GPL-3.0).  \nCódigo fuente disponible en GitHub:",
+        "sidebar_github_btn": "⭐ Ver código fuente en GitHub",
+        "outlier_excluded_no": "No",
+        "outlier_excluded_yes": "Sí",
         "stat_decision_title": "🔬 Decisión estadística",
         "stat_decision_steps": "**Selección de prueba paso a paso:**",
         "stat_shapiro_title": "**1. Prueba de normalidad de Shapiro-Wilk**",
@@ -2002,6 +2168,40 @@ Bustin SA et al. *Clin Chem* 2009 (directrices MIQE).
         "outlier_iqr_label": "مُضاعف IQR (k)",
         "outlier_iqr_help": "k=1.5 = حدود Tukey القياسية. k=3.0 = القيم الشاذة الشديدة فقط.",
         "outlier_expander": "ℹ️ حول اكتشاف القيم الشاذة في qPCR",
+        "outlier_excluded_no": "لا",
+        "outlier_excluded_yes": "نعم",
+        # Outlier stage selector
+        "outlier_stage_label": "🔬 مرحلة اكتشاف القيم الشاذة",
+        "outlier_stage_raw": "Ct الخام — قبل التطبيع (موصى به)",
+        "outlier_stage_dct": "ΔCt — بعد التطبيع (السلوك السابق)",
+        "outlier_stage_help": (
+            "**Ct الخام (موصى به):** يتم اكتشاف القيم الشاذة على قيم Ct الخام قبل حساب ΔCt. "
+            "يُطبَّق بشكل منفصل على الجين المستهدف وكل جين مرجعي.\n\n"
+            "**ΔCt:** الاكتشاف بعد التطبيع (السلوك الأصلي)."
+        ),
+        # Distribution plot mode selector
+        "dist_plot_mode_label": "📊 مخطط التوزيع — وضع العرض",
+        "dist_plot_rq":   "RQ (2^-ΔCt)  — موصى به",
+        "dist_plot_dct":  "ΔCt  — القيم المطبَّعة الخام",
+        "dist_plot_ddct": "ΔΔCt  — بالنسبة لمتوسط المجموعة الضابطة",
+        "dist_plot_help": (
+            "**RQ (موصى به):** يحوّل ΔCt إلى 2^(-ΔCt). قيمة أعلى = تعبير أعلى.\n\n"
+            "**ΔCt:** قيم لوغاريتمية خام. مفيد للتحقق من توزيع البيانات.\n\n"
+            "**ΔΔCt:** ΔCt لكل عينة ناقص متوسط مجموعة التحكم."
+        ),
+        "unequal_n_warning": (
+            "⚠️ **تم اكتشاف أعداد متكررة غير متساوية — {group}:**  \n"
+            "{details}  \nسيستمر التحليل باستخدام **أقصر طول مشترك (n={min_n})**.  \n"
+            "يرجى التحقق من بيانات الإدخال."
+        ),
+        # Sidebar
+        "sidebar_load_example": "📂 تحميل البيانات النموذجية",
+        "sidebar_example_loaded": "✅ تم تحميل البيانات النموذجية! انتقل إلى تبويب إدخال البيانات.",
+        "sidebar_desktop_title": "### 💻 تطبيق سطح المكتب",
+        "sidebar_desktop_btn": "⬇️ تنزيل تطبيق سطح المكتب",
+        "sidebar_opensource_title": "### 🔓 مفتوح المصدر",
+        "sidebar_opensource_body": "GeneQuantify مفتوح المصدر (GPL-3.0).  \nالكود المصدري متاح على GitHub:",
+        "sidebar_github_btn": "⭐ عرض الكود المصدري على GitHub",
         "outlier_excluded_no": "لا",
         "outlier_excluded_yes": "نعم",
         "stat_decision_title": "🔬 القرار الإحصائي",
@@ -2693,22 +2893,16 @@ with tab_data:
     # may allow noisy raw Ct replicates to pass through undetected.
     # Option added: apply outlier detection on raw Ct values BEFORE normalization.
     outlier_stage = st.radio(
-        "🔬 Outlier Detection Stage",
+        translations[language_code]["outlier_stage_label"],
         options=[
-            "Raw Ct — before normalization (recommended)",
-            "ΔCt — after normalization (previous behaviour)"
+            translations[language_code]["outlier_stage_raw"],
+            translations[language_code]["outlier_stage_dct"],
         ],
         index=0,
         key="outlier_stage",
-        help=(
-            "**Raw Ct (recommended):** Outliers are flagged on raw Ct values before "
-            "ΔCt is computed. This prevents noisy replicates from propagating into "
-            "the normalization step. Applied separately to target and each reference gene.\n\n"
-            "**ΔCt:** Outliers are flagged after normalization (original behaviour). "
-            "Keeps consistency with older workflows but may miss raw Ct noise."
-        )
+        help=translations[language_code]["outlier_stage_help"]
     )
-    outlier_on_raw = outlier_stage.startswith("Raw Ct")
+    outlier_on_raw = outlier_stage == translations[language_code]["outlier_stage_raw"]
 
     with st.expander(translations[language_code]["outlier_expander"], expanded=False):
         st.markdown(translations[language_code]["outlier_description"])
@@ -2860,13 +3054,13 @@ with tab_data:
         min_control_len = min(len(control_target_ct_values), *[len(a) for a in ctrl_ref_arrays])
         all_ctrl_lengths = [len(control_target_ct_values)] + [len(a) for a in ctrl_ref_arrays]
         if len(set(all_ctrl_lengths)) > 1:
-            st.warning(
-                f"⚠️ **Unequal replicate counts detected — Control Group {i+1}:**  \n"
-                + f"Target Gene: n={len(control_target_ct_values)}"
-                + "".join([f", Ref Gene {r+1}: n={len(ctrl_ref_arrays[r])}" for r in range(len(ctrl_ref_arrays))])
-                + f"  \nAnalysis will proceed using the **shortest common length (n={min_control_len})**.  \n"
-                + "Please verify your input data — mismatched replicates may indicate a data entry error."
-            )
+            details = f"Target Gene: n={len(control_target_ct_values)}" + \
+                      "".join([f", Ref Gene {r+1}: n={len(ctrl_ref_arrays[r])}" for r in range(len(ctrl_ref_arrays))])
+            st.warning(translations[language_code]["unequal_n_warning"].format(
+                group=f"Control Group {i+1}",
+                details=details,
+                min_n=min_control_len
+            ))
         control_target_ct_values = control_target_ct_values[:min_control_len]
         ctrl_ref_arrays = [a[:min_control_len] for a in ctrl_ref_arrays]
 
@@ -3090,14 +3284,13 @@ with tab_data:
             min_sample_len = min(len(sample_target_ct_values), *[len(a) for a in smp_ref_arrays])
             all_smp_lengths = [len(sample_target_ct_values)] + [len(a) for a in smp_ref_arrays]
             if len(set(all_smp_lengths)) > 1:
-                st.warning(
-                    f"⚠️ **Unequal replicate counts detected — "
-                    f"{translations[language_code]['patient_group']} {j+1}, Gene {i+1}:**  \n"
-                    + f"Target Gene: n={len(sample_target_ct_values)}"
-                    + "".join([f", Ref Gene {r+1}: n={len(smp_ref_arrays[r])}" for r in range(len(smp_ref_arrays))])
-                    + f"  \nAnalysis will proceed using the **shortest common length (n={min_sample_len})**.  \n"
-                    + "Please verify your input data — mismatched replicates may indicate a data entry error."
-                )
+                details = f"Target Gene: n={len(sample_target_ct_values)}" + \
+                          "".join([f", Ref Gene {r+1}: n={len(smp_ref_arrays[r])}" for r in range(len(smp_ref_arrays))])
+                st.warning(translations[language_code]["unequal_n_warning"].format(
+                    group=f"{translations[language_code]['patient_group']} {j+1}, Gene {i+1}",
+                    details=details,
+                    min_n=min_sample_len
+                ))
             sample_target_ct_values = sample_target_ct_values[:min_sample_len]
             smp_ref_arrays = [a[:min_sample_len] for a in smp_ref_arrays]
 
@@ -3953,24 +4146,25 @@ Ge Y et al. *Bioinformatics* 2003; Storey JD. *J R Stat Soc B* 2002.
     # Allow user to choose which values to display in the distribution plot:
     # RQ (2^-ΔCt), raw ΔCt, or ΔΔCt (relative to control mean).
     plot_mode = st.radio(
-        "📊 Distribution Plot — Display Mode",
+        translations[language_code]["dist_plot_mode_label"],
         options=[
-            "RQ (2^-ΔCt)  — recommended",
-            "ΔCt  — raw normalized values",
-            "ΔΔCt  — relative to control mean",
+            translations[language_code]["dist_plot_rq"],
+            translations[language_code]["dist_plot_dct"],
+            translations[language_code]["dist_plot_ddct"],
         ],
         index=0,
         horizontal=True,
         key="dist_plot_mode",
-        help=(
-            "**RQ (recommended):** Converts ΔCt to 2^(-ΔCt). Higher value = higher expression. "
-            "Avoids the counter-intuitive ΔCt paradox (high ΔCt = low expression).\n\n"
-            "**ΔCt:** Raw normalized values on a log scale. Useful for checking data spread "
-            "and normality, but higher value means lower expression.\n\n"
-            "**ΔΔCt:** Each sample's ΔCt minus the control group mean ΔCt. "
-            "Shows expression change relative to control on a log scale."
-        )
+        help=translations[language_code]["dist_plot_help"]
     )
+
+    # Map selected option back to mode identifier
+    if plot_mode == translations[language_code]["dist_plot_rq"]:
+        _plot_mode_id = "RQ"
+    elif plot_mode == translations[language_code]["dist_plot_ddct"]:
+        _plot_mode_id = "DDCT"
+    else:
+        _plot_mode_id = "DCT"
 
     for i in range(num_target_genes):
         st.subheader(f"{translations[language_code]['target_gene']} {i+1} - {translations[language_code]['distribution_graph']}")
@@ -4001,19 +4195,19 @@ Ge Y et al. *Bioinformatics* 2003; Storey JD. *J R Stat Soc B* 2002.
 
         # ── Convert values based on selected plot mode ────────────────────────
         def _transform(dct_array, mode, ctrl_mean):
-            if mode.startswith("RQ"):
+            if mode == "RQ":
                 return 2 ** (-np.array(dct_array))
-            elif mode.startswith("ΔΔCt"):
+            elif mode == "DDCT":
                 return np.array(dct_array) - ctrl_mean
-            else:  # raw ΔCt
+            else:
                 return np.array(dct_array)
 
         def _yaxis_label(mode):
-            if mode.startswith("RQ"):    return "RQ (2^-ΔCt)"
-            elif mode.startswith("ΔΔCt"): return "ΔΔCt (vs control mean)"
-            else:                          return "ΔCt"
+            if mode == "RQ":    return "RQ (2^-ΔCt)"
+            elif mode == "DDCT": return "ΔΔCt (vs control mean)"
+            else:                return "ΔCt"
 
-        ctrl_plot_vals = _transform(control_delta_ct, plot_mode, average_control_delta_ct)
+        ctrl_plot_vals = _transform(control_delta_ct, _plot_mode_id, average_control_delta_ct)
         avg_ctrl_plot  = float(np.mean(ctrl_plot_vals))
 
         fig = go.Figure()
@@ -4036,7 +4230,7 @@ Ge Y et al. *Bioinformatics* 2003; Storey JD. *J R Stat Soc B* 2002.
             ]
             if not sample_dct_raw:
                 continue
-            smp_plot_vals   = _transform(sample_dct_raw, plot_mode, average_control_delta_ct)
+            smp_plot_vals   = _transform(sample_dct_raw, _plot_mode_id, average_control_delta_ct)
             avg_smp_plot    = float(np.mean(smp_plot_vals))
             fig.add_trace(go.Scatter(
                 x=[(j + 1.8), (j + 2.2)],
@@ -4068,7 +4262,7 @@ Ge Y et al. *Bioinformatics* 2003; Storey JD. *J R Stat Soc B* 2002.
             ]
             if not sample_dct_raw:
                 continue
-            smp_plot_vals = _transform(sample_dct_raw, plot_mode, average_control_delta_ct)
+            smp_plot_vals = _transform(sample_dct_raw, _plot_mode_id, average_control_delta_ct)
             fig.add_trace(go.Scatter(
                 x=np.ones(len(smp_plot_vals)) * (j + 2) + np.random.uniform(-0.05, 0.05, len(smp_plot_vals)),
                 y=smp_plot_vals,
@@ -4615,25 +4809,19 @@ with tab_report:
 st.markdown(f"<h4 style='font-size: 12px; font-family: Arial, sans-serif; color: #555;'><a href='mailto:mailtoburhanettin@gmail.com' style='color: #555; text-decoration: none;'>{translations[language_code]['subtitle']}</a></h4>", unsafe_allow_html=True)
 
 st.sidebar.markdown("---")
-st.sidebar.markdown(
-    "### 💻 Desktop Application",
-    unsafe_allow_html=False
-)
+st.sidebar.markdown(translations[language_code]["sidebar_desktop_title"])
 st.sidebar.link_button(
-    "⬇️ Download Desktop App",
+    translations[language_code]["sidebar_desktop_btn"],
     "https://drive.google.com/file/d/1oGBPqLeS6JxWBdVSs47qgEfl0wiMI3Z9/view?usp=sharing",
     use_container_width=True
 )
 
 # ── REVIEWER RESPONSE (Reviewer 2): Open-source source code on GitHub ─────────
 st.sidebar.markdown("---")
-st.sidebar.markdown("### 🔓 Open Source")
-st.sidebar.markdown(
-    "GeneQuantify is open source (GPL-3.0).  \n"
-    "Source code available on GitHub:"
-)
+st.sidebar.markdown(translations[language_code]["sidebar_opensource_title"])
+st.sidebar.markdown(translations[language_code]["sidebar_opensource_body"])
 st.sidebar.link_button(
-    "⭐ View Source on GitHub",
-    "https://github.com/byalcinkaya/GeneQuantify",  # <-- GitHub linkini buraya gir
+    translations[language_code]["sidebar_github_btn"],
+    "https://github.com/byalcinkaya/GeneQuantify",
     use_container_width=True
 )
