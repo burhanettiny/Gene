@@ -2293,6 +2293,29 @@ with tab_data:
                 key="iqr_mult", help=translations[language_code]["outlier_iqr_help"]
             )
             grubbs_alpha = 0.05
+
+    # ── REVIEWER RESPONSE (Comment 3): Outlier detection stage selector ──────
+    # Reviewer suggested that applying Grubbs on already-normalized ΔCt values
+    # may allow noisy raw Ct replicates to pass through undetected.
+    # Option added: apply outlier detection on raw Ct values BEFORE normalization.
+    outlier_stage = st.radio(
+        "🔬 Outlier Detection Stage",
+        options=[
+            "Raw Ct — before normalization (recommended)",
+            "ΔCt — after normalization (previous behaviour)"
+        ],
+        index=0,
+        key="outlier_stage",
+        help=(
+            "**Raw Ct (recommended):** Outliers are flagged on raw Ct values before "
+            "ΔCt is computed. This prevents noisy replicates from propagating into "
+            "the normalization step. Applied separately to target and each reference gene.\n\n"
+            "**ΔCt:** Outliers are flagged after normalization (original behaviour). "
+            "Keeps consistency with older workflows but may miss raw Ct noise."
+        )
+    )
+    outlier_on_raw = outlier_stage.startswith("Raw Ct")
+
     with st.expander(translations[language_code]["outlier_expander"], expanded=False):
         st.markdown(translations[language_code]["outlier_description"])
 
@@ -2443,9 +2466,53 @@ with tab_data:
         control_target_ct_values = control_target_ct_values[:min_control_len]
         ctrl_ref_arrays = [a[:min_control_len] for a in ctrl_ref_arrays]
 
-        # ── Outlier detection — Control Target Ct ────────────────────────────────
-        ctrl_excluded_target = []  # always initialized
-        if outlier_enabled and len(control_target_ct_values) >= 3:
+        # ── Outlier detection — Raw Ct stage (BEFORE normalization) ──────────────
+        # REVIEWER RESPONSE (Comment 3):
+        # When outlier_on_raw is True, Grubbs/IQR is applied to raw Ct values
+        # separately for target gene and each reference gene before ΔCt is computed.
+        # This prevents noisy replicates from propagating into normalization.
+        ctrl_excluded_target = []
+
+        if outlier_enabled and outlier_on_raw:
+            # --- Target Ct outlier check ---
+            if len(control_target_ct_values) >= 3:
+                detected_raw_tgt = detect_outliers_grubbs(control_target_ct_values, alpha=grubbs_alpha) \
+                                   if outlier_method == "Grubbs" \
+                                   else detect_outliers_iqr(control_target_ct_values, multiplier=iqr_multiplier)
+                if detected_raw_tgt:
+                    control_target_ct_values, ctrl_excluded_target = render_outlier_ui(
+                        control_target_ct_values,
+                        f"Control Group {i+1} — Target Gene {i+1} (Raw Ct)",
+                        f"ctrl_raw_tgt_{i}",
+                        outlier_method
+                    )
+                    if ctrl_excluded_target:
+                        keep_indices = [k for k in range(min_control_len) if k not in ctrl_excluded_target]
+                        ctrl_ref_arrays = [a[keep_indices] for a in ctrl_ref_arrays]
+                        min_control_len = len(keep_indices)
+
+            # --- Reference gene Ct outlier check (each ref gene separately) ---
+            for r in range(len(ctrl_ref_arrays)):
+                if len(ctrl_ref_arrays[r]) >= 3:
+                    detected_raw_ref = detect_outliers_grubbs(ctrl_ref_arrays[r], alpha=grubbs_alpha) \
+                                       if outlier_method == "Grubbs" \
+                                       else detect_outliers_iqr(ctrl_ref_arrays[r], multiplier=iqr_multiplier)
+                    if detected_raw_ref:
+                        cleaned_ref, excl_ref = render_outlier_ui(
+                            ctrl_ref_arrays[r],
+                            f"Control Group {i+1} — Reference Gene {r+1} (Raw Ct)",
+                            f"ctrl_raw_ref_{i}_{r}",
+                            outlier_method
+                        )
+                        if excl_ref:
+                            # Remove same indices from target and all other refs
+                            keep_ref = [k for k in range(len(ctrl_ref_arrays[r])) if k not in excl_ref]
+                            control_target_ct_values = control_target_ct_values[keep_ref]
+                            ctrl_ref_arrays = [a[keep_ref] for a in ctrl_ref_arrays]
+                            min_control_len = len(keep_ref)
+
+        # ── Outlier detection — Control Target Ct (ΔCt stage fallback) ──────────
+        elif outlier_enabled and not outlier_on_raw and len(control_target_ct_values) >= 3:
             detected_ctrl_tgt = detect_outliers_grubbs(control_target_ct_values, alpha=grubbs_alpha) \
                                 if outlier_method == "Grubbs" \
                                 else detect_outliers_iqr(control_target_ct_values, multiplier=iqr_multiplier)
@@ -2619,9 +2686,49 @@ with tab_data:
             sample_target_ct_values = sample_target_ct_values[:min_sample_len]
             smp_ref_arrays = [a[:min_sample_len] for a in smp_ref_arrays]
 
-            # ── Outlier detection — Patient Target Ct ─────────────────────────────
-            smp_excluded_target = []  # always initialized
-            if outlier_enabled and len(sample_target_ct_values) >= 3:
+            # ── Outlier detection — Raw Ct stage (BEFORE normalization) ──────────
+            # REVIEWER RESPONSE (Comment 3): same logic as control group above
+            smp_excluded_target = []
+
+            if outlier_enabled and outlier_on_raw:
+                # --- Target Ct ---
+                if len(sample_target_ct_values) >= 3:
+                    detected_raw_smp_tgt = detect_outliers_grubbs(sample_target_ct_values, alpha=grubbs_alpha) \
+                                           if outlier_method == "Grubbs" \
+                                           else detect_outliers_iqr(sample_target_ct_values, multiplier=iqr_multiplier)
+                    if detected_raw_smp_tgt:
+                        sample_target_ct_values, smp_excluded_target = render_outlier_ui(
+                            sample_target_ct_values,
+                            f"{translations[language_code]['patient_group']} {j+1} — Target Gene {i+1} (Raw Ct)",
+                            f"smp_raw_tgt_{i}_{j}",
+                            outlier_method
+                        )
+                        if smp_excluded_target:
+                            keep_indices_smp = [k for k in range(min_sample_len) if k not in smp_excluded_target]
+                            smp_ref_arrays = [a[keep_indices_smp] for a in smp_ref_arrays]
+                            min_sample_len = len(keep_indices_smp)
+
+                # --- Reference gene Ct (each separately) ---
+                for r in range(len(smp_ref_arrays)):
+                    if len(smp_ref_arrays[r]) >= 3:
+                        detected_raw_smp_ref = detect_outliers_grubbs(smp_ref_arrays[r], alpha=grubbs_alpha) \
+                                               if outlier_method == "Grubbs" \
+                                               else detect_outliers_iqr(smp_ref_arrays[r], multiplier=iqr_multiplier)
+                        if detected_raw_smp_ref:
+                            cleaned_smp_ref, excl_smp_ref = render_outlier_ui(
+                                smp_ref_arrays[r],
+                                f"{translations[language_code]['patient_group']} {j+1} — Reference Gene {r+1} (Raw Ct)",
+                                f"smp_raw_ref_{i}_{j}_{r}",
+                                outlier_method
+                            )
+                            if excl_smp_ref:
+                                keep_ref_smp = [k for k in range(len(smp_ref_arrays[r])) if k not in excl_smp_ref]
+                                sample_target_ct_values = sample_target_ct_values[keep_ref_smp]
+                                smp_ref_arrays = [a[keep_ref_smp] for a in smp_ref_arrays]
+                                min_sample_len = len(keep_ref_smp)
+
+            # ── Outlier detection — Patient Target Ct (ΔCt stage fallback) ──────
+            elif outlier_enabled and not outlier_on_raw and len(sample_target_ct_values) >= 3:
                 detected_smp_tgt = detect_outliers_grubbs(sample_target_ct_values, alpha=grubbs_alpha) \
                                    if outlier_method == "Grubbs" \
                                    else detect_outliers_iqr(sample_target_ct_values, multiplier=iqr_multiplier)
