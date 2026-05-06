@@ -79,15 +79,14 @@ st.sidebar.markdown("---")
 
 # ── REVIEWER RESPONSE (Reviewer 2): Add one-click example data loader ────────
 if st.sidebar.button("📂 Load Example Data"):
-    # Pre-fill session state keys that the text_area widgets read from
-    # Example: 1 target gene, 1 patient group, 3 replicates each
-    # Control Target Ct
-    st.session_state["ctrl_target_ct_0"] = "23.15\n22.90\n25.20\n24.88\n23.45"
-    # Control Reference Ct
-    st.session_state["ctrl_reference_ct_0_0"] = "18.20\n17.90\n18.50\n18.30\n18.10"
-    # Patient Group 1 Target Ct
+    # Keys must match the key= parameters used in st.text_area below
+    # Control Target Gene 1 Ct values
+    st.session_state["control_target_ct_0"] = "23.15\n22.90\n25.20\n24.88\n23.45"
+    # Control Reference Gene 1 Ct values
+    st.session_state["control_reference_ct_0_0"] = "18.20\n17.90\n18.50\n18.30\n18.10"
+    # Patient Group 1 Target Gene 1 Ct values
     st.session_state["sample_target_ct_0_0"] = "27.30\n28.10\n26.80\n27.60\n28.40"
-    # Patient Group 1 Reference Ct
+    # Patient Group 1 Reference Gene 1 Ct values
     st.session_state["sample_reference_ct_0_0_0"] = "18.30\n18.00\n18.60\n18.20\n18.40"
     st.sidebar.success("✅ Example data loaded! Switch to Data Entry tab.")
 
@@ -2410,6 +2409,7 @@ with tab_data:
 
         control_target_ct = st.text_area(
             f"Control {i+1} - {translations[language_code]['target_gene']} {i+1} - {translations[language_code]['ct_value']}",
+            value=st.session_state.get(f"control_target_ct_{i}", ""),
             key=f"control_target_ct_{i}"
         )
 
@@ -2422,6 +2422,7 @@ with tab_data:
             ref_label = f"Ref Gene {r+1}" if num_ref_genes > 1 else translations[language_code]["reference_gene"]
             ctrl_ref_ct_raw = st.text_area(
                 f"Control {i+1} — {ref_label} {i+1} — {translations[language_code]['ct_value']}",
+                value=st.session_state.get(f"control_reference_ct_{i}_{r}", ""),
                 key=f"control_reference_ct_{i}_{r}"
             )
             parsed = parse_input_data(ctrl_ref_ct_raw)
@@ -2587,6 +2588,7 @@ with tab_data:
 
             sample_target_ct = st.text_area(
                 f"{translations[language_code]['patient_group']} {j+1} - {translations[language_code]['target_gene']} {i+1} - {translations[language_code]['ct_value']}",
+                value=st.session_state.get(f"sample_target_ct_{i}_{j}", ""),
                 key=f"sample_target_ct_{i}_{j}"
             )
 
@@ -2598,6 +2600,7 @@ with tab_data:
                 ref_label = f"Ref Gene {r+1}" if num_ref_genes > 1 else translations[language_code]["reference_gene"]
                 smp_ref_ct_raw = st.text_area(
                     f"{translations[language_code]['patient_group']} {j+1} — {ref_label} {i+1} — {translations[language_code]['ct_value']}",
+                    value=st.session_state.get(f"sample_reference_ct_{i}_{j}_{r}", ""),
                     key=f"sample_reference_ct_{i}_{j}_{r}"
                 )
                 parsed = parse_input_data(smp_ref_ct_raw)
