@@ -76,6 +76,22 @@ st.markdown("""
 
 
 st.sidebar.markdown("---")
+
+# ── REVIEWER RESPONSE (Reviewer 2): Add one-click example data loader ────────
+if st.sidebar.button("📂 Load Example Data"):
+    # Pre-fill session state keys that the text_area widgets read from
+    # Example: 1 target gene, 1 patient group, 3 replicates each
+    # Control Target Ct
+    st.session_state["ctrl_target_ct_0"] = "23.15\n22.90\n25.20\n24.88\n23.45"
+    # Control Reference Ct
+    st.session_state["ctrl_reference_ct_0_0"] = "18.20\n17.90\n18.50\n18.30\n18.10"
+    # Patient Group 1 Target Ct
+    st.session_state["sample_target_ct_0_0"] = "27.30\n28.10\n26.80\n27.60\n28.40"
+    # Patient Group 1 Reference Ct
+    st.session_state["sample_reference_ct_0_0_0"] = "18.30\n18.00\n18.60\n18.20\n18.40"
+    st.sidebar.success("✅ Example data loaded! Switch to Data Entry tab.")
+
+st.sidebar.markdown("---")
 instruction_clicked = st.sidebar.button("📘 Instruction ")
 
 if instruction_clicked or selected_language_name == "Instruction":
@@ -516,11 +532,11 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE kılavuzları).
         "pdf_s3_title": "3. Gen Ekspresyonu Sonuçları",
         "pdf_s3_body": "Klasik ΔΔCt ve Pfaffl yöntemleriyle hesaplanan kat değişimi değerleri. Kat değişimi > 1 hasta grubunda kontrole göre yüksek ekspresyonu gösterir.",
         "pdf_s4_title": "4. İstatistiksel Analiz",
-        "pdf_s4_body": "Kontrol ve hasta grupları arasındaki gen ekspresyon farklılıklarının istatistiksel anlamlılığı. Test seçimi normallik (Shapiro-Wilk) ve varyans homojenliği (Levene) testlerine göre otomatik yapıldı. Anlamlılık eşiği: p < 0.05.",
+        "pdf_s4_body": "Kontrol ve hasta grupları arasındaki gen ekspresyon farklılıklarının istatistiksel anlamlılığı. Tüm testler ham ΔCt değil RQ (2^-ΔCt) değerleri üzerinden uygulandı; çünkü ΔCt logaritmik ölçekte olduğundan, ΔCt üzerinden t-testi biyolojik değişkenliği hafife alabilir. Test seçimi normallik (Shapiro-Wilk) ve varyans homojenliği (Levene) testlerine göre otomatik yapıldı. Anlamlılık eşiği: p < 0.05.",
         "pdf_s4_interp": "İstatistiksel Testlerin Yorumu",
         "pdf_s4_interp_body": "Student t-testi: Her iki grup normal dağılım ve eşit varyanstaysa kullanılır. Welch t-testi: Her iki grup normal fakat varyanslar eşit değilse kullanılır. Mann-Whitney U: Normallik varsayımı karşılanmadığında kullanılan parametrik olmayan test. p < 0.05 istatistiksel olarak anlamlı diferansiyel ekspresyonu gösterir.",
-        "pdf_s5_title": "5. Delta Ct Dağılım Grafikleri",
-        "pdf_s5_body": "Her hedef gen için gruplar arası ΔCt değer dağılımı. Her nokta bir biyolojik replikatı temsil eder. Yatay çubuklar grup ortalamalarını gösterir.",
+        "pdf_s5_title": "5. Göreli Miktar (RQ) Dağılım Grafikleri",
+        "pdf_s5_body": "Her hedef gen için RQ (2^-ΔCt) değerlerinin dağılımı. Her nokta bir biyolojik replikatı temsil eder. Yatay çubuklar grup ortalamalarını gösterir. İstatistiksel testler de RQ değerleri üzerinden gerçekleştirilmiştir.",
         "pdf_s6_title": "6. Sonuçların Yorumlanması",
         "pdf_s6_fc": "6.1 Kat Değişimi Yorumu",
         "pdf_s6_choose": "6.2 ΔΔCt ve Pfaffl Arasında Seçim",
@@ -555,7 +571,7 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE kılavuzları).
         "pdf_footer": "GeneQuantify — Yalnızca araştırma ve eğitim amaçlı. Klinik tanı için doğrulanmamıştır.",
         "pdf_fig1": "Şekil 1. Klasik ΔΔCt ve Pfaffl yöntemleri arasında kat değişimi karşılaştırması. Kesikli çizgi y=1'de kontrole göre değişim olmadığını gösterir.",
         "pdf_fig2": "Şekil 2. Tüm ikili karşılaştırmalar için p-değerleri. Kırmızı çubuklar istatistiksel olarak anlamlı sonuçları (p < 0.05) gösterir. Kesikli çizgi anlamlılık eşiğini işaretler.",
-        "pdf_fig3": "Şekil. {gene} için ΔCt dağılımı. Noktalar = bireysel replikatlar; yatay çubuklar = grup ortalamaları.",
+        "pdf_fig3": "Şekil. {gene} için RQ (2^-ΔCt) dağılımı. Noktalar = bireysel replikatlar; yatay çubuklar = grup ortalamaları.",
         "pdf_nochange": "Değişim Yok",
         "pdf_stat_cols": ["Hedef Gen", "Karşılaştırma", "Test Türü", "Kullanılan Test", "p-değeri", "Anlamlılık"],
         "pdf_res_cols": ["Hedef Gen", "Grup", "ΔCt Kontrol", "ΔCt Örnek", "ΔΔCt", "2^(-ΔΔCt)", "Pfaffl Oranı", "Regülasyon", "E hedef", "E ref"],
@@ -827,11 +843,11 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE guidelines).
         "pdf_s3_title": "3. Gene Expression Results",
         "pdf_s3_body": "Fold change values calculated by both Classic ΔΔCt and Pfaffl methods. Fold change > 1 indicates higher expression in patient group relative to control.",
         "pdf_s4_title": "4. Statistical Analysis",
-        "pdf_s4_body": "Statistical significance of gene expression differences. Test selection performed automatically based on normality (Shapiro-Wilk) and variance homogeneity (Levene). Significance threshold: p < 0.05.",
+        "pdf_s4_body": "Statistical significance of gene expression differences between control and patient groups. All tests are performed on RQ values (2^-ΔCt) rather than raw ΔCt, because ΔCt is on a logarithmic scale and direct parametric testing on ΔCt underestimates biological variability (Tellez-Sosa et al., Sci Rep 2025; Willems et al., Sci Rep 2021). Test selection is automatic based on normality (Shapiro-Wilk) and variance homogeneity (Levene). Significance threshold: p < 0.05.",
         "pdf_s4_interp": "Interpretation of Statistical Tests",
         "pdf_s4_interp_body": "Student's t-test: Used when both groups are normal with equal variances. Welch's t-test: Used when groups are normal but variances differ. Mann-Whitney U: Non-parametric test when normality is violated. p < 0.05 = statistically significant differential expression.",
-        "pdf_s5_title": "5. Delta Ct Distribution Plots",
-        "pdf_s5_body": "Distribution of ΔCt values for each target gene across groups. Each point = one biological replicate. Horizontal bars = group means.",
+        "pdf_s5_title": "5. Relative Quantity (RQ) Distribution Plots",
+        "pdf_s5_body": "RQ values (2^-ΔCt) per target gene across groups. Each dot = one biological replicate; horizontal bars = group means. Statistical tests are performed on RQ values, not raw ΔCt, to avoid underestimation of biological variability on the logarithmic scale.",
         "pdf_s6_title": "6. How to Interpret Your Results",
         "pdf_s6_fc": "6.1 Fold Change Interpretation",
         "pdf_s6_choose": "6.2 Choosing Between ΔΔCt and Pfaffl",
@@ -866,7 +882,7 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE guidelines).
         "pdf_footer": "GeneQuantify — For research and educational use only. Not validated for clinical diagnostic purposes.",
         "pdf_fig1": "Figure 1. Fold change comparison: Classic ΔΔCt vs Pfaffl. Dashed line at y=1 = no change relative to control.",
         "pdf_fig2": "Figure 2. p-values for all comparisons. Red bars = significant (p < 0.05). Dashed line = significance threshold.",
-        "pdf_fig3": "Figure. ΔCt distribution for {gene}. Points = individual replicates; horizontal bars = group means.",
+        "pdf_fig3": "Figure. RQ (2^-ΔCt) distribution for {gene}. Points = individual replicates; horizontal bars = group means. Statistical tests performed on RQ values.",
         "pdf_nochange": "No Change",
         "pdf_stat_cols": ["Target Gene", "Comparison", "Test Type", "Test Method", "p-value", "Significance"],
         "pdf_res_cols": ["Target Gene", "Group", "ΔCt Control", "ΔCt Sample", "ΔΔCt", "2^(-ΔΔCt)", "Pfaffl Ratio", "Regulation", "E target", "E ref"],
@@ -2792,8 +2808,18 @@ with tab_data:
                 # ─────────────────────────────────────────────────────────────
 
                 # ── Per-group pairwise stats (control vs this patient group) ────
-                n_ctrl = len(control_delta_ct)
-                n_smp  = len(sample_delta_ct)
+                # REVIEWER RESPONSE (Comments 8 & 14):
+                # Statistical tests are now performed on RQ values (2^-ΔCt) instead of
+                # raw ΔCt values. ΔCt values are on a logarithmic scale; performing
+                # t-tests directly on ΔCt underestimates biological variability and can
+                # produce false significant differences compared to linear RQ-based tests.
+                # References: https://www.nature.com/articles/s41598-025-11822-0
+                #             https://www.nature.com/articles/s41598-021-99727-6
+                control_rq = 2 ** (-np.array(control_delta_ct))
+                sample_rq  = 2 ** (-np.array(sample_delta_ct))
+
+                n_ctrl = len(control_rq)
+                n_smp  = len(sample_rq)
 
                 # Shapiro-Wilk n<3 veya n>=3 ama n<8 için dejenere sonuç verebilir.
                 # n<8 ise testi atla ve parametrik varsay (MIQE önerisi: küçük n'de
@@ -2802,8 +2828,8 @@ with tab_data:
                 _MIN_N_SHAPIRO = 8
 
                 if n_ctrl >= _MIN_N_SHAPIRO and n_smp >= _MIN_N_SHAPIRO:
-                    shapiro_control = stats.shapiro(control_delta_ct)
-                    shapiro_sample  = stats.shapiro(sample_delta_ct)
+                    shapiro_control = stats.shapiro(control_rq)
+                    shapiro_sample  = stats.shapiro(sample_rq)
                     control_normal  = shapiro_control.pvalue > 0.05
                     sample_normal   = shapiro_sample.pvalue  > 0.05
                 else:
@@ -2813,19 +2839,19 @@ with tab_data:
                     control_normal  = True
                     sample_normal   = True
 
-                levene_test    = stats.levene(control_delta_ct, sample_delta_ct)
+                levene_test    = stats.levene(control_rq, sample_rq)
                 equal_variance = levene_test.pvalue > 0.05
 
                 if control_normal and sample_normal:
                     if equal_variance:
-                        test_pvalue = stats.ttest_ind(control_delta_ct, sample_delta_ct).pvalue
+                        test_pvalue = stats.ttest_ind(control_rq, sample_rq).pvalue
                         test_method = translations[language_code]["t_test"]
                     else:
-                        test_pvalue = stats.ttest_ind(control_delta_ct, sample_delta_ct, equal_var=False).pvalue
+                        test_pvalue = stats.ttest_ind(control_rq, sample_rq, equal_var=False).pvalue
                         test_method = translations[language_code]["welch_t_test"]
                     test_type = translations[language_code]["parametric"]
                 else:
-                    test_pvalue = stats.mannwhitneyu(control_delta_ct, sample_delta_ct,
+                    test_pvalue = stats.mannwhitneyu(control_rq, sample_rq,
                                                       alternative='two-sided').pvalue
                     test_method = translations[language_code]["mann_whitney_u_test"]
                     test_type   = translations[language_code]["non_parametric"]
@@ -2949,7 +2975,10 @@ for i in range(num_target_genes):
     if not ctrl_dct or not patient_dcts:
         continue
 
-    all_groups      = [ctrl_dct] + list(patient_dcts.values())
+    # REVIEWER RESPONSE (Comments 8 & 14):
+    # Convert ΔCt lists to RQ (2^-ΔCt) for all statistical tests
+    all_groups_dct  = [ctrl_dct] + list(patient_dcts.values())
+    all_groups      = [list(2 ** (-np.array(g))) for g in all_groups_dct]
     all_group_names = ["Control"] + list(patient_dcts.keys())
     n_groups        = len(all_groups)
 
@@ -3908,22 +3937,28 @@ def create_pdf(results, stats, input_df, language_code):
         try:
             fig_d, ax_d = plt.subplots(figsize=(6, 3.2))
             all_vals = []; all_labels = []
-            ctrl_vals = [
+            ctrl_dct_vals = [
                 float(d["__dct_ctrl__"]) for d in input_values_table
                 if d.get(tg_key_) == gene_label
                 and d.get("__dct_ctrl__") not in ("EXCLUDED", None)
                 and d.get("Outlier Excluded", "No") == "No"
             ]
+            # REVIEWER RESPONSE (Comments 9 & 13):
+            # Convert ΔCt to RQ = 2^(-ΔCt) for visualization.
+            # Plotting raw ΔCt is misleading because higher ΔCt = lower expression,
+            # which is counter-intuitive. RQ values reflect actual expression levels.
+            ctrl_vals = [2 ** (-v) for v in ctrl_dct_vals]
             if ctrl_vals:
                 all_vals.append(ctrl_vals)
                 all_labels.append(T['control_group'])
             for j in range(num_patient_groups):
                 pg = f"Group {j+1}"
-                sv = [float(d[dcp_key_]) for d in input_values_table
+                smp_dct_vals = [float(d[dcp_key_]) for d in input_values_table
                       if d.get(tg_key_) == gene_label
                       and d.get("Grup") == pg
                       and d.get(dcp_key_) not in ("EXCLUDED", None)
                       and d.get("Outlier Excluded","No") == "No"]
+                sv = [2 ** (-v) for v in smp_dct_vals]
                 if sv:
                     all_vals.append(sv); all_labels.append(pg)
             for k, (vals, lbl) in enumerate(zip(all_vals, all_labels)):
@@ -3933,8 +3968,8 @@ def create_pdf(results, stats, input_df, language_code):
                 ax_d.hlines(np.mean(vals), k+0.75, k+1.25, colors='black', linewidths=2, zorder=4)
             ax_d.set_xticks(range(1, len(all_labels)+1))
             ax_d.set_xticklabels(all_labels, fontsize=8)
-            ax_d.set_ylabel('ΔCt', fontsize=9)
-            ax_d.set_title(f'{gene_label} — ΔCt', fontsize=10, fontweight='bold')
+            ax_d.set_ylabel('RQ (2^-ΔCt)', fontsize=9)
+            ax_d.set_title(f'{gene_label} — Relative Quantity (RQ)', fontsize=10, fontweight='bold')
             ax_d.spines['top'].set_visible(False); ax_d.spines['right'].set_visible(False)
             plt.tight_layout()
             ib3 = BytesIO(); plt.savefig(ib3, format='png', dpi=150, bbox_inches='tight'); plt.close(); ib3.seek(0)
@@ -4018,5 +4053,18 @@ st.sidebar.markdown(
 st.sidebar.link_button(
     "⬇️ Download Desktop App",
     "https://drive.google.com/file/d/1oGBPqLeS6JxWBdVSs47qgEfl0wiMI3Z9/view?usp=sharing",
+    use_container_width=True
+)
+
+# ── REVIEWER RESPONSE (Reviewer 2): Open-source source code on GitHub ─────────
+st.sidebar.markdown("---")
+st.sidebar.markdown("### 🔓 Open Source")
+st.sidebar.markdown(
+    "GeneQuantify is open source (GPL-3.0).  \n"
+    "Source code available on GitHub:"
+)
+st.sidebar.link_button(
+    "⭐ View Source on GitHub",
+    "https://github.com/byalcinkaya/GeneQuantify",  # <-- GitHub linkini buraya gir
     use_container_width=True
 )
