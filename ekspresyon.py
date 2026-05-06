@@ -93,16 +93,14 @@ if st.sidebar.button("📂 Load Example Data"):
 st.sidebar.markdown("---")
 
 # ── RDML / RDES FILE IMPORT ───────────────────────────────────────────────────
-with st.sidebar.expander("📂 Import RDML / RDES File", expanded=False):
-    st.markdown(
-        "Upload an **RDML** (`.rdml`) or **RDES** (`.tsv`/`.csv`/`.txt`) file "
-        "to auto-fill Cq values."
-    )
+t = translations[language_code]
+with st.sidebar.expander(t.get("rdml_expander", "📂 Import RDML / RDES File"), expanded=False):
+    st.markdown(t.get("rdml_description", "Upload an RDML or RDES file to auto-fill Cq values."))
     imported_file = st.file_uploader(
-        "Choose file",
+        t.get("rdml_uploader", "Choose file"),
         type=["rdml", "tsv", "csv", "txt"],
         key="rdml_rdes_uploader",
-        help="RDML: Bio-Rad CFX, Roche LightCycler, etc.  RDES: tab-separated spreadsheet format.",
+        help=t.get("rdml_uploader_help", "RDML: Bio-Rad CFX, Roche LightCycler, etc.  RDES: tab-separated format."),
     )
 
     if imported_file is not None:
@@ -117,49 +115,46 @@ with st.sidebar.expander("📂 Import RDML / RDES File", expanded=False):
             fmt_label = "RDES"
 
         if import_err:
-            st.error(f"❌ {fmt_label} parse error: {import_err}")
+            st.error(t.get("rdml_error", "❌ {fmt} parse error: {err}").format(fmt=fmt_label, err=import_err))
             import_df = None
 
         if import_df is not None:
-            st.success(f"✅ {fmt_label} file loaded — {len(import_df)} reactions found.")
+            st.success(t.get("rdml_success", "✅ {fmt} file loaded — {n} reactions found.").format(fmt=fmt_label, n=len(import_df)))
 
-            # Show a preview
-            with st.expander("Preview parsed data", expanded=False):
+            with st.expander(t.get("rdml_preview", "Preview parsed data"), expanded=False):
                 st.dataframe(import_df, use_container_width=True)
 
-            # Samples detected
             all_samples = sorted(import_df["Sample"].unique())
-            st.markdown("**Step 1 — Label your Control group**")
+            st.markdown(t.get("rdml_step1", "**Step 1 — Label your Control group**"))
             ctrl_label = st.text_input(
-                "Control sample name(s) (comma-separated substrings)",
+                t.get("rdml_ctrl_label", "Control sample name(s) (comma-separated substrings)"),
                 value=", ".join([s for s in all_samples[:1]]),
-                key="rdml_ctrl_label",
-                help="Any sample whose name contains this text will be treated as Control."
+                key="rdml_ctrl_label_input",
+                help=t.get("rdml_ctrl_help", "Any sample whose name contains this text will be treated as Control.")
             )
 
-            st.markdown("**Step 2 — Label your Patient groups**")
-            n_pat_grps = st.number_input("Number of patient groups", min_value=1, max_value=10, value=1, step=1, key="rdml_n_pat")
+            st.markdown(t.get("rdml_step2", "**Step 2 — Label your Patient groups**"))
+            n_pat_grps = st.number_input(
+                t.get("rdml_n_pat", "Number of patient groups"),
+                min_value=1, max_value=10, value=1, step=1, key="rdml_n_pat"
+            )
             patient_labels = []
             for pg in range(int(n_pat_grps)):
                 default_pat = all_samples[pg + 1] if pg + 1 < len(all_samples) else ""
                 pat_lbl = st.text_input(
-                    f"Patient group {pg+1} sample name(s)",
+                    t.get("rdml_pat_label", "Patient group {i} sample name(s)").format(i=pg+1),
                     value=default_pat,
                     key=f"rdml_pat_{pg}",
-                    help="Comma-separated substrings. All matching samples will be pooled into this group."
+                    help=t.get("rdml_pat_help", "Comma-separated substrings.")
                 )
                 patient_labels.append(pat_lbl)
 
-            if st.button(f"✅ Apply {fmt_label} import to Data Entry", key="rdml_apply_btn"):
+            if st.button(t.get("rdml_apply", "✅ Apply {fmt} import to Data Entry").format(fmt=fmt_label), key="rdml_apply_btn"):
                 n_filled = apply_import_to_session(import_df, ctrl_label, patient_labels)
                 if n_filled > 0:
-                    st.success(f"✅ {n_filled} Cq values loaded into Data Entry tab! "
-                               "Switch to the Data Entry tab to review and adjust.")
+                    st.success(t.get("rdml_apply_success", "✅ {n} Cq values loaded!").format(n=n_filled))
                 else:
-                    st.warning(
-                        "⚠️ No values were mapped. Check that your control/patient "
-                        "labels match the sample names in the preview above."
-                    )
+                    st.warning(t.get("rdml_apply_warning", "⚠️ No values were mapped. Check your labels."))
 
 st.sidebar.markdown("---")
 instruction_clicked = st.sidebar.button("📘 Instruction ")
@@ -651,6 +646,24 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE kılavuzları).
         "pdf_outlier_col": "Aykırı Değer Dışlandı",
         "pdf_contact": "İletişim: mailtoburhanettin@gmail.com",
         "pdf_ready": "{n} kayıt hazır — PDF oluşturabilirsiniz.",
+        # RDML / RDES import
+        "rdml_expander":        "📂 RDML / RDES Dosyası İçe Aktar",
+        "rdml_description":     "Cq değerlerini otomatik doldurmak için **RDML** (`.rdml`) veya **RDES** (`.tsv`/`.csv`/`.txt`) dosyası yükleyin.",
+        "rdml_uploader":        "Dosya seçin",
+        "rdml_uploader_help":   "RDML: Bio-Rad CFX, Roche LightCycler vb.  RDES: sekmeyle ayrılmış tablo formatı.",
+        "rdml_success":         "✅ {fmt} dosyası yüklendi — {n} reaksiyon bulundu.",
+        "rdml_error":           "❌ {fmt} ayrıştırma hatası: {err}",
+        "rdml_preview":         "Ayrıştırılan verileri önizle",
+        "rdml_step1":           "**Adım 1 — Kontrol grubunu etiketleyin**",
+        "rdml_ctrl_label":      "Kontrol örnek adı (virgülle ayrılmış alt dizeler)",
+        "rdml_ctrl_help":       "Adı bu metni içeren tüm örnekler Kontrol grubu olarak işlenecektir.",
+        "rdml_step2":           "**Adım 2 — Hasta gruplarını etiketleyin**",
+        "rdml_n_pat":           "Hasta grubu sayısı",
+        "rdml_pat_label":       "Hasta grubu {i} örnek adı (adları)",
+        "rdml_pat_help":        "Virgülle ayrılmış alt dizeler. Eşleşen tüm örnekler bu gruba dahil edilir.",
+        "rdml_apply":           "✅ {fmt} verilerini Veri Girişine Uygula",
+        "rdml_apply_success":   "✅ {n} Cq değeri Veri Girişi sekmesine yüklendi! Kontrol edip ayarlayabilirsiniz.",
+        "rdml_apply_warning":   "⚠️ Hiçbir değer eşleştirilemedi. Kontrol/hasta etiketlerinin yukarıdaki önizlemedeki örnek adlarıyla uyuştuğundan emin olun.",
     },
 
     "en": {
@@ -962,6 +975,24 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE guidelines).
         "pdf_outlier_col": "Outlier Excluded",
         "pdf_contact": "Contact: mailtoburhanettin@gmail.com",
         "pdf_ready": "{n} records ready — you can generate the PDF.",
+        # RDML / RDES import
+        "rdml_expander":        "📂 Import RDML / RDES File",
+        "rdml_description":     "Upload an **RDML** (`.rdml`) or **RDES** (`.tsv`/`.csv`/`.txt`) file to auto-fill Cq values.",
+        "rdml_uploader":        "Choose file",
+        "rdml_uploader_help":   "RDML: Bio-Rad CFX, Roche LightCycler, etc.  RDES: tab-separated spreadsheet format.",
+        "rdml_success":         "✅ {fmt} file loaded — {n} reactions found.",
+        "rdml_error":           "❌ {fmt} parse error: {err}",
+        "rdml_preview":         "Preview parsed data",
+        "rdml_step1":           "**Step 1 — Label your Control group**",
+        "rdml_ctrl_label":      "Control sample name(s) (comma-separated substrings)",
+        "rdml_ctrl_help":       "Any sample whose name contains this text will be treated as Control.",
+        "rdml_step2":           "**Step 2 — Label your Patient groups**",
+        "rdml_n_pat":           "Number of patient groups",
+        "rdml_pat_label":       "Patient group {i} sample name(s)",
+        "rdml_pat_help":        "Comma-separated substrings. All matching samples will be pooled into this group.",
+        "rdml_apply":           "✅ Apply {fmt} import to Data Entry",
+        "rdml_apply_success":   "✅ {n} Cq values loaded into Data Entry tab! Switch to review and adjust.",
+        "rdml_apply_warning":   "⚠️ No values were mapped. Check that your labels match the sample names in the preview above.",
     },
 
     "de": {
@@ -1260,6 +1291,24 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE-Richtlinien).
         "pdf_eff_ok": "OK", "pdf_eff_warn": "WARNUNG: Pfaffl verwenden",
         "pdf_outlier_col": "Ausreißer ausgeschlossen", "pdf_contact": "Kontakt: mailtoburhanettin@gmail.com",
         "pdf_ready": "{n} Einträge bereit — Sie können das PDF erstellen.",
+        # RDML / RDES import
+        "rdml_expander":        "📂 RDML / RDES-Datei importieren",
+        "rdml_description":     "Laden Sie eine **RDML** (`.rdml`) oder **RDES** (`.tsv`/`.csv`/`.txt`) Datei hoch, um Cq-Werte automatisch einzufügen.",
+        "rdml_uploader":        "Datei auswählen",
+        "rdml_uploader_help":   "RDML: Bio-Rad CFX, Roche LightCycler usw.  RDES: tabulatorgetrennte Tabellenkalkulation.",
+        "rdml_success":         "✅ {fmt}-Datei geladen — {n} Reaktionen gefunden.",
+        "rdml_error":           "❌ {fmt}-Fehler: {err}",
+        "rdml_preview":         "Geparste Daten anzeigen",
+        "rdml_step1":           "**Schritt 1 — Kontrollgruppe bezeichnen**",
+        "rdml_ctrl_label":      "Kontrollprobenname(n) (kommagetrennte Teilstrings)",
+        "rdml_ctrl_help":       "Alle Proben, deren Name diesen Text enthält, werden als Kontrolle behandelt.",
+        "rdml_step2":           "**Schritt 2 — Patientengruppen bezeichnen**",
+        "rdml_n_pat":           "Anzahl der Patientengruppen",
+        "rdml_pat_label":       "Patientengruppe {i} Probenname(n)",
+        "rdml_pat_help":        "Kommagetrennte Teilstrings. Alle passenden Proben werden in diese Gruppe zusammengeführt.",
+        "rdml_apply":           "✅ {fmt}-Import auf Dateneingabe anwenden",
+        "rdml_apply_success":   "✅ {n} Cq-Werte in den Dateneingabe-Tab geladen! Wechseln Sie dorthin zum Überprüfen.",
+        "rdml_apply_warning":   "⚠️ Keine Werte zugeordnet. Prüfen Sie, ob Ihre Bezeichnungen mit den Probennamen in der Vorschau übereinstimmen.",
     },
 
     "fr": {
@@ -1566,6 +1615,24 @@ Bustin SA et al. *Clin Chem* 2009 (directives MIQE).
         "pdf_outlier_col": "Valeur aberrante exclue",
         "pdf_contact": "Contact: mailtoburhanettin@gmail.com",
         "pdf_ready": "{n} enregistrements prêts — vous pouvez générer le PDF.",
+        # RDML / RDES import
+        "rdml_expander":        "📂 Importer un fichier RDML / RDES",
+        "rdml_description":     "Importez un fichier **RDML** (`.rdml`) ou **RDES** (`.tsv`/`.csv`/`.txt`) pour remplir automatiquement les valeurs Cq.",
+        "rdml_uploader":        "Choisir un fichier",
+        "rdml_uploader_help":   "RDML: Bio-Rad CFX, Roche LightCycler, etc.  RDES: tableau séparé par tabulations.",
+        "rdml_success":         "✅ Fichier {fmt} chargé — {n} réactions trouvées.",
+        "rdml_error":           "❌ Erreur d'analyse {fmt} : {err}",
+        "rdml_preview":         "Aperçu des données analysées",
+        "rdml_step1":           "**Étape 1 — Étiquetez votre groupe contrôle**",
+        "rdml_ctrl_label":      "Nom(s) d'échantillon contrôle (sous-chaînes séparées par des virgules)",
+        "rdml_ctrl_help":       "Tout échantillon dont le nom contient ce texte sera traité comme Contrôle.",
+        "rdml_step2":           "**Étape 2 — Étiquetez vos groupes patients**",
+        "rdml_n_pat":           "Nombre de groupes patients",
+        "rdml_pat_label":       "Nom(s) d'échantillon du groupe patient {i}",
+        "rdml_pat_help":        "Sous-chaînes séparées par des virgules. Tous les échantillons correspondants seront regroupés.",
+        "rdml_apply":           "✅ Appliquer l'import {fmt} à la saisie des données",
+        "rdml_apply_success":   "✅ {n} valeurs Cq chargées dans l'onglet Saisie ! Vérifiez et ajustez si nécessaire.",
+        "rdml_apply_warning":   "⚠️ Aucune valeur correspondante. Vérifiez que vos étiquettes correspondent aux noms dans l'aperçu.",
     },
 
     "es": {
@@ -1872,6 +1939,24 @@ Bustin SA et al. *Clin Chem* 2009 (directrices MIQE).
         "pdf_outlier_col": "Valor atípico excluido",
         "pdf_contact": "Contacto: mailtoburhanettin@gmail.com",
         "pdf_ready": "{n} registros listos — puede generar el PDF.",
+        # RDML / RDES import
+        "rdml_expander":        "📂 Importar archivo RDML / RDES",
+        "rdml_description":     "Cargue un archivo **RDML** (`.rdml`) o **RDES** (`.tsv`/`.csv`/`.txt`) para rellenar automáticamente los valores Cq.",
+        "rdml_uploader":        "Seleccionar archivo",
+        "rdml_uploader_help":   "RDML: Bio-Rad CFX, Roche LightCycler, etc.  RDES: tabla separada por tabulaciones.",
+        "rdml_success":         "✅ Archivo {fmt} cargado — {n} reacciones encontradas.",
+        "rdml_error":           "❌ Error al analizar {fmt}: {err}",
+        "rdml_preview":         "Vista previa de los datos analizados",
+        "rdml_step1":           "**Paso 1 — Etiquete su grupo de control**",
+        "rdml_ctrl_label":      "Nombre(s) de muestra de control (subcadenas separadas por comas)",
+        "rdml_ctrl_help":       "Cualquier muestra cuyo nombre contenga este texto se tratará como Control.",
+        "rdml_step2":           "**Paso 2 — Etiquete sus grupos de pacientes**",
+        "rdml_n_pat":           "Número de grupos de pacientes",
+        "rdml_pat_label":       "Nombre(s) de muestra del grupo de pacientes {i}",
+        "rdml_pat_help":        "Subcadenas separadas por comas. Todas las muestras coincidentes se agruparán.",
+        "rdml_apply":           "✅ Aplicar importación {fmt} a la entrada de datos",
+        "rdml_apply_success":   "✅ {n} valores Cq cargados en la pestaña de entrada. ¡Revise y ajuste si es necesario!",
+        "rdml_apply_warning":   "⚠️ No se mapearon valores. Compruebe que sus etiquetas coinciden con los nombres de muestra de la vista previa.",
     },
 
     "ar": {
@@ -2170,6 +2255,24 @@ Bustin SA et al. *Clin Chem* 2009 (إرشادات MIQE).
         "pdf_eff_ok": "مقبول", "pdf_eff_warn": "تحذير: استخدم Pfaffl",
         "pdf_outlier_col": "قيمة شاذة مستبعدة", "pdf_contact": "التواصل: mailtoburhanettin@gmail.com",
         "pdf_ready": "{n} سجلات جاهزة — يمكنك إنشاء تقرير PDF.",
+        # RDML / RDES import
+        "rdml_expander":        "📂 استيراد ملف RDML / RDES",
+        "rdml_description":     "ارفع ملف **RDML** (`.rdml`) أو **RDES** (`.tsv`/`.csv`/`.txt`) لملء قيم Cq تلقائيًا.",
+        "rdml_uploader":        "اختر ملفًا",
+        "rdml_uploader_help":   "RDML: Bio-Rad CFX، Roche LightCycler، إلخ.  RDES: جدول مفصول بعلامات تبويب.",
+        "rdml_success":         "✅ تم تحميل ملف {fmt} — تم العثور على {n} تفاعل.",
+        "rdml_error":           "❌ خطأ في تحليل {fmt}: {err}",
+        "rdml_preview":         "معاينة البيانات المحللة",
+        "rdml_step1":           "**الخطوة 1 — حدد مجموعة التحكم**",
+        "rdml_ctrl_label":      "اسم (أسماء) عينة التحكم (سلاسل فرعية مفصولة بفواصل)",
+        "rdml_ctrl_help":       "أي عينة يحتوي اسمها على هذا النص ستُعامَل كمجموعة تحكم.",
+        "rdml_step2":           "**الخطوة 2 — حدد مجموعات المرضى**",
+        "rdml_n_pat":           "عدد مجموعات المرضى",
+        "rdml_pat_label":       "اسم (أسماء) عينات مجموعة المرضى {i}",
+        "rdml_pat_help":        "سلاسل فرعية مفصولة بفواصل. سيتم تجميع جميع العينات المطابقة في هذه المجموعة.",
+        "rdml_apply":           "✅ تطبيق استيراد {fmt} على إدخال البيانات",
+        "rdml_apply_success":   "✅ تم تحميل {n} قيمة Cq في تبويب إدخال البيانات! انتقل إليه للمراجعة والتعديل.",
+        "rdml_apply_warning":   "⚠️ لم يتم تعيين أي قيم. تحقق من أن التسميات تتطابق مع أسماء العينات في المعاينة.",
     }
 }
 
