@@ -3946,8 +3946,32 @@ Ge Y et al. *Bioinformatics* 2003; Storey JD. *J R Stat Soc B* 2002.
             st.plotly_chart(fig_log, use_container_width=True, key="multigene_fc_log2")
             st.caption("log2 > 0 = upregulated, log2 < 0 = downregulated, log2 = 0 = no change")
 
-    # ── ΔCt Dağılım Grafikleri ────────────────────────────────────────────────
+    # ── Dağılım Grafikleri ────────────────────────────────────────────────────
     st.markdown("---")
+
+    # REVIEWER RESPONSE (Comment 3 — second part):
+    # Allow user to choose which values to display in the distribution plot:
+    # RQ (2^-ΔCt), raw ΔCt, or ΔΔCt (relative to control mean).
+    plot_mode = st.radio(
+        "📊 Distribution Plot — Display Mode",
+        options=[
+            "RQ (2^-ΔCt)  — recommended",
+            "ΔCt  — raw normalized values",
+            "ΔΔCt  — relative to control mean",
+        ],
+        index=0,
+        horizontal=True,
+        key="dist_plot_mode",
+        help=(
+            "**RQ (recommended):** Converts ΔCt to 2^(-ΔCt). Higher value = higher expression. "
+            "Avoids the counter-intuitive ΔCt paradox (high ΔCt = low expression).\n\n"
+            "**ΔCt:** Raw normalized values on a log scale. Useful for checking data spread "
+            "and normality, but higher value means lower expression.\n\n"
+            "**ΔΔCt:** Each sample's ΔCt minus the control group mean ΔCt. "
+            "Shows expression change relative to control on a log scale."
+        )
+    )
+
     for i in range(num_target_genes):
         st.subheader(f"{translations[language_code]['target_gene']} {i+1} - {translations[language_code]['distribution_graph']}")
 
@@ -3959,7 +3983,6 @@ Ge Y et al. *Bioinformatics* 2003; Storey JD. *J R Stat Soc B* 2002.
                d.get("__target_ct__") not in ("EXCLUDED", None) and
                d.get("Outlier Excluded", "No") == "No"
         ]
-
         control_reference_ct_values = [
             d["__ref_ct__"] 
             for d in input_values_table
@@ -3976,74 +3999,95 @@ Ge Y et al. *Bioinformatics* 2003; Storey JD. *J R Stat Soc B* 2002.
         control_delta_ct = np.array(control_target_ct_values, dtype=float) - np.array(control_reference_ct_values, dtype=float)
         average_control_delta_ct = np.mean(control_delta_ct)
 
+        # ── Convert values based on selected plot mode ────────────────────────
+        def _transform(dct_array, mode, ctrl_mean):
+            if mode.startswith("RQ"):
+                return 2 ** (-np.array(dct_array))
+            elif mode.startswith("ΔΔCt"):
+                return np.array(dct_array) - ctrl_mean
+            else:  # raw ΔCt
+                return np.array(dct_array)
+
+        def _yaxis_label(mode):
+            if mode.startswith("RQ"):    return "RQ (2^-ΔCt)"
+            elif mode.startswith("ΔΔCt"): return "ΔΔCt (vs control mean)"
+            else:                          return "ΔCt"
+
+        ctrl_plot_vals = _transform(control_delta_ct, plot_mode, average_control_delta_ct)
+        avg_ctrl_plot  = float(np.mean(ctrl_plot_vals))
+
         fig = go.Figure()
         fig.add_trace(go.Scatter(
             x=[0.8, 1.2],
-            y=[average_control_delta_ct, average_control_delta_ct],
+            y=[avg_ctrl_plot, avg_ctrl_plot],
             mode='lines',
             line=dict(color='black', width=4),
             name=translations[language_code]["control_group_avg"]
         ))
 
         for j in range(num_patient_groups):
-            sample_delta_ct_values = [
+            sample_dct_raw = [
                 float(d["__dct_patient__"])
-                for d in input_values_table 
-                if d["Grup"] == f"Group {j+1}" and 
+                for d in input_values_table
+                if d["Grup"] == f"Group {j+1}" and
                    d["__target_gene__"] == f"Gene {i+1}" and
                    d.get("__dct_patient__") not in ("EXCLUDED", None) and
                    d.get("Outlier Excluded", "No") == "No"
             ]
-            if not sample_delta_ct_values:
+            if not sample_dct_raw:
                 continue
-            average_sample_delta_ct = np.mean(sample_delta_ct_values)
+            smp_plot_vals   = _transform(sample_dct_raw, plot_mode, average_control_delta_ct)
+            avg_smp_plot    = float(np.mean(smp_plot_vals))
             fig.add_trace(go.Scatter(
                 x=[(j + 1.8), (j + 2.2)],
-                y=[average_sample_delta_ct, average_sample_delta_ct],
+                y=[avg_smp_plot, avg_smp_plot],
                 mode='lines',
                 line=dict(color='black', width=4),
                 name=f"{translations[language_code]['patient_group']} {j+1} {translations[language_code]['avg']}"
             ))
 
         fig.add_trace(go.Scatter(
-            x=np.ones(len(control_delta_ct)) + np.random.uniform(-0.05, 0.05, len(control_delta_ct)),
-            y=control_delta_ct,
+            x=np.ones(len(ctrl_plot_vals)) + np.random.uniform(-0.05, 0.05, len(ctrl_plot_vals)),
+            y=ctrl_plot_vals,
             mode='markers',
             name="Control",
             marker=dict(color='blue'),
-            text=[f"{translations[language_code]['control']} {value:.2f}, {translations[language_code]['sample']} {idx+1}" for idx, value in enumerate(control_delta_ct)],
+            text=[f"Control — {_yaxis_label(plot_mode)}={v:.4f}, replicate {idx+1}"
+                  for idx, v in enumerate(ctrl_plot_vals)],
             hoverinfo='text'
         ))
 
         for j in range(num_patient_groups):
-            sample_delta_ct_values = [
+            sample_dct_raw = [
                 float(d["__dct_patient__"])
-                for d in input_values_table 
-                if d["Grup"] == f"Group {j+1}" and 
+                for d in input_values_table
+                if d["Grup"] == f"Group {j+1}" and
                    d["__target_gene__"] == f"Gene {i+1}" and
                    d.get("__dct_patient__") not in ("EXCLUDED", None) and
                    d.get("Outlier Excluded", "No") == "No"
             ]
-            if not sample_delta_ct_values:
+            if not sample_dct_raw:
                 continue
+            smp_plot_vals = _transform(sample_dct_raw, plot_mode, average_control_delta_ct)
             fig.add_trace(go.Scatter(
-                x=np.ones(len(sample_delta_ct_values)) * (j + 2) + np.random.uniform(-0.05, 0.05, len(sample_delta_ct_values)),
-                y=sample_delta_ct_values,
+                x=np.ones(len(smp_plot_vals)) * (j + 2) + np.random.uniform(-0.05, 0.05, len(smp_plot_vals)),
+                y=smp_plot_vals,
                 mode='markers',
                 name=f"Group {j+1}",
                 marker=dict(color='red'),
-                text=[f"{translations[language_code]['patient']} {value:.2f}, {translations[language_code]['sample']} {idx+1}" for idx, value in enumerate(sample_delta_ct_values)],
+                text=[f"Group {j+1} — {_yaxis_label(plot_mode)}={v:.4f}, replicate {idx+1}"
+                      for idx, v in enumerate(smp_plot_vals)],
                 hoverinfo='text'
             ))
 
         fig.update_layout(
-            title=f"{translations[language_code]['target_gene']} {i+1} - {translations[language_code]['delta_ct_distribution']}",
+            title=f"{translations[language_code]['target_gene']} {i+1} — {_yaxis_label(plot_mode)} Distribution",
             xaxis=dict(
                 tickvals=[1] + [j + 2 for j in range(num_patient_groups)],
                 ticktext=["Control"] + [f"Group {j+1}" for j in range(num_patient_groups)],
                 title=translations[language_code]['x_axis_title']
             ),
-            yaxis=dict(title=translations[language_code]['delta_ct_value']),
+            yaxis=dict(title=_yaxis_label(plot_mode)),
             showlegend=True
         )
         st.plotly_chart(fig, use_container_width=True, key=f"dist_chart_{i}")
