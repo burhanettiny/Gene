@@ -91,72 +91,6 @@ if st.sidebar.button("📂 Load Example Data"):
     st.sidebar.success("✅ Example data loaded! Switch to Data Entry tab.")
 
 st.sidebar.markdown("---")
-
-# ── RDML / RDES FILE IMPORT ───────────────────────────────────────────────────
-t = translations[language_code]
-with st.sidebar.expander(t.get("rdml_expander", "📂 Import RDML / RDES File"), expanded=False):
-    st.markdown(t.get("rdml_description", "Upload an RDML or RDES file to auto-fill Cq values."))
-    imported_file = st.file_uploader(
-        t.get("rdml_uploader", "Choose file"),
-        type=["rdml", "tsv", "csv", "txt"],
-        key="rdml_rdes_uploader",
-        help=t.get("rdml_uploader_help", "RDML: Bio-Rad CFX, Roche LightCycler, etc.  RDES: tab-separated format."),
-    )
-
-    if imported_file is not None:
-        file_bytes = imported_file.read()
-        fname = imported_file.name.lower()
-
-        if fname.endswith(".rdml"):
-            import_df, import_err = parse_rdml(file_bytes)
-            fmt_label = "RDML"
-        else:
-            import_df, import_err = parse_rdes(file_bytes)
-            fmt_label = "RDES"
-
-        if import_err:
-            st.error(t.get("rdml_error", "❌ {fmt} parse error: {err}").format(fmt=fmt_label, err=import_err))
-            import_df = None
-
-        if import_df is not None:
-            st.success(t.get("rdml_success", "✅ {fmt} file loaded — {n} reactions found.").format(fmt=fmt_label, n=len(import_df)))
-
-            with st.expander(t.get("rdml_preview", "Preview parsed data"), expanded=False):
-                st.dataframe(import_df, use_container_width=True)
-
-            all_samples = sorted(import_df["Sample"].unique())
-            st.markdown(t.get("rdml_step1", "**Step 1 — Label your Control group**"))
-            ctrl_label = st.text_input(
-                t.get("rdml_ctrl_label", "Control sample name(s) (comma-separated substrings)"),
-                value=", ".join([s for s in all_samples[:1]]),
-                key="rdml_ctrl_label_input",
-                help=t.get("rdml_ctrl_help", "Any sample whose name contains this text will be treated as Control.")
-            )
-
-            st.markdown(t.get("rdml_step2", "**Step 2 — Label your Patient groups**"))
-            n_pat_grps = st.number_input(
-                t.get("rdml_n_pat", "Number of patient groups"),
-                min_value=1, max_value=10, value=1, step=1, key="rdml_n_pat"
-            )
-            patient_labels = []
-            for pg in range(int(n_pat_grps)):
-                default_pat = all_samples[pg + 1] if pg + 1 < len(all_samples) else ""
-                pat_lbl = st.text_input(
-                    t.get("rdml_pat_label", "Patient group {i} sample name(s)").format(i=pg+1),
-                    value=default_pat,
-                    key=f"rdml_pat_{pg}",
-                    help=t.get("rdml_pat_help", "Comma-separated substrings.")
-                )
-                patient_labels.append(pat_lbl)
-
-            if st.button(t.get("rdml_apply", "✅ Apply {fmt} import to Data Entry").format(fmt=fmt_label), key="rdml_apply_btn"):
-                n_filled = apply_import_to_session(import_df, ctrl_label, patient_labels)
-                if n_filled > 0:
-                    st.success(t.get("rdml_apply_success", "✅ {n} Cq values loaded!").format(n=n_filled))
-                else:
-                    st.warning(t.get("rdml_apply_warning", "⚠️ No values were mapped. Check your labels."))
-
-st.sidebar.markdown("---")
 instruction_clicked = st.sidebar.button("📘 Instruction ")
 
 if instruction_clicked or selected_language_name == "Instruction":
@@ -2277,6 +2211,65 @@ Bustin SA et al. *Clin Chem* 2009 (إرشادات MIQE).
 }
 
                   
+# ═══════════════════════════════════════════════════════════════════════════════
+# RDML / RDES SIDEBAR (burada language_code ve translations hazır)
+# ═══════════════════════════════════════════════════════════════════════════════
+_t = translations[language_code]
+st.sidebar.markdown("---")
+with st.sidebar.expander(_t.get("rdml_expander", "📂 Import RDML / RDES File"), expanded=False):
+    st.markdown(_t.get("rdml_description", "Upload an RDML or RDES file to auto-fill Cq values."))
+    imported_file = st.file_uploader(
+        _t.get("rdml_uploader", "Choose file"),
+        type=["rdml", "tsv", "csv", "txt"],
+        key="rdml_rdes_uploader",
+        help=_t.get("rdml_uploader_help", "RDML: Bio-Rad CFX, Roche LightCycler, etc.  RDES: tab-separated format."),
+    )
+    if imported_file is not None:
+        file_bytes = imported_file.read()
+        fname = imported_file.name.lower()
+        if fname.endswith(".rdml"):
+            import_df, import_err = parse_rdml(file_bytes)
+            fmt_label = "RDML"
+        else:
+            import_df, import_err = parse_rdes(file_bytes)
+            fmt_label = "RDES"
+        if import_err:
+            st.error(_t.get("rdml_error", "❌ {fmt} parse error: {err}").format(fmt=fmt_label, err=import_err))
+            import_df = None
+        if import_df is not None:
+            st.success(_t.get("rdml_success", "✅ {fmt} file loaded — {n} reactions found.").format(fmt=fmt_label, n=len(import_df)))
+            with st.expander(_t.get("rdml_preview", "Preview parsed data"), expanded=False):
+                st.dataframe(import_df, use_container_width=True)
+            all_samples = sorted(import_df["Sample"].unique())
+            st.markdown(_t.get("rdml_step1", "**Step 1 — Label your Control group**"))
+            ctrl_label = st.text_input(
+                _t.get("rdml_ctrl_label", "Control sample name(s) (comma-separated substrings)"),
+                value=", ".join([s for s in all_samples[:1]]),
+                key="rdml_ctrl_label_input",
+                help=_t.get("rdml_ctrl_help", "Any sample whose name contains this text will be treated as Control.")
+            )
+            st.markdown(_t.get("rdml_step2", "**Step 2 — Label your Patient groups**"))
+            n_pat_grps = st.number_input(
+                _t.get("rdml_n_pat", "Number of patient groups"),
+                min_value=1, max_value=10, value=1, step=1, key="rdml_n_pat"
+            )
+            patient_labels = []
+            for pg in range(int(n_pat_grps)):
+                default_pat = all_samples[pg + 1] if pg + 1 < len(all_samples) else ""
+                pat_lbl = st.text_input(
+                    _t.get("rdml_pat_label", "Patient group {i} sample name(s)").format(i=pg+1),
+                    value=default_pat,
+                    key=f"rdml_pat_{pg}",
+                    help=_t.get("rdml_pat_help", "Comma-separated substrings.")
+                )
+                patient_labels.append(pat_lbl)
+            if st.button(_t.get("rdml_apply", "✅ Apply {fmt} import to Data Entry").format(fmt=fmt_label), key="rdml_apply_btn"):
+                n_filled = apply_import_to_session(import_df, ctrl_label, patient_labels)
+                if n_filled > 0:
+                    st.success(_t.get("rdml_apply_success", "✅ {n} Cq values loaded!").format(n=n_filled))
+                else:
+                    st.warning(_t.get("rdml_apply_warning", "⚠️ No values were mapped. Check your labels."))
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # ANA ALAN — Başlık + 3 sekme
 # ═══════════════════════════════════════════════════════════════════════════════
