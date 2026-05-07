@@ -97,7 +97,7 @@ if instruction_clicked or selected_language_name == "Instruction":
 
         with tab1:
             st.markdown("### 📥 Data Input Format")
-            st.info("GeneQuantify accepts Ct (Cq) values entered as a column — one value per line. Compatible with direct **Excel/spreadsheet copy–paste**.")
+            st.info("GeneQuantify accepts Cq values entered as a column — one value per line. Compatible with direct **Excel/spreadsheet copy–paste**.")
             col1, col2 = st.columns(2)
             with col1:
                 st.markdown("**✅ Correct format**")
@@ -115,14 +115,14 @@ if instruction_clicked or selected_language_name == "Instruction":
             st.markdown("### 📋 Example Study Design")
             st.dataframe({
                 "Group": ["Control","Control","Control","Patient 1","Patient 1","Patient 1"],
-                "Target Ct": [23.1, 22.9, 25.2, 27.3, 28.1, 26.8],
-                "Reference Ct": [18.2, 17.9, 18.5, 18.3, 18.0, 18.6],
+                "Target Cq": [23.1, 22.9, 25.2, 27.3, 28.1, 26.8],
+                "Reference Cq": [18.2, 17.9, 18.5, 18.3, 18.0, 18.6],
             }, use_container_width=True)
 
         with tab2:
             st.markdown("### 🧮 Calculation Methods")
-            st.markdown("#### 1. Classic ΔΔCt Method (Livak & Schmittgen, 2001)")
-            st.code("ΔCt        = Ct(target) − Ct(reference)\nΔΔCt       = ΔCt(sample) − ΔCt(control)\nFold Change = 2^(−ΔΔCt)", language="text")
+            st.markdown("#### 1. Classic ΔΔCq Method (Livak & Schmittgen, 2001)")
+            st.code("ΔCq        = Cq(target) − Cq(reference)\nΔΔCq       = ΔCt(sample) − ΔCt(control)\nFold Change = 2^(−ΔΔCq)", language="text")
             st.markdown("""
 **Assumptions:**
 - Target and reference gene efficiencies are both ~100% (E ≈ 2.0)
@@ -130,7 +130,7 @@ if instruction_clicked or selected_language_name == "Instruction":
 - If these assumptions are violated, use the **Pfaffl method** instead
 """)
             st.markdown("#### 2. Pfaffl Method (Pfaffl, 2001)")
-            st.code("Ratio = (E_target ^ ΔCt_target) / (E_ref ^ ΔCt_ref)\n\nwhere:\n  ΔCt_target = Ct_control(target) − Ct_sample(target)\n  ΔCt_ref    = Ct_control(ref)    − Ct_sample(ref)", language="text")
+            st.code("Ratio = (E_target ^ ΔCq_target) / (E_ref ^ ΔCt_ref)\n\nwhere:\n  ΔCt_target = Ct_control(target) − Ct_sample(target)\n  ΔCt_ref    = Ct_control(ref)    − Ct_sample(ref)", language="text")
             st.info("The Pfaffl method accounts for primer-specific efficiencies and is more accurate when E differs between genes.")
 
             st.markdown("#### 3. Amplification Efficiency (E)")
@@ -145,7 +145,7 @@ if instruction_clicked or selected_language_name == "Instruction":
 | Primer datasheet | Manufacturer-validated E for commercial kits |
 """)
             st.markdown("#### 4. Multiple Reference Genes (geNorm, Vandesompele 2002)")
-            st.code("Normalization Factor (NF) = arithmetic mean of reference gene Ct values\nGeNorm M-value < 0.5  → Excellent stability\nGeNorm M-value 0.5–1.0 → Acceptable\nGeNorm M-value ≥ 1.0  → Unstable — consider excluding", language="text")
+            st.code("Normalization Factor (NF) = arithmetic mean of reference gene Cq values\nGeNorm M-value < 0.5  → Excellent stability\nGeNorm M-value 0.5–1.0 → Acceptable\nGeNorm M-value ≥ 1.0  → Unstable — consider excluding", language="text")
 
         with tab3:
             st.markdown("### 📊 Statistical Decision Pathway")
@@ -153,7 +153,7 @@ if instruction_clicked or selected_language_name == "Instruction":
 The app automatically selects the appropriate statistical test:
 
 ```
-Input ΔCt values
+Input ΔCq values
       │
       ▼
 Shapiro-Wilk normality test (p > 0.05 = normal)
@@ -222,7 +222,7 @@ This application is intended for research, education, and preliminary laboratory
 It is **NOT** designed or validated for clinical diagnosis, treatment decisions, or patient management.
 
 **Users are responsible for:**
-- Verifying the accuracy of entered Ct data
+- Verifying the accuracy of entered Cq data
 - Appropriate interpretation of results
 - Confirming findings using validated laboratory methods
 
@@ -231,7 +231,7 @@ All clinical decisions must be made by qualified professionals.
 """)
             st.markdown("""
 **References:**
-- Livak KJ & Schmittgen TD. *Methods* 2001;25:402–408. (ΔΔCt method)
+- Livak KJ & Schmittgen TD. *Methods* 2001;25:402–408. (ΔΔCq method)
 - Pfaffl MW. *Nucleic Acids Res* 2001;29(9):e45. (Pfaffl method)
 - Vandesompele J et al. *Genome Biol* 2002;3(7). (geNorm)
 - Bustin SA et al. *Clin Chem* 2009;55(4):611–622. (MIQE guidelines)
@@ -267,10 +267,10 @@ translations = {
         "sample_number": "Örnek Numarası",
         "Grup": "Grup",
         "x_axis_title": "Grup Adı",
-        "ct_value": "Ct Değeri",
-        "reference_ct": "Referans Ct",
-        "delta_ct_control": "ΔCt (Kontrol)",
-        "delta_ct_patient": "ΔCt (Hasta)",
+        "ct_value": "Cq Değeri",
+        "reference_ct": "Referans Cq",
+        "delta_ct_control": "ΔCq (Kontrol)",
+        "delta_ct_patient": "ΔCq (Hasta)",
         "warning_empty_input": "⚠️ Dikkat: Verileri alt alta yazın veya boşluk içeren hücre olmayacak şekilde excelden kopyalayıp yapıştırın.",
         "download_csv": "📥 CSV İndir",
         "generate_pdf": "📥 PDF Raporu Hazırla",
@@ -279,15 +279,15 @@ translations = {
         "nil_mine": "📊 Sonuçlar",
         "gr_tbl": "📋 Giriş Verileri Tablosu",
         "control_group": "🧬 Kontrol Grubu",
-        "ctrl_trgt_ct": "🟦 Kontrol Grubu Hedef Gen {i} Ct Değerleri",
-        "ctrl_ref_ct": "🟦 Kontrol Grubu Referans Gen {i} Ct Değerleri",
-        "hst_trgt_ct": "🩸 Hasta Grubu Hedef Gen {j} Ct Değerleri",
-        "hst_ref_ct": "🩸 Hasta Grubu Referans Gen {j} Ct Değerleri",
+        "ctrl_trgt_ct": "🟦 Kontrol Grubu Hedef Gen {i} Cq Değerleri",
+        "ctrl_ref_ct": "🟦 Kontrol Grubu Referans Gen {i} Cq Değerleri",
+        "hst_trgt_ct": "🩸 Hasta Grubu Hedef Gen {j} Cq Değerleri",
+        "hst_ref_ct": "🩸 Hasta Grubu Referans Gen {j} Cq Değerleri",
         "warning_control_ct": "⚠️ Dikkat: Kontrol Grubu {i} verilerini alt alta yazın veya boşluk içeren hücre olmayacak şekilde Excel'den kopyalayıp yapıştırın.",
-        "warning_patient_ct": "⚠️ Dikkat: Hasta grubu Ct verilerini alt alta yazın veya boşluk içeren hücre olmayacak şekilde Excel'den kopyalayıp yapıştırın.",
+        "warning_patient_cq": "⚠️ Dikkat: Hasta grubu Cq verilerini alt alta yazın veya boşluk içeren hücre olmayacak şekilde Excel'den kopyalayıp yapıştırın.",
         "target_gene": "Hedef Gen",
         "reference_gene": "Referans Gen",
-        "target_ct": "Hedef Gen Ct",
+        "target_ct": "Hedef Gen Cq",
         "distribution_graph": "Dağılım Grafiği",
         "error_missing_control_data": "⚠️ Hata: Kontrol Grubu için Hedef Gen {i} verileri eksik!",
         "control_group_avg": "Kontrol Grubu Ortalama",
@@ -295,8 +295,8 @@ translations = {
         "control": "Kontrol",
         "sample": "Örnek",
         "patient": "Hasta",
-        "delta_ct_distribution": "ΔCt Dağılımı",
-        "delta_ct_value": "ΔCt Değeri",
+        "delta_ct_distribution": "ΔCq Dağılımı",
+        "delta_ct_value": "ΔCq Değeri",
         "parametric": "Parametrik",
         "non_parametric": "Nonparametrik",
         "t_test": "t-test",
@@ -308,8 +308,8 @@ translations = {
         "test_method": "Kullanılan Test",
         "test_pvalue": "Test P-değeri",
         "significance": "Anlamlılık",
-        "delta_delta_ct": "ΔΔCt",
-        "gene_expression_change": "Gen Ekspresyon Değişimi (2^(-ΔΔCt))",
+        "delta_delta_ct": "ΔΔCq",
+        "gene_expression_change": "Gen Ekspresyon Değişimi (2^(-ΔΔCq))",
         "regulation_status": "Regülasyon Durumu",
         "no_change": "Değişim Yok",
         "upregulated": "Yukarı Regüle",
@@ -336,13 +336,13 @@ translations = {
         "efficiency_ref_slope_label": "Referans Gen {i} Slope",
         "efficiency_threshold": "Kabul edilebilir efficiency farkı eşiği (%)",
         "efficiency_ok": "✅ Efficiency farkı kabul edilebilir ({diff:.1f}%)",
-        "efficiency_warning": "⚠️ Efficiency farkı eşiği aşıyor ({diff:.1f}%) — ΔΔCt yöntemi güvenilir olmayabilir!",
+        "efficiency_warning": "⚠️ Efficiency farkı eşiği aşıyor ({diff:.1f}%) — ΔΔCq yöntemi güvenilir olmayabilir!",
         "efficiency_target_pct": "Hedef Gen Efficiency",
         "efficiency_ref_pct": "Referans Gen Efficiency",
         "efficiency_diff": "Fark",
         "pfaffl_result": "Pfaffl Oranı",
         "pfaffl_header": "Pfaffl Metodu Sonuçları",
-        "classic_ddct": "Klasik ΔΔCt Sonucu (2^(-ΔΔCt))",
+        "classic_ddct": "Klasik ΔΔCq Sonucu (2^(-ΔΔCq))",
         "pfaffl_ratio": "Pfaffl Oranı",
         "method_comparison": "📊 Yöntem Karşılaştırması",
         "efficiency_note": "Not: E=2.0 mükemmel etkinliği (100%) temsil eder. Kabul edilen aralık: 1.8–2.2 (90–110%)",
@@ -357,7 +357,7 @@ translations = {
         # Outlier section
         "outlier_section_title": "### 🔍 Aykırı Değer Tespiti Ayarları",
         "outlier_enable": "Aykırı değer tespitini etkinleştir",
-        "outlier_enable_help": "İstatistiksel olarak aşırı Ct değerlerini tespit eder.",
+        "outlier_enable_help": "İstatistiksel olarak aşırı Cq değerlerini tespit eder.",
         "outlier_method_label": "Tespit yöntemi",
         "outlier_method_help": "Grubbs: normal dağılım için, tek aykırı değer. IQR: parametrik olmayan, çarpık dağılımlar için.",
         "outlier_alpha_label": "Anlamlılık düzeyi (α)",
@@ -365,28 +365,29 @@ translations = {
         "outlier_iqr_label": "IQR çarpanı (k)",
         "outlier_iqr_help": "k=1.5 = standart Tukey sınırları. k=3.0 = yalnızca aşırı aykırı değerler.",
         "outlier_expander": "ℹ️ qPCR'de aykırı değer tespiti hakkında",
+        "grubbs_info": "ℹ️ **Grubbs testi gereksinimleri:** Her grup için minimum **n ≥ 3** replikat. Anlamlılık eşiği: **α = {alpha:.2f}**. Test normallik varsayar; n < 8 için normallik güvenilir biçimde değerlendirilemez — sonuçlar dikkatli yorumlanmalıdır. Gürültülü replikatların ΔCq hesabına yansımasını önlemek için **ham Cq değerlerine** (normalizasyon öncesi) uygulanması önerilir.",
         "outlier_excluded_no": "Hayır",
         "outlier_excluded_yes": "Evet",
         # Outlier stage selector (Reviewer 1, Yorum 3)
         "outlier_stage_label": "🔬 Aykırı Değer Uygulama Aşaması",
-        "outlier_stage_raw": "Ham Ct — normalizasyon öncesi (önerilen)",
-        "outlier_stage_dct": "ΔCt — normalizasyon sonrası (eski davranış)",
+        "outlier_stage_raw": "Ham Cq — normalizasyon öncesi (önerilen)",
+        "outlier_stage_dct": "ΔCq — normalizasyon sonrası (eski davranış)",
         "outlier_stage_help": (
-            "**Ham Ct (önerilen):** Aykırı değerler, ΔCt hesaplanmadan önce ham Ct değerlerine "
+            "**Ham Ct (önerilen):** Aykırı değerler, ΔCq hesaplanmadan önce ham Cq değerlerine "
             "uygulanır. Her target ve referans gen için ayrı ayrı kontrol edilir. "
             "Gürültülü replikatların normalizasyona sızması engellenir.\n\n"
-            "**ΔCt:** Aykırı değerler normalizasyon sonrası uygulanır (orijinal davranış)."
+            "**ΔCq:** Aykırı değerler normalizasyon sonrası uygulanır (orijinal davranış)."
         ),
         # Distribution plot mode selector (Reviewer 1, Yorum 3 & 9)
         "dist_plot_mode_label": "📊 Dağılım Grafiği — Görüntüleme Modu",
-        "dist_plot_rq":   "RQ (2^-ΔCt)  — önerilen",
-        "dist_plot_dct":  "ΔCt  — ham normalize değerler",
-        "dist_plot_ddct": "ΔΔCt  — kontrol ortalamasına göre",
+        "dist_plot_rq":   "RQ (2^-ΔCq)  — önerilen",
+        "dist_plot_dct":  "ΔCq  — ham normalize değerler",
+        "dist_plot_ddct": "ΔΔCq  — kontrol ortalamasına göre",
         "dist_plot_help": (
-            "**RQ (önerilen):** ΔCt → 2^(-ΔCt) dönüşümü. Yüksek değer = yüksek ekspresyon. "
-            "Yüksek ΔCt = düşük ekspresyon paradoksunu ortadan kaldırır.\n\n"
-            "**ΔCt:** Ham logaritmik değerler. Veri dağılımı ve normallik kontrolü için.\n\n"
-            "**ΔΔCt:** Her örneğin ΔCt'si eksi kontrol grubu ortalaması. Kontrole göre değişimi gösterir."
+            "**RQ (önerilen):** ΔCq → 2^(-ΔCt) dönüşümü. Yüksek değer = yüksek ekspresyon. "
+            "Yüksek ΔCq = düşük ekspresyon paradoksunu ortadan kaldırır.\n\n"
+            "**ΔCq:** Ham logaritmik değerler. Veri dağılımı ve normallik kontrolü için.\n\n"
+            "**ΔΔCq:** Her örneğin ΔCq'si eksi kontrol grubu ortalaması. Kontrole göre değişimi gösterir."
         ),
         "unequal_n_warning": (
             "⚠️ **Eşit olmayan replikat sayısı — {group}:**  \n"
@@ -462,7 +463,7 @@ translations = {
         "sc_dilution_factor_input": "Dilüsyon faktörü",
         "sc_start_conc_label": "**Başlangıç konsantrasyonu** (keyfi birim, örn. 1)",
         "sc_start_conc_input": "Başlangıç konsantrasyonu",
-        "sc_enter_ct": "**Her dilüsyon için ortalama Ct girin:**",
+        "sc_enter_ct": "**Her dilüsyon için ortalama Cq girin:**",
         "sc_calc_button": "📊 Etkinliği Hesapla",
         "sc_slope": "Eğim",
         "sc_e_value": "E değeri",
@@ -477,26 +478,26 @@ translations = {
         "sc_description": """\
 **Standart Eğri Hesaplayıcı nasıl kullanılır:**
 
-Seri dilüsyon Ct değerlerinizi aşağıya girin. Hesaplayıcı doğrusal regresyon uygulayarak eğim, R² ve amplifikasyon etkinliğini otomatik hesaplar.
+Seri dilüsyon Cq değerlerinizi aşağıya girin. Hesaplayıcı doğrusal regresyon uygulayarak eğim, R² ve amplifikasyon etkinliğini otomatik hesaplar.
 
 **Kullanım:**  
 1. Her primer için seri dilüsyonlarda qPCR çalıştırın (örn. seyreltilmemiş, 1:10, 1:100, 1:1000, 1:10000)  
-2. Her dilüsyon için ortalama Ct değerini girin  
+2. Her dilüsyon için ortalama Cq değerini girin  
 3. Eğim, E ve R² değerlerini okuyun  
 """,
         "ref_multi_description": """\
 **Geometrik ortalama normalizasyonu** (Vandesompele et al. 2002)  
-Normalizasyon faktörü (NF), her örnek için tüm referans genlerinin Ct değerlerinin aritmetik ortalamasıdır;  
+Normalizasyon faktörü (NF), her örnek için tüm referans genlerinin Cq değerlerinin aritmetik ortalamasıdır;  
 bu da ifade düzeylerinin geometrik ortalamasına karşılık gelir.  
 `NF_örnek = ortalama(Ct_ref1, Ct_ref2, ..., Ct_refN)` her örnek için  
-`ΔCt = Ct_hedef − NF`
+`ΔCq = Ct_hedef − NF`
 
 **geNorm M-değeri** (stabilite skoru)  
 Her referans gen için M, diğer tüm referans genlerine karşı log-oranlarının ortalama standart sapmasıdır.  
 **Düşük M = daha kararlı.** MIQE tavsiye edilen eşik: M < 0,5 (katı) veya M < 1,0 (kabul edilebilir).
 
 **CV (Varyasyon Katsayısı)**  
-`CV = (SS / ortalama) × 100%` tüm örneklerdeki ham Ct değerlerinin.  
+`CV = (SS / ortalama) × 100%` tüm örneklerdeki ham Cq değerlerinin.  
 Düşük CV, daha az varyasyon ve referans olarak daha iyi kararlılık anlamına gelir.
 
 **Referans:** Vandesompele J et al. *Genome Biology* 2002; Bustin SA et al. *Clin Chem* 2009 (MIQE).
@@ -504,7 +505,7 @@ Düşük CV, daha az varyasyon ve referans olarak daha iyi kararlılık anlamın
         "outlier_description": """\
 **qPCR'de aykırı değer tespiti neden önemlidir?**
 
-Teknik değişkenlik qPCR'ye özgüdür: pipetleme hataları, hava kabarcığı oluşumu, inhibitör taşınması veya RNA kalite farklılıkları, replikat grubunun geri kalanıyla istatistiksel olarak uyumsuz Ct değerleri üretebilir.  
+Teknik değişkenlik qPCR'ye özgüdür: pipetleme hataları, hava kabarcığı oluşumu, inhibitör taşınması veya RNA kalite farklılıkları, replikat grubunun geri kalanıyla istatistiksel olarak uyumsuz Cq değerleri üretebilir.  
 Bu tür değerlerin dahil edilmesi varyansı şişirir, ortalamaları saptırır ve yanlış sonuçlara yol açabilir — özellikle küçük örneklem büyüklüklüeri olan klinik veri setlerinde.
 
 **Bu kısıtlamanın kritik hale geldiği durumlar:**
@@ -515,7 +516,7 @@ Bu tür değerlerin dahil edilmesi varyansı şişirir, ortalamaları saptırır
 
 **Grubbs testi** *(Grubbs 1969)*  
 Normallik varsayar. En uç değerin istatistiksel olarak anlamlı bir aykırı değer olup olmadığını test eder (p < α). Başka aykırı değer bulunmayana kadar tekrarlanır.  
-En iyi: tek bir deneysel gruptan replikat Ct değerleri için.
+En iyi: tek bir deneysel gruptan replikat Cq değerleri için.
 
 **IQR yöntemi** *(Tukey 1977)*  
 Parametrik olmayan. Q1 − k×IQR veya Q3 + k×IQR dışındaki değerleri işaretler.  
@@ -535,10 +536,10 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE kılavuzları).
         "pdf_s1_title": "1. Yöntemler ve Analiz Ayarları",
         "pdf_s1_calc": "1.1 Hesaplama Yöntemleri",
         "pdf_s1_calc_body": "Kat değişimi hesabı için iki tamamlayıcı yöntem kullanıldı:",
-        "pdf_s1_classic": "Klasik ΔΔCt (Livak & Schmittgen, 2001): ΔCt = Ct(hedef) - Ct(referans);  ΔΔCt = ΔCt(örnek) - ΔCt(kontrol);  Kat Değişimi = 2^(-ΔΔCt). Her iki gen için eşit amplifikasyon verimliliği varsayar (E ≈ 2.0).",
-        "pdf_s1_pfaffl": "Pfaffl Yöntemi (Pfaffl, 2001): Oran = (E_hedef ^ ΔCt_hedef) / (E_ref ^ ΔCt_ref). Primer'e özgü verimlilikleri düzeltir; verimlilik farkı > %10 olduğunda önerilir.",
+        "pdf_s1_classic": "Klasik ΔΔCq (Livak & Schmittgen, 2001): ΔCq = Cq(hedef) - Ct(referans);  ΔΔCq = ΔCq(örnek) - ΔCt(kontrol);  Kat Değişimi = 2^(-ΔΔCt). Her iki gen için eşit amplifikasyon verimliliği varsayar (E ≈ 2.0).",
+        "pdf_s1_pfaffl": "Pfaffl Yöntemi (Pfaffl, 2001): Oran = (E_hedef ^ ΔCq_hedef) / (E_ref ^ ΔCt_ref). Primer'e özgü verimlilikleri düzeltir; verimlilik farkı > %10 olduğunda önerilir.",
         "pdf_s1_norm": "1.2 Normalizasyon",
-        "pdf_s1_norm_multi": "Çoklu referans gen (n={n}) kullanıldı. Normalizasyon faktörü (NF), her örnek için referans gen Ct değerlerinin aritmetik ortalaması olarak hesaplandı (geNorm yaklaşımı, Vandesompele et al. 2002). geNorm M-değerleri ve varyasyon katsayısı (CV%) hesaplandı.",
+        "pdf_s1_norm_multi": "Çoklu referans gen (n={n}) kullanıldı. Normalizasyon faktörü (NF), her örnek için referans gen Cq değerlerinin aritmetik ortalaması olarak hesaplandı (geNorm yaklaşımı, Vandesompele et al. 2002). geNorm M-değerleri ve varyasyon katsayısı (CV%) hesaplandı.",
         "pdf_s1_norm_single": "Normalizasyon için tek referans gen kullanıldı. MIQE kılavuzları sağlam normalizasyon için ≥2 referans gen önermektedir.",
         "pdf_s1_eff": "1.3 Amplifikasyon Verimliliği",
         "pdf_s1_eff_range": "Kabul edilebilir verimlilik aralığı: E = 1.8-2.2 (%90-110%). Uygulanan verimlilik farkı eşiği: {thr}%.",
@@ -548,23 +549,23 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE kılavuzları).
         "pdf_s1_outlier_warn": "UYARI: Aykırı değer dışlama biyolojik veya teknik gerekçe gerektirir. Dışlanan örnekler aşağıdaki veri tablosunda işaretlendi.",
         "pdf_s1_outlier_off": "Bu analiz için aykırı değer tespiti devre dışı bırakıldı.",
         "pdf_s2_title": "2. Giriş Verileri",
-        "pdf_s2_body": "Aykırı değer işleme sonrası kullanıcı tarafından girilen ham Ct değerleri. 'Aykırı Değer Dışlandı' sütununda 'Evet' olan satırlar hesaplamalardan çıkarıldı.",
+        "pdf_s2_body": "Aykırı değer işleme sonrası kullanıcı tarafından girilen ham Cq değerleri. 'Aykırı Değer Dışlandı' sütununda 'Evet' olan satırlar hesaplamalardan çıkarıldı.",
         "pdf_s3_title": "3. Gen Ekspresyonu Sonuçları",
-        "pdf_s3_body": "Klasik ΔΔCt ve Pfaffl yöntemleriyle hesaplanan kat değişimi değerleri. Kat değişimi > 1 hasta grubunda kontrole göre yüksek ekspresyonu gösterir.",
+        "pdf_s3_body": "Klasik ΔΔCq ve Pfaffl yöntemleriyle hesaplanan kat değişimi değerleri. Kat değişimi > 1 hasta grubunda kontrole göre yüksek ekspresyonu gösterir.",
         "pdf_s4_title": "4. İstatistiksel Analiz",
-        "pdf_s4_body": "Kontrol ve hasta grupları arasındaki gen ekspresyon farklılıklarının istatistiksel anlamlılığı. Tüm testler ham ΔCt değil RQ (2^-ΔCt) değerleri üzerinden uygulandı; çünkü ΔCt logaritmik ölçekte olduğundan, ΔCt üzerinden t-testi biyolojik değişkenliği hafife alabilir. Test seçimi normallik (Shapiro-Wilk) ve varyans homojenliği (Levene) testlerine göre otomatik yapıldı. Anlamlılık eşiği: p < 0.05.",
+        "pdf_s4_body": "Kontrol ve hasta grupları arasındaki gen ekspresyon farklılıklarının istatistiksel anlamlılığı. Tüm testler ham ΔCq değil RQ (2^-ΔCt) değerleri üzerinden uygulandı; çünkü ΔCt logaritmik ölçekte olduğundan, ΔCt üzerinden t-testi biyolojik değişkenliği hafife alabilir. Test seçimi normallik (Shapiro-Wilk) ve varyans homojenliği (Levene) testlerine göre otomatik yapıldı. Anlamlılık eşiği: p < 0.05.",
         "pdf_s4_interp": "İstatistiksel Testlerin Yorumu",
         "pdf_s4_interp_body": "Student t-testi: Her iki grup normal dağılım ve eşit varyanstaysa kullanılır. Welch t-testi: Her iki grup normal fakat varyanslar eşit değilse kullanılır. Mann-Whitney U: Normallik varsayımı karşılanmadığında kullanılan parametrik olmayan test. p < 0.05 istatistiksel olarak anlamlı diferansiyel ekspresyonu gösterir.",
         "pdf_s5_title": "5. Göreli Miktar (RQ) Dağılım Grafikleri",
-        "pdf_s5_body": "Her hedef gen için RQ (2^-ΔCt) değerlerinin dağılımı. Her nokta bir biyolojik replikatı temsil eder. Yatay çubuklar grup ortalamalarını gösterir. İstatistiksel testler de RQ değerleri üzerinden gerçekleştirilmiştir.",
+        "pdf_s5_body": "Her hedef gen için RQ (2^-ΔCq) değerlerinin dağılımı. Her nokta bir biyolojik replikatı temsil eder. Yatay çubuklar grup ortalamalarını gösterir. İstatistiksel testler de RQ değerleri üzerinden gerçekleştirilmiştir.",
         "pdf_s6_title": "6. Sonuçların Yorumlanması",
         "pdf_s6_fc": "6.1 Kat Değişimi Yorumu",
-        "pdf_s6_choose": "6.2 ΔΔCt ve Pfaffl Arasında Seçim",
-        "pdf_s6_choose_body": "Klasik ΔΔCt'yi şu durumlarda kullanın: Her iki genin verimliliği %90-110 aralığında ve aralarındaki fark %10'dan az. Pfaffl'ı şu durumlarda kullanın: Verimlilik farkı %10'u aşıyor ya da gen verimlilikleri ölçülmüş ve farklı. Her durumda her iki değeri de raporlayın.",
+        "pdf_s6_choose": "6.2 ΔΔCq ve Pfaffl Arasında Seçim",
+        "pdf_s6_choose_body": "Klasik ΔΔCq'yi şu durumlarda kullanın: Her iki genin verimliliği %90-110 aralığında ve aralarındaki fark %10'dan az. Pfaffl'ı şu durumlarda kullanın: Verimlilik farkı %10'u aşıyor ya da gen verimlilikleri ölçülmüş ve farklı. Her durumda her iki değeri de raporlayın.",
         "pdf_s6_stat": "6.3 İstatistiksel Test Seçimi Gerekçesi",
         "pdf_s6_stat_body": "Normallik değerlendirmesi için Shapiro-Wilk testi (küçük örneklemler, n < 50 için önerilir) kullanıldı. Varyans homojenliği için Levene testi uygulandı. Eşit varyanslı parametrik veriler için Student t-testi maksimum istatistiksel güç sağlar. Welch t-testi varyanslar farklı olduğunda daha sağlamdır. Mann-Whitney U normallik varsayılamadığında parametrik olmayan alternatiftir.",
         "pdf_s7_title": "7. Kaynaklar",
-        "pdf_fc_interp_header": ["Kat Değişimi", "ΔΔCt", "Yorum", "Biyolojik Önem"],
+        "pdf_fc_interp_header": ["Kat Değişimi", "ΔΔCq", "Yorum", "Biyolojik Önem"],
         "pdf_fc_interp_rows": [
             [">2.0", "<-1.0", "Güçlü yukarı regülasyon", "Biyolojik olarak anlamlı kabul edilebilir"],
             ["1.5-2.0", "-1.0 ila -0.58", "Orta yukarı regülasyon", "İlgili olabilir; doğrulayın"],
@@ -586,15 +587,15 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE kılavuzları).
         "pdf_summary_norm_multi": "geNorm NF",
         "pdf_summary_norm_single": "Tek referans gen",
         "pdf_summary_methods": "Hesaplama yöntemleri",
-        "pdf_summary_methods_val": "Klasik ΔΔCt + Pfaffl",
+        "pdf_summary_methods_val": "Klasik ΔΔCq + Pfaffl",
         "pdf_disclaimer": "Bu rapor GeneQuantify tarafından otomatik oluşturulmuştur. Tüm hesaplamalar MIQE kılavuzlarını (Bustin et al., Clin Chem 2009) izler.",
         "pdf_footer": "GeneQuantify — Yalnızca araştırma ve eğitim amaçlı. Klinik tanı için doğrulanmamıştır.",
-        "pdf_fig1": "Şekil 1. Klasik ΔΔCt ve Pfaffl yöntemleri arasında kat değişimi karşılaştırması. Kesikli çizgi y=1'de kontrole göre değişim olmadığını gösterir.",
+        "pdf_fig1": "Şekil 1. Klasik ΔΔCq ve Pfaffl yöntemleri arasında kat değişimi karşılaştırması. Kesikli çizgi y=1'de kontrole göre değişim olmadığını gösterir.",
         "pdf_fig2": "Şekil 2. Tüm ikili karşılaştırmalar için p-değerleri. Kırmızı çubuklar istatistiksel olarak anlamlı sonuçları (p < 0.05) gösterir. Kesikli çizgi anlamlılık eşiğini işaretler.",
-        "pdf_fig3": "Şekil. {gene} için RQ (2^-ΔCt) dağılımı. Noktalar = bireysel replikatlar; yatay çubuklar = grup ortalamaları.",
+        "pdf_fig3": "Şekil. {gene} için RQ (2^-ΔCq) dağılımı. Noktalar = bireysel replikatlar; yatay çubuklar = grup ortalamaları.",
         "pdf_nochange": "Değişim Yok",
         "pdf_stat_cols": ["Hedef Gen", "Karşılaştırma", "Test Türü", "Kullanılan Test", "p-değeri", "Anlamlılık"],
-        "pdf_res_cols": ["Hedef Gen", "Grup", "ΔCt Kontrol", "ΔCt Örnek", "ΔΔCt", "2^(-ΔΔCt)", "Pfaffl Oranı", "Regülasyon", "E hedef", "E ref"],
+        "pdf_res_cols": ["Hedef Gen", "Grup", "ΔCq Kontrol", "ΔCq Örnek", "ΔΔCq", "2^(-ΔΔCq)", "Pfaffl Oranı", "Regülasyon", "E hedef", "E ref"],
         "pdf_eff_cols": ["Gen", "E (hedef)", "Eff% (hedef)", "E (ref)", "Eff% (ref)", "Fark%", "Durum"],
         "pdf_eff_ok": "Kabul edilebilir",
         "pdf_eff_warn": "UYARI: Pfaffl kullanın",
@@ -633,10 +634,10 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE kılavuzları).
         "sample_number": "Sample Number",
         "Grup": "Group",
         "x_axis_title": "Group Name",
-        "ct_value": "Ct Value",
-        "reference_ct": "Reference Ct",
-        "delta_ct_control": "ΔCt (Control)",
-        "delta_ct_patient": "ΔCt (Patient)",
+        "ct_value": "Cq Value",
+        "reference_ct": "Reference Cq",
+        "delta_ct_control": "ΔCq (Control)",
+        "delta_ct_patient": "ΔCq (Patient)",
         "warning_empty_input": "⚠️ Warning: Write data one below the other or copy-paste without empty cells from Excel.",
         "download_csv": "📥 Download CSV",
         "generate_pdf": "📥 Prepare PDF Report",
@@ -644,15 +645,15 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE kılavuzları).
         "nil_mine": "📊 Results",
         "gr_tbl": "📋 Input Data Table",
         "control_group": "🧬 Control Group",
-        "ctrl_trgt_ct": "🟦 Control Group Target Gene {i} Ct Values",
-        "ctrl_ref_ct": "🟦 Control Group Reference Gene {i} Ct Values",
-        "hst_trgt_ct": "🩸 Patient Group Target Gene {j} Ct Values",
-        "hst_ref_ct": "🩸 Patient Group Reference Gene {j} Ct Values",
+        "ctrl_trgt_ct": "🟦 Control Group Target Gene {i} Cq Values",
+        "ctrl_ref_ct": "🟦 Control Group Reference Gene {i} Cq Values",
+        "hst_trgt_ct": "🩸 Patient Group Target Gene {j} Cq Values",
+        "hst_ref_ct": "🩸 Patient Group Reference Gene {j} Cq Values",
         "warning_control_ct": "⚠️ Warning: Control Group {i} data should be entered line by line or copied from Excel without empty cells.",
-        "warning_patient_ct": "⚠️ Warning: Enter patient group Ct values line by line or copy-paste from Excel without empty cells.",
+        "warning_patient_cq": "⚠️ Warning: Enter patient group Cq values line by line or copy-paste from Excel without empty cells.",
         "target_gene": "Target Gene",
         "reference_gene": "Reference Gene",
-        "target_ct": "Target Gene Ct", 
+        "target_ct": "Target Gene Cq", 
         "distribution_graph": "Distribution Graph",
         "error_missing_control_data": "⚠️ Error: Missing data for Target Gene {i} in the Control Group!",
         "control_group_avg": "Control Group Average",
@@ -660,8 +661,8 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE kılavuzları).
         "control": "Control",
         "sample": "Sample",
         "patient": "Patient",
-        "delta_ct_distribution": "ΔCt Distribution",
-        "delta_ct_value": "ΔCt Value",
+        "delta_ct_distribution": "ΔCq Distribution",
+        "delta_ct_value": "ΔCq Value",
         "parametric": "Parametric",
         "non_parametric": "Nonparametric",
         "t_test": "t-test",
@@ -673,8 +674,8 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE kılavuzları).
         "test_method": "Test Method",
         "test_pvalue": "Test P-value",
         "significance": "Significance",
-        "delta_delta_ct": "ΔΔCt",
-        "gene_expression_change": "Gene Expression Change (2^(-ΔΔCt))",
+        "delta_delta_ct": "ΔΔCq",
+        "gene_expression_change": "Gene Expression Change (2^(-ΔΔCq))",
         "regulation_status": "Regulation Status",
         "no_change": "No Change",
         "upregulated": "Upregulated",
@@ -702,13 +703,13 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE kılavuzları).
         "efficiency_ref_slope_label": "Reference Gene {i} Slope",
         "efficiency_threshold": "Acceptable efficiency difference threshold (%)",
         "efficiency_ok": "✅ Efficiency difference is acceptable ({diff:.1f}%)",
-        "efficiency_warning": "⚠️ Efficiency difference exceeds threshold ({diff:.1f}%) — ΔΔCt method may not be reliable!",
+        "efficiency_warning": "⚠️ Efficiency difference exceeds threshold ({diff:.1f}%) — ΔΔCq method may not be reliable!",
         "efficiency_target_pct": "Target Gene Efficiency",
         "efficiency_ref_pct": "Reference Gene Efficiency",
         "efficiency_diff": "Difference",
         "pfaffl_result": "Pfaffl Ratio",
         "pfaffl_header": "Pfaffl Method Results",
-        "classic_ddct": "Classic ΔΔCt Result (2^(-ΔΔCt))",
+        "classic_ddct": "Classic ΔΔCq Result (2^(-ΔΔCq))",
         "pfaffl_ratio": "Pfaffl Ratio",
         "method_comparison": "📊 Method Comparison",
         "efficiency_note": "Note: E=2.0 represents perfect efficiency (100%). Accepted range: 1.8–2.2 (90–110%)",
@@ -722,7 +723,7 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE kılavuzları).
         ),
         "outlier_section_title": "### 🔍 Outlier Detection Settings",
         "outlier_enable": "Enable outlier detection",
-        "outlier_enable_help": "Detects statistically extreme Ct values that may reflect technical errors.",
+        "outlier_enable_help": "Detects statistically extreme Cq values that may reflect technical errors.",
         "outlier_method_label": "Detection method",
         "outlier_method_help": "Grubbs: best for normally distributed data, detects one outlier at a time. IQR: non-parametric, robust for skewed distributions.",
         "outlier_alpha_label": "Significance level (α)",
@@ -730,28 +731,29 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE kılavuzları).
         "outlier_iqr_label": "IQR multiplier (k)",
         "outlier_iqr_help": "k=1.5 = standard Tukey fences. k=3.0 = extreme outliers only.",
         "outlier_expander": "ℹ️ About outlier detection in qPCR",
+        "grubbs_info": "ℹ️ **Grubbs' test requirements:** Minimum **n ≥ 3** replicates per group. Significance threshold: **α = {alpha:.2f}**. The test assumes normality; for n < 8, normality cannot be reliably assessed — results should be interpreted with caution. Applying the test on **raw Cq values** (before normalization) is recommended to prevent noisy replicates from propagating into the ΔCq calculation.",
         "outlier_excluded_no": "No",
         "outlier_excluded_yes": "Yes",
         # Outlier stage selector
         "outlier_stage_label": "🔬 Outlier Detection Stage",
-        "outlier_stage_raw": "Raw Ct — before normalization (recommended)",
-        "outlier_stage_dct": "ΔCt — after normalization (previous behaviour)",
+        "outlier_stage_raw": "Raw Cq — before normalization (recommended)",
+        "outlier_stage_dct": "ΔCq — after normalization (previous behaviour)",
         "outlier_stage_help": (
-            "**Raw Ct (recommended):** Outliers are flagged on raw Ct values before ΔCt is computed. "
+            "**Raw Cq (recommended):** Outliers are flagged on raw Ct values before ΔCq is computed. "
             "Applied separately to target and each reference gene. Prevents noisy replicates from "
             "propagating into the normalization step.\n\n"
-            "**ΔCt:** Outliers are flagged after normalization (original behaviour)."
+            "**ΔCq:** Outliers are flagged after normalization (original behaviour)."
         ),
         # Distribution plot mode selector
         "dist_plot_mode_label": "📊 Distribution Plot — Display Mode",
-        "dist_plot_rq":   "RQ (2^-ΔCt)  — recommended",
-        "dist_plot_dct":  "ΔCt  — raw normalized values",
-        "dist_plot_ddct": "ΔΔCt  — relative to control mean",
+        "dist_plot_rq":   "RQ (2^-ΔCq)  — recommended",
+        "dist_plot_dct":  "ΔCq  — raw normalized values",
+        "dist_plot_ddct": "ΔΔCq  — relative to control mean",
         "dist_plot_help": (
-            "**RQ (recommended):** Converts ΔCt to 2^(-ΔCt). Higher value = higher expression. "
-            "Avoids the counter-intuitive ΔCt paradox (high ΔCt = low expression).\n\n"
-            "**ΔCt:** Raw normalized values on a log scale. Useful for checking data spread and normality.\n\n"
-            "**ΔΔCt:** Each sample's ΔCt minus the control group mean ΔCt. "
+            "**RQ (recommended):** Converts ΔCq to 2^(-ΔCt). Higher value = higher expression. "
+            "Avoids the counter-intuitive ΔCq paradox (high ΔCt = low expression).\n\n"
+            "**ΔCq:** Raw normalized values on a log scale. Useful for checking data spread and normality.\n\n"
+            "**ΔΔCq:** Each sample's ΔCq minus the control group mean ΔCt. "
             "Shows expression change relative to control on a log scale."
         ),
         "unequal_n_warning": (
@@ -823,7 +825,7 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE kılavuzları).
         "sc_dilution_factor_input": "Dilution factor",
         "sc_start_conc_label": "**Starting concentration** (arbitrary units, e.g. 1)",
         "sc_start_conc_input": "Starting concentration",
-        "sc_enter_ct": "**Enter mean Ct for each dilution:**",
+        "sc_enter_ct": "**Enter mean Cq for each dilution:**",
         "sc_calc_button": "📊 Calculate Efficiency",
         "sc_slope": "Slope",
         "sc_e_value": "E value",
@@ -849,7 +851,7 @@ compute the slope, R², and amplification efficiency automatically.
 The normalization factor (NF) is the arithmetic mean of Ct values across all reference genes per sample,
 which corresponds to the geometric mean of their expression levels.  
 `NF_sample = mean(Ct_ref1, Ct_ref2, ..., Ct_refN)` for each sample  
-`ΔCt = Ct_target − NF`
+`ΔCq = Ct_target − NF`
 
 **geNorm M-value** (stability score)  
 For each reference gene, M = average standard deviation of log-ratios against all other reference genes.  
@@ -899,10 +901,10 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE guidelines).
         "pdf_s1_title": "1. Methods and Analysis Settings",
         "pdf_s1_calc": "1.1 Calculation Methods",
         "pdf_s1_calc_body": "Two complementary methods were applied for fold-change calculation:",
-        "pdf_s1_classic": "Classic ΔΔCt (Livak & Schmittgen, 2001): ΔCt = Ct(target) - Ct(reference);  ΔΔCt = ΔCt(sample) - ΔCt(control);  Fold Change = 2^(-ΔΔCt). Assumes equal amplification efficiencies (E ≈ 2.0) for both genes.",
-        "pdf_s1_pfaffl": "Pfaffl Method (Pfaffl, 2001): Ratio = (E_target ^ ΔCt_target) / (E_ref ^ ΔCt_ref). Corrects for primer-specific efficiencies; recommended when efficiency difference > 10%.",
+        "pdf_s1_classic": "Classic ΔΔCq (Livak & Schmittgen, 2001): ΔCq = Cq(target) - Cq(reference);  ΔΔCq = ΔCq(sample) - ΔCt(control);  Fold Change = 2^(-ΔΔCt). Assumes equal amplification efficiencies (E ≈ 2.0) for both genes.",
+        "pdf_s1_pfaffl": "Pfaffl Method (Pfaffl, 2001): Ratio = (E_target ^ ΔCq_target) / (E_ref ^ ΔCt_ref). Corrects for primer-specific efficiencies; recommended when efficiency difference > 10%.",
         "pdf_s1_norm": "1.2 Normalization",
-        "pdf_s1_norm_multi": "Multiple reference genes (n={n}) were used. Normalization factor (NF) was calculated as the arithmetic mean of reference gene Ct values per sample (geNorm approach, Vandesompele et al. 2002). geNorm M-values and CV% were computed.",
+        "pdf_s1_norm_multi": "Multiple reference genes (n={n}) were used. Normalization factor (NF) was calculated as the arithmetic mean of reference gene Cq values per sample (geNorm approach, Vandesompele et al. 2002). geNorm M-values and CV% were computed.",
         "pdf_s1_norm_single": "A single reference gene was used. MIQE guidelines recommend ≥2 reference genes for robust normalization.",
         "pdf_s1_eff": "1.3 Amplification Efficiency",
         "pdf_s1_eff_range": "Acceptable efficiency range: E = 1.8-2.2 (90-110%). Efficiency difference threshold applied: {thr}%.",
@@ -912,23 +914,23 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE guidelines).
         "pdf_s1_outlier_warn": "WARNING: Outlier exclusion requires biological or technical justification. Excluded samples are flagged in the data table.",
         "pdf_s1_outlier_off": "Outlier detection was disabled for this analysis.",
         "pdf_s2_title": "2. Input Data",
-        "pdf_s2_body": "Raw Ct values entered by the user, after outlier processing. Rows marked Yes in the Outlier Excluded column were removed from calculations.",
+        "pdf_s2_body": "Raw Cq values entered by the user, after outlier processing. Rows marked Yes in the Outlier Excluded column were removed from calculations.",
         "pdf_s3_title": "3. Gene Expression Results",
-        "pdf_s3_body": "Fold change values calculated by both Classic ΔΔCt and Pfaffl methods. Fold change > 1 indicates higher expression in patient group relative to control.",
+        "pdf_s3_body": "Fold change values calculated by both Classic ΔΔCq and Pfaffl methods. Fold change > 1 indicates higher expression in patient group relative to control.",
         "pdf_s4_title": "4. Statistical Analysis",
-        "pdf_s4_body": "Statistical significance of gene expression differences between control and patient groups. All tests are performed on RQ values (2^-ΔCt) rather than raw ΔCt, because ΔCt is on a logarithmic scale and direct parametric testing on ΔCt underestimates biological variability (Tellez-Sosa et al., Sci Rep 2025; Willems et al., Sci Rep 2021). Test selection is automatic based on normality (Shapiro-Wilk) and variance homogeneity (Levene). Significance threshold: p < 0.05.",
+        "pdf_s4_body": "Statistical significance of gene expression differences between control and patient groups. All tests are performed on RQ values (2^-ΔCq) rather than raw ΔCt, because ΔCt is on a logarithmic scale and direct parametric testing on ΔCt underestimates biological variability (Tellez-Sosa et al., Sci Rep 2025; Willems et al., Sci Rep 2021). Test selection is automatic based on normality (Shapiro-Wilk) and variance homogeneity (Levene). Significance threshold: p < 0.05.",
         "pdf_s4_interp": "Interpretation of Statistical Tests",
         "pdf_s4_interp_body": "Student's t-test: Used when both groups are normal with equal variances. Welch's t-test: Used when groups are normal but variances differ. Mann-Whitney U: Non-parametric test when normality is violated. p < 0.05 = statistically significant differential expression.",
         "pdf_s5_title": "5. Relative Quantity (RQ) Distribution Plots",
-        "pdf_s5_body": "RQ values (2^-ΔCt) per target gene across groups. Each dot = one biological replicate; horizontal bars = group means. Statistical tests are performed on RQ values, not raw ΔCt, to avoid underestimation of biological variability on the logarithmic scale.",
+        "pdf_s5_body": "RQ values (2^-ΔCq) per target gene across groups. Each dot = one biological replicate; horizontal bars = group means. Statistical tests are performed on RQ values, not raw ΔCt, to avoid underestimation of biological variability on the logarithmic scale.",
         "pdf_s6_title": "6. How to Interpret Your Results",
         "pdf_s6_fc": "6.1 Fold Change Interpretation",
-        "pdf_s6_choose": "6.2 Choosing Between ΔΔCt and Pfaffl",
-        "pdf_s6_choose_body": "Use Classic ΔΔCt when: both efficiencies are 90-110% and difference < 10%. Use Pfaffl when: efficiency difference > 10%. Always report both values.",
+        "pdf_s6_choose": "6.2 Choosing Between ΔΔCq and Pfaffl",
+        "pdf_s6_choose_body": "Use Classic ΔΔCq when: both efficiencies are 90-110% and difference < 10%. Use Pfaffl when: efficiency difference > 10%. Always report both values.",
         "pdf_s6_stat": "6.3 Statistical Test Selection Rationale",
         "pdf_s6_stat_body": "Normality assessed using Shapiro-Wilk (recommended for n < 50). Variance homogeneity assessed using Levene's test. Parametric data with equal variances: Student's t-test. Unequal variances: Welch's t-test. Non-normal: Mann-Whitney U.",
         "pdf_s7_title": "7. References",
-        "pdf_fc_interp_header": ["Fold Change", "ΔΔCt", "Interpretation", "Biological Significance"],
+        "pdf_fc_interp_header": ["Fold Change", "ΔΔCq", "Interpretation", "Biological Significance"],
         "pdf_fc_interp_rows": [
             [">2.0", "<-1.0", "Strong upregulation", "Consider biologically relevant"],
             ["1.5-2.0", "-1.0 to -0.58", "Moderate upregulation", "May be relevant; verify"],
@@ -950,15 +952,15 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE guidelines).
         "pdf_summary_norm_multi": "geNorm NF",
         "pdf_summary_norm_single": "Single reference gene",
         "pdf_summary_methods": "Calculation methods",
-        "pdf_summary_methods_val": "Classic ΔΔCt + Pfaffl",
+        "pdf_summary_methods_val": "Classic ΔΔCq + Pfaffl",
         "pdf_disclaimer": "This report was generated automatically by GeneQuantify. All calculations follow MIQE guidelines (Bustin et al., Clin Chem 2009).",
         "pdf_footer": "GeneQuantify — For research and educational use only. Not validated for clinical diagnostic purposes.",
-        "pdf_fig1": "Figure 1. Fold change comparison: Classic ΔΔCt vs Pfaffl. Dashed line at y=1 = no change relative to control.",
+        "pdf_fig1": "Figure 1. Fold change comparison: Classic ΔΔCq vs Pfaffl. Dashed line at y=1 = no change relative to control.",
         "pdf_fig2": "Figure 2. p-values for all comparisons. Red bars = significant (p < 0.05). Dashed line = significance threshold.",
-        "pdf_fig3": "Figure. RQ (2^-ΔCt) distribution for {gene}. Points = individual replicates; horizontal bars = group means. Statistical tests performed on RQ values.",
+        "pdf_fig3": "Figure. RQ (2^-ΔCq) distribution for {gene}. Points = individual replicates; horizontal bars = group means. Statistical tests performed on RQ values.",
         "pdf_nochange": "No Change",
         "pdf_stat_cols": ["Target Gene", "Comparison", "Test Type", "Test Method", "p-value", "Significance"],
-        "pdf_res_cols": ["Target Gene", "Group", "ΔCt Control", "ΔCt Sample", "ΔΔCt", "2^(-ΔΔCt)", "Pfaffl Ratio", "Regulation", "E target", "E ref"],
+        "pdf_res_cols": ["Target Gene", "Group", "ΔCq Control", "ΔCq Sample", "ΔΔCq", "2^(-ΔΔCq)", "Pfaffl Ratio", "Regulation", "E target", "E ref"],
         "pdf_eff_cols": ["Gene", "E (target)", "Eff% (target)", "E (ref)", "Eff% (ref)", "Diff%", "Status"],
         "pdf_eff_ok": "OK",
         "pdf_eff_warn": "WARNING: use Pfaffl",
@@ -997,10 +999,10 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE guidelines).
         "sample_number": "Beispielnummer",
         "Grup": "Gruppe",
         "x_axis_title": "Gruppenname",
-        "ct_value": "Ct-Wert",
-        "reference_ct": "Referenz Ct",
-        "delta_ct_control": "ΔCt (Kontrolle)",
-        "delta_ct_patient": "ΔCt (Patientendaten)",
+        "ct_value": "Cq-Wert",
+        "reference_ct": "Referenz Cq",
+        "delta_ct_control": "ΔCq (Kontrolle)",
+        "delta_ct_patient": "ΔCq (Patientendaten)",
         "warning_empty_input": "⚠️ Warnung: Geben Sie die Daten untereinander ein oder kopieren Sie sie ohne leere Zellen aus Excel.",
         "download_csv": "📥 CSV herunterladen",
         "generate_pdf": "📥 PDF-Bericht erstellen",
@@ -1008,15 +1010,15 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE guidelines).
         "nil_mine": "📊 Ergebnisse",
         "gr_tbl": "📋 Eingabedaten Tabelle",
         "control_group": "🧬 Kontrollgruppe",
-        "ctrl_trgt_ct": "🟦 Kontrollgruppe Zielgen {i} Ct-Werte",
+        "ctrl_trgt_ct": "🟦 Kontrollgruppe Zielgen {i} Cq-Werte",
         "ctrl_ref_ct": "🟦 Kontrollgruppe Referenz {i} Ct-Werte",
-        "hst_trgt_ct": "🩸 Patientengruppe Zielgen {j} Ct-Werte",
+        "hst_trgt_ct": "🩸 Patientengruppe Zielgen {j} Cq-Werte",
         "hst_ref_ct": "🩸 Patientengruppe Referenz {j} Ct-Werte",
         "warning_control_ct": "⚠️ Achtung: Kontrollgruppe {i} Daten sollten untereinander eingegeben oder aus Excel ohne leere Zellen eingefügt werden.",
-        "warning_patient_ct": "⚠️ Achtung: Geben Sie die Ct-Werte der Patientengruppe untereinander ein oder kopieren Sie sie aus Excel ohne leere Zellen.",
+        "warning_patient_cq": "⚠️ Achtung: Geben Sie die Cq-Werte der Patientengruppe untereinander ein oder kopieren Sie sie aus Excel ohne leere Zellen.",
         "target_gene": "Zielgen",
         "reference_gene": "Referenzgen",
-        "target_ct": "Zielgen Ct",
+        "target_ct": "Zielgen Cq",
         "distribution_graph": "Verteilungsdiagramm",
         "error_missing_control_data": "⚠️ Fehler: Fehlende Daten für Zielgen {i} in der Kontrollgruppe!",
         "control_group_avg": "Durchschnitt der Kontrollgruppe",
@@ -1024,8 +1026,8 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE guidelines).
         "control": "Kontrolle",
         "sample": "Probe",
         "patient": "Patient",
-        "delta_ct_distribution": "ΔCt-Verteilung",
-        "delta_ct_value": "ΔCt-Wert",
+        "delta_ct_distribution": "ΔCq-Verteilung",
+        "delta_ct_value": "ΔCq-Wert",
         "parametric": "Parametrisch",
         "non_parametric": "Nicht parametrisch",
         "t_test": "t-Test",
@@ -1037,8 +1039,8 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE guidelines).
         "test_method": "Verwendeter Test",
         "test_pvalue": "P-Wert",
         "significance": "Signifikanz",
-        "delta_delta_ct": "ΔΔCt",
-        "gene_expression_change": "Genexpression Veränderung (2^(-ΔΔCt))",
+        "delta_delta_ct": "ΔΔCq",
+        "gene_expression_change": "Genexpression Veränderung (2^(-ΔΔCq))",
         "regulation_status": "Regulierungsstatus",
         "no_change": "Keine Veränderung",
         "upregulated": "Hochreguliert",
@@ -1066,13 +1068,13 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE guidelines).
         "efficiency_ref_slope_label": "Referenzgen {i} Steigung",
         "efficiency_threshold": "Akzeptable Effizienzdifferenz-Schwelle (%)",
         "efficiency_ok": "✅ Effizienzdifferenz ist akzeptabel ({diff:.1f}%)",
-        "efficiency_warning": "⚠️ Effizienzdifferenz überschreitet Schwelle ({diff:.1f}%) — ΔΔCt-Methode möglicherweise nicht zuverlässig!",
+        "efficiency_warning": "⚠️ Effizienzdifferenz überschreitet Schwelle ({diff:.1f}%) — ΔΔCq-Methode möglicherweise nicht zuverlässig!",
         "efficiency_target_pct": "Zielgen-Effizienz",
         "efficiency_ref_pct": "Referenzgen-Effizienz",
         "efficiency_diff": "Differenz",
         "pfaffl_result": "Pfaffl-Verhältnis",
         "pfaffl_header": "Pfaffl-Methode Ergebnisse",
-        "classic_ddct": "Klassisches ΔΔCt-Ergebnis (2^(-ΔΔCt))",
+        "classic_ddct": "Klassisches ΔΔCq-Ergebnis (2^(-ΔΔCq))",
         "pfaffl_ratio": "Pfaffl-Verhältnis",
         "method_comparison": "📊 Methodenvergleich",
         "efficiency_note": "Hinweis: E=2.0 steht für perfekte Effizienz (100%). Akzeptierter Bereich: 1.8–2.2 (90–110%)",
@@ -1086,7 +1088,7 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE guidelines).
         ),
         "outlier_section_title": "### 🔍 Ausreißer-Erkennungseinstellungen",
         "outlier_enable": "Ausreißererkennung aktivieren",
-        "outlier_enable_help": "Erkennt statistisch extreme Ct-Werte, die auf technische Fehler hinweisen können.",
+        "outlier_enable_help": "Erkennt statistisch extreme Cq-Werte, die auf technische Fehler hinweisen können.",
         "outlier_method_label": "Erkennungsmethode",
         "outlier_method_help": "Grubbs: für normalverteilte Daten. IQR: nicht-parametrisch, robust bei schiefen Verteilungen.",
         "outlier_alpha_label": "Signifikanzniveau (α)",
@@ -1094,26 +1096,27 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE guidelines).
         "outlier_iqr_label": "IQR-Multiplikator (k)",
         "outlier_iqr_help": "k=1,5 = Standard Tukey-Grenzen. k=3,0 = nur extreme Ausreißer.",
         "outlier_expander": "ℹ️ Über Ausreißererkennung in qPCR",
+        "grubbs_info": "ℹ️ **Grubbs-Test-Anforderungen:** Mindestens **n ≥ 3** Replikate pro Gruppe. Signifikanzschwelle: **α = {alpha:.2f}**. Der Test setzt Normalverteilung voraus; bei n < 8 kann Normalität nicht zuverlässig geprüft werden. Die Anwendung auf **rohe Cq-Werte** (vor Normalisierung) wird empfohlen.",
         "outlier_excluded_no": "Nein",
         "outlier_excluded_yes": "Ja",
         # Outlier stage selector
         "outlier_stage_label": "🔬 Ausreißererkennung — Analysestufe",
-        "outlier_stage_raw": "Roh-Ct — vor Normalisierung (empfohlen)",
-        "outlier_stage_dct": "ΔCt — nach Normalisierung (bisheriges Verhalten)",
+        "outlier_stage_raw": "Roh-Cq — vor Normalisierung (empfohlen)",
+        "outlier_stage_dct": "ΔCq — nach Normalisierung (bisheriges Verhalten)",
         "outlier_stage_help": (
-            "**Roh-Ct (empfohlen):** Ausreißer werden vor der ΔCt-Berechnung erkannt. "
+            "**Roh-Ct (empfohlen):** Ausreißer werden vor der ΔCq-Berechnung erkannt. "
             "Für Zielgen und jedes Referenzgen separat angewendet.\n\n"
-            "**ΔCt:** Ausreißer werden nach der Normalisierung erkannt (bisheriges Verhalten)."
+            "**ΔCq:** Ausreißer werden nach der Normalisierung erkannt (bisheriges Verhalten)."
         ),
         # Distribution plot mode selector
         "dist_plot_mode_label": "📊 Verteilungsdiagramm — Anzeigemodus",
-        "dist_plot_rq":   "RQ (2^-ΔCt)  — empfohlen",
-        "dist_plot_dct":  "ΔCt  — rohe normalisierte Werte",
-        "dist_plot_ddct": "ΔΔCt  — relativ zum Kontrollmittelwert",
+        "dist_plot_rq":   "RQ (2^-ΔCq)  — empfohlen",
+        "dist_plot_dct":  "ΔCq  — rohe normalisierte Werte",
+        "dist_plot_ddct": "ΔΔCq  — relativ zum Kontrollmittelwert",
         "dist_plot_help": (
-            "**RQ (empfohlen):** Konvertiert ΔCt zu 2^(-ΔCt). Höherer Wert = höhere Expression.\n\n"
-            "**ΔCt:** Rohe logarithmische Werte. Nützlich zur Überprüfung der Datenverteilung.\n\n"
-            "**ΔΔCt:** ΔCt jeder Probe minus dem Kontrollgruppenmittelwert."
+            "**RQ (empfohlen):** Konvertiert ΔCq zu 2^(-ΔCt). Höherer Wert = höhere Expression.\n\n"
+            "**ΔCq:** Rohe logarithmische Werte. Nützlich zur Überprüfung der Datenverteilung.\n\n"
+            "**ΔΔCq:** ΔCq jeder Probe minus dem Kontrollgruppenmittelwert."
         ),
         "unequal_n_warning": (
             "⚠️ **Ungleiche Replikatanzahl erkannt — {group}:**  \n"
@@ -1186,7 +1189,7 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE guidelines).
         "sc_dilution_factor_input": "Verdünnungsfaktor",
         "sc_start_conc_label": "**Ausgangskonzentration** (beliebige Einheiten, z.B. 1)",
         "sc_start_conc_input": "Ausgangskonzentration",
-        "sc_enter_ct": "**Mittleren Ct-Wert für jede Verdünnung eingeben:**",
+        "sc_enter_ct": "**Mittleren Cq-Wert für jede Verdünnung eingeben:**",
         "sc_calc_button": "📊 Effizienz berechnen",
         "sc_slope": "Steigung",
         "sc_e_value": "E-Wert",
@@ -1211,7 +1214,7 @@ Geben Sie die Ct-Werte Ihrer seriellen Verdünnung unten ein. Der Rechner passt 
 Der Normalisierungsfaktor (NF) ist das arithmetische Mittel der Ct-Werte über alle Referenzgene pro Probe,  
 was dem geometrischen Mittel ihrer Expressionsniveaus entspricht.  
 `NF_Probe = Mittel(Ct_ref1, Ct_ref2, ..., Ct_refN)` für jede Probe  
-`ΔCt = Ct_Ziel − NF`
+`ΔCq = Ct_Ziel − NF`
 
 **geNorm M-Wert** (Stabilitätsscore)  
 Für jedes Referenzgen ist M die durchschnittliche Standardabweichung der Log-Verhältnisse gegenüber allen anderen Referenzgenen.  
@@ -1257,8 +1260,8 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE-Richtlinien).
         "pdf_s1_title": "1. Methoden und Analyseeinstellungen",
         "pdf_s1_calc": "1.1 Berechnungsmethoden",
         "pdf_s1_calc_body": "Zwei komplementäre Methoden zur Berechnung des Fold-Change:",
-        "pdf_s1_classic": "Klassische ΔΔCt-Methode (Livak & Schmittgen, 2001): Fold-Change = 2^(-ΔΔCt). Gleiche Effizienz vorausgesetzt.",
-        "pdf_s1_pfaffl": "Pfaffl-Methode (Pfaffl, 2001): Verhältnis = (E_Ziel ^ ΔCt_Ziel) / (E_Ref ^ ΔCt_Ref). Empfohlen bei Effizienzunterschied > 10%.",
+        "pdf_s1_classic": "Klassische ΔΔCq-Methode (Livak & Schmittgen, 2001): Fold-Change = 2^(-ΔΔCq). Gleiche Effizienz vorausgesetzt.",
+        "pdf_s1_pfaffl": "Pfaffl-Methode (Pfaffl, 2001): Verhältnis = (E_Ziel ^ ΔCq_Ziel) / (E_Ref ^ ΔCt_Ref). Empfohlen bei Effizienzunterschied > 10%.",
         "pdf_s1_norm": "1.2 Normalisierung",
         "pdf_s1_norm_multi": "Mehrere Referenzgene (n={n}) verwendet (geNorm, Vandesompele et al. 2002).",
         "pdf_s1_norm_single": "Ein Referenzgen verwendet. MIQE empfiehlt ≥2 Referenzgene.",
@@ -1270,23 +1273,23 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE-Richtlinien).
         "pdf_s1_outlier_warn": "WARNUNG: Ausreißerausschluss erfordert biologische oder technische Begründung.",
         "pdf_s1_outlier_off": "Ausreißererkennung deaktiviert.",
         "pdf_s2_title": "2. Eingabedaten",
-        "pdf_s2_body": "Roh-Ct-Werte nach der Ausreißerverarbeitung.",
+        "pdf_s2_body": "Roh-Cq-Werte nach der Ausreißerverarbeitung.",
         "pdf_s3_title": "3. Genexpressionsergebnisse",
-        "pdf_s3_body": "Fold-Change berechnet mit Klassischer ΔΔCt- und Pfaffl-Methode.",
+        "pdf_s3_body": "Fold-Change berechnet mit Klassischer ΔΔCq- und Pfaffl-Methode.",
         "pdf_s4_title": "4. Statistische Analyse",
         "pdf_s4_body": "Statistische Signifikanz. Testauswahl automatisch (Shapiro-Wilk, Levene). p < 0,05.",
         "pdf_s4_interp": "Interpretation der Tests",
         "pdf_s4_interp_body": "Student-t: Normalverteilung, gleiche Varianzen. Welch-t: ungleiche Varianzen. Mann-Whitney U: nicht-normal.",
-        "pdf_s5_title": "5. Delta-Ct-Verteilungsdiagramme",
-        "pdf_s5_body": "ΔCt-Verteilung je Zielgen. Punkte = Replikate; Balken = Mittelwerte.",
+        "pdf_s5_title": "5. Delta-Cq-Verteilungsdiagramme",
+        "pdf_s5_body": "ΔCq-Verteilung je Zielgen. Punkte = Replikate; Balken = Mittelwerte.",
         "pdf_s6_title": "6. Interpretation",
         "pdf_s6_fc": "6.1 Fold-Change-Interpretation",
-        "pdf_s6_choose": "6.2 ΔΔCt vs. Pfaffl",
-        "pdf_s6_choose_body": "ΔΔCt wenn Effizienzen 90-110% und Unterschied < 10%. Pfaffl wenn > 10%.",
+        "pdf_s6_choose": "6.2 ΔΔCq vs. Pfaffl",
+        "pdf_s6_choose_body": "ΔΔCq wenn Effizienzen 90-110% und Unterschied < 10%. Pfaffl wenn > 10%.",
         "pdf_s6_stat": "6.3 Testauswahl-Begründung",
         "pdf_s6_stat_body": "Normalität: Shapiro-Wilk. Varianzhomogenität: Levene. Student/Welch/Mann-Whitney je nach Ergebnis.",
         "pdf_s7_title": "7. Referenzen",
-        "pdf_fc_interp_header": ["Fold-Change", "ΔΔCt", "Interpretation", "Biologische Bedeutung"],
+        "pdf_fc_interp_header": ["Fold-Change", "ΔΔCq", "Interpretation", "Biologische Bedeutung"],
         "pdf_fc_interp_rows": [
             [">2,0", "<-1,0", "Starke Hochregulation", "Biologisch relevant"],
             ["1,5-2,0", "-1,0 bis -0,58", "Mäßige Hochregulation", "Möglicherweise relevant"],
@@ -1302,15 +1305,15 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE-Richtlinien).
         "pdf_summary_samples": "Proben gesamt", "pdf_summary_excluded": "Ausgeschlossene Ausreißer",
         "pdf_summary_tests": "Vergleiche", "pdf_summary_norm": "Normalisierungsmethode",
         "pdf_summary_norm_multi": "geNorm NF", "pdf_summary_norm_single": "Einzelnes Referenzgen",
-        "pdf_summary_methods": "Berechnungsmethoden", "pdf_summary_methods_val": "Klassische ΔΔCt + Pfaffl",
+        "pdf_summary_methods": "Berechnungsmethoden", "pdf_summary_methods_val": "Klassische ΔΔCq + Pfaffl",
         "pdf_disclaimer": "Dieser Bericht wurde automatisch von GeneQuantify erstellt (MIQE-Richtlinien).",
         "pdf_footer": "GeneQuantify — Nur für Forschung und Bildung. Nicht für klinische Diagnostik.",
-        "pdf_fig1": "Abbildung 1. Fold-Change: Klassisches ΔΔCt vs. Pfaffl. Linie y=1 = keine Änderung.",
+        "pdf_fig1": "Abbildung 1. Fold-Change: Klassisches ΔΔCq vs. Pfaffl. Linie y=1 = keine Änderung.",
         "pdf_fig2": "Abbildung 2. p-Werte. Rote Balken = signifikant (p < 0,05).",
-        "pdf_fig3": "Abbildung. ΔCt-Verteilung für {gene}.",
+        "pdf_fig3": "Abbildung. ΔCq-Verteilung für {gene}.",
         "pdf_nochange": "Keine Änderung",
         "pdf_stat_cols": ["Zielgen", "Vergleich", "Testtyp", "Testmethode", "p-Wert", "Signifikanz"],
-        "pdf_res_cols": ["Zielgen", "Gruppe", "ΔCt Kontrolle", "ΔCt Probe", "ΔΔCt", "2^(-ΔΔCt)", "Pfaffl-Verhältnis", "Regulation", "E Ziel", "E Ref"],
+        "pdf_res_cols": ["Zielgen", "Gruppe", "ΔCq Kontrolle", "ΔCq Probe", "ΔΔCq", "2^(-ΔΔCq)", "Pfaffl-Verhältnis", "Regulation", "E Ziel", "E Ref"],
         "pdf_eff_cols": ["Gen", "E (Ziel)", "Eff% (Ziel)", "E (Ref)", "Eff% (Ref)", "Diff%", "Status"],
         "pdf_eff_ok": "OK", "pdf_eff_warn": "WARNUNG: Pfaffl verwenden",
         "pdf_outlier_col": "Ausreißer ausgeschlossen", "pdf_contact": "Kontakt: mailtoburhanettin@gmail.com",
@@ -1347,10 +1350,10 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE-Richtlinien).
         "sample_number": "Numéro de l'échantillon",
         "Grup": "Groupe",
         "x_axis_title": "Nom du Groupe",
-        "ct_value": "Valeur Ct",
-        "reference_ct": "Ct de Référence",
-        "delta_ct_control": "ΔCt (Contrôle)",
-        "delta_ct_patient": "ΔCt (Patient)",
+        "ct_value": "Valeur Cq",
+        "reference_ct": "Cq de Référence",
+        "delta_ct_control": "ΔCq (Contrôle)",
+        "delta_ct_patient": "ΔCq (Patient)",
         "warning_empty_input": "⚠️ Avertissement : Entrez les données sous forme de liste ou copiez-collez sans cellules vides depuis Excel.",
         "download_csv": "📥 Télécharger CSV",
         "generate_pdf": "📥 Préparer le Rapport PDF",
@@ -1358,15 +1361,15 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE-Richtlinien).
         "nil_mine": "📊 Résultats",
         "gr_tbl": "📋 Tableau des Données d'Entrée",
         "control_group": "🧬 Groupe Contrôle",
-        "ctrl_trgt_ct": "🟦 Valeurs Ct du Gène Cible {i} pour le Groupe Contrôle",
+        "ctrl_trgt_ct": "🟦 Valeurs Cq du Gène Cible {i} pour le Groupe Contrôle",
         "ctrl_ref_ct": "🟦 Valeurs Ct du Gène Référence {i} pour le Groupe Contrôle",
-        "hst_trgt_ct": "🩸 Valeurs Ct du Gène Cible {j} pour le Groupe Patient",
+        "hst_trgt_ct": "🩸 Valeurs Cq du Gène Cible {j} pour le Groupe Patient",
         "hst_ref_ct": "🩸 Valeurs Ct du Gène Référence {j} pour le Groupe Patient",
         "warning_control_ct": "⚠️ Avertissement : Les données du groupe témoin {i} doivent être saisies ligne par ligne ou copiées depuis Excel sans cellules vides.",
-        "warning_patient_ct": "⚠️ Avertissement : Entrez les valeurs Ct du groupe patient ligne par ligne ou copiez-les depuis Excel sans cellules vides.",
+        "warning_patient_cq": "⚠️ Avertissement : Entrez les valeurs Cq du groupe patient ligne par ligne ou copiez-les depuis Excel sans cellules vides.",
         "target_gene": "Gène Cible",
         "reference_gene": "Gène Référence",
-        "target_ct": "Ct du Gène Cible", 
+        "target_ct": "Cq du Gène Cible", 
         "distribution_graph": "Graphique de Distribution",
         "error_missing_control_data": "⚠️ Erreur : Données manquantes pour le Gène Cible {i} dans le Groupe Contrôle!",
         "control_group_avg": "Moyenne du Groupe Contrôle",
@@ -1374,8 +1377,8 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE-Richtlinien).
         "control": "Contrôle",
         "sample": "Échantillon",
         "patient": "Patient",
-        "delta_ct_distribution": "Distribution ΔCt",
-        "delta_ct_value": "Valeur ΔCt",
+        "delta_ct_distribution": "Distribution ΔCq",
+        "delta_ct_value": "Valeur ΔCq",
         "parametric": "Paramétrique",
         "non_parametric": "Non paramétrique",
         "t_test": "Test t",
@@ -1387,8 +1390,8 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE-Richtlinien).
         "test_method": "Méthode de Test",
         "test_pvalue": "P-valeur du Test",
         "significance": "Signification",
-        "delta_delta_ct": "ΔΔCt",
-        "gene_expression_change": "Changement de l'Expression Génétique (2^(-ΔΔCt))",
+        "delta_delta_ct": "ΔΔCq",
+        "gene_expression_change": "Changement de l'Expression Génétique (2^(-ΔΔCq))",
         "regulation_status": "Statut de Régulation",
         "no_change": "Aucun Changement",
         "upregulated": "Upregulé",
@@ -1416,13 +1419,13 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE-Richtlinien).
         "efficiency_ref_slope_label": "Pente du Gène Référence {i}",
         "efficiency_threshold": "Seuil de différence d'efficacité acceptable (%)",
         "efficiency_ok": "✅ La différence d'efficacité est acceptable ({diff:.1f}%)",
-        "efficiency_warning": "⚠️ La différence d'efficacité dépasse le seuil ({diff:.1f}%) — La méthode ΔΔCt peut ne pas être fiable!",
+        "efficiency_warning": "⚠️ La différence d'efficacité dépasse le seuil ({diff:.1f}%) — La méthode ΔΔCq peut ne pas être fiable!",
         "efficiency_target_pct": "Efficacité du Gène Cible",
         "efficiency_ref_pct": "Efficacité du Gène Référence",
         "efficiency_diff": "Différence",
         "pfaffl_result": "Rapport Pfaffl",
         "pfaffl_header": "Résultats de la Méthode Pfaffl",
-        "classic_ddct": "Résultat ΔΔCt Classique (2^(-ΔΔCt))",
+        "classic_ddct": "Résultat ΔΔCq Classique (2^(-ΔΔCq))",
         "pfaffl_ratio": "Rapport Pfaffl",
         "method_comparison": "📊 Comparaison des Méthodes",
         "efficiency_note": "Note : E=2.0 représente une efficacité parfaite (100%). Plage acceptée : 1.8–2.2 (90–110%)",
@@ -1436,7 +1439,7 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE-Richtlinien).
         ),
         "outlier_section_title": "### 🔍 Paramètres de détection des valeurs aberrantes",
         "outlier_enable": "Activer la détection des valeurs aberrantes",
-        "outlier_enable_help": "Détecte les valeurs Ct statistiquement extrêmes pouvant indiquer des erreurs techniques.",
+        "outlier_enable_help": "Détecte les valeurs Cq statistiquement extrêmes pouvant indiquer des erreurs techniques.",
         "outlier_method_label": "Méthode de détection",
         "outlier_method_help": "Grubbs : pour les données normalement distribuées. IQR : non paramétrique, robuste pour les distributions asymétriques.",
         "outlier_alpha_label": "Niveau de signification (α)",
@@ -1444,26 +1447,27 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE-Richtlinien).
         "outlier_iqr_label": "Multiplicateur IQR (k)",
         "outlier_iqr_help": "k=1,5 = clôtures de Tukey standard. k=3,0 = uniquement les valeurs extrêmes.",
         "outlier_expander": "ℹ️ À propos de la détection des valeurs aberrantes en qPCR",
+        "grubbs_info": "ℹ️ **Conditions du test de Grubbs :** Minimum **n ≥ 3** réplicats par groupe. Seuil de signification : **α = {alpha:.2f}**. Le test suppose la normalité ; pour n < 8, la normalité ne peut pas être évaluée de manière fiable. L'application sur les **valeurs Cq brutes** (avant normalisation) est recommandée.",
         "outlier_excluded_no": "Non",
         "outlier_excluded_yes": "Oui",
         # Outlier stage selector
         "outlier_stage_label": "🔬 Étape de détection des valeurs aberrantes",
-        "outlier_stage_raw": "Ct brut — avant normalisation (recommandé)",
-        "outlier_stage_dct": "ΔCt — après normalisation (comportement précédent)",
+        "outlier_stage_raw": "Cq brut — avant normalisation (recommandé)",
+        "outlier_stage_dct": "ΔCq — après normalisation (comportement précédent)",
         "outlier_stage_help": (
-            "**Ct brut (recommandé):** Les valeurs aberrantes sont détectées sur les valeurs Ct brutes "
-            "avant le calcul du ΔCt. Appliqué séparément au gène cible et à chaque gène de référence.\n\n"
-            "**ΔCt:** Détection après normalisation (comportement original)."
+            "**Cq brut (recommandé):** Les valeurs aberrantes sont détectées sur les valeurs Cq brutes "
+            "avant le calcul du ΔCq. Appliqué séparément au gène cible et à chaque gène de référence.\n\n"
+            "**ΔCq:** Détection après normalisation (comportement original)."
         ),
         # Distribution plot mode selector
         "dist_plot_mode_label": "📊 Graphique de distribution — Mode d'affichage",
-        "dist_plot_rq":   "RQ (2^-ΔCt)  — recommandé",
-        "dist_plot_dct":  "ΔCt  — valeurs normalisées brutes",
-        "dist_plot_ddct": "ΔΔCt  — relatif à la moyenne du contrôle",
+        "dist_plot_rq":   "RQ (2^-ΔCq)  — recommandé",
+        "dist_plot_dct":  "ΔCq  — valeurs normalisées brutes",
+        "dist_plot_ddct": "ΔΔCq  — relatif à la moyenne du contrôle",
         "dist_plot_help": (
-            "**RQ (recommandé):** Convertit ΔCt en 2^(-ΔCt). Valeur plus élevée = expression plus élevée.\n\n"
-            "**ΔCt:** Valeurs logarithmiques brutes. Utile pour vérifier la distribution des données.\n\n"
-            "**ΔΔCt:** ΔCt de chaque échantillon moins la moyenne du groupe contrôle."
+            "**RQ (recommandé):** Convertit ΔCq en 2^(-ΔCt). Valeur plus élevée = expression plus élevée.\n\n"
+            "**ΔCq:** Valeurs logarithmiques brutes. Utile pour vérifier la distribution des données.\n\n"
+            "**ΔΔCq:** ΔCq de chaque échantillon moins la moyenne du groupe contrôle."
         ),
         "unequal_n_warning": (
             "⚠️ **Nombre de réplicats inégal détecté — {group}:**  \n"
@@ -1536,7 +1540,7 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE-Richtlinien).
         "sc_dilution_factor_input": "Facteur de dilution",
         "sc_start_conc_label": "**Concentration initiale** (unités arbitraires, ex. 1)",
         "sc_start_conc_input": "Concentration initiale",
-        "sc_enter_ct": "**Entrez la valeur Ct moyenne pour chaque dilution :**",
+        "sc_enter_ct": "**Entrez la valeur Cq moyenne pour chaque dilution :**",
         "sc_calc_button": "📊 Calculer l'efficacité",
         "sc_slope": "Pente",
         "sc_e_value": "Valeur E",
@@ -1561,14 +1565,14 @@ Entrez vos valeurs Ct de dilution en série ci-dessous. Le calculateur ajustera 
 Le facteur de normalisation (NF) est la moyenne arithmétique des valeurs Ct de tous les gènes de référence par échantillon,  
 ce qui correspond à la moyenne géométrique de leurs niveaux d'expression.  
 `NF_échantillon = moyenne(Ct_ref1, Ct_ref2, ..., Ct_refN)` pour chaque échantillon  
-`ΔCt = Ct_cible − NF`
+`ΔCq = Ct_cible − NF`
 
 **Valeur M de geNorm** (score de stabilité)  
 Pour chaque gène de référence, M = écart-type moyen des log-ratios par rapport à tous les autres gènes de référence.  
 **M plus bas = plus stable.** Seuil recommandé MIQE : M < 0,5 (strict) ou M < 1,0 (acceptable).
 
 **CV (Coefficient de Variation)**  
-`CV = (ET / moyenne) × 100%` des valeurs Ct brutes sur tous les échantillons.  
+`CV = (ET / moyenne) × 100%` des valeurs Cq brutes sur tous les échantillons.  
 Un CV plus faible indique moins de variation et une meilleure stabilité comme référence.
 
 **Référence :** Vandesompele J et al. *Genome Biology* 2002 ; Bustin SA et al. *Clin Chem* 2009 (MIQE).
@@ -1576,7 +1580,7 @@ Un CV plus faible indique moins de variation et une meilleure stabilité comme r
         "outlier_description": """\
 **Pourquoi la détection des valeurs aberrantes est importante en qPCR**
 
-La variabilité technique est inhérente à la qPCR : erreurs de pipetage, formation de bulles, contamination par des inhibiteurs ou variation de la qualité de l'ARN peuvent produire des valeurs Ct statistiquement incohérentes avec le reste d'un groupe de réplicats.  
+La variabilité technique est inhérente à la qPCR : erreurs de pipetage, formation de bulles, contamination par des inhibiteurs ou variation de la qualité de l'ARN peuvent produire des valeurs Cq statistiquement incohérentes avec le reste d'un groupe de réplicats.  
 L'inclusion de telles valeurs gonfle la variance, biaise les moyennes et peut conduire à de fausses conclusions — particulièrement dans les jeux de données cliniques avec de petits effectifs.
 
 **Quand cette limitation devient critique :**
@@ -1607,10 +1611,10 @@ Bustin SA et al. *Clin Chem* 2009 (directives MIQE).
         "pdf_s1_title": "1. Méthodes et paramètres d'analyse",
         "pdf_s1_calc": "1.1 Méthodes de calcul",
         "pdf_s1_calc_body": "Deux méthodes complémentaires ont été appliquées pour le calcul du fold-change:",
-        "pdf_s1_classic": "ΔΔCt classique (Livak & Schmittgen, 2001): ΔCt = Ct(cible) - Ct(référence);  ΔΔCt = ΔCt(échantillon) - ΔCt(contrôle);  Fold-Change = 2^(-ΔΔCt). Suppose des efficacités égales (E ≈ 2,0).",
-        "pdf_s1_pfaffl": "Méthode Pfaffl (Pfaffl, 2001): Ratio = (E_cible ^ ΔCt_cible) / (E_réf ^ ΔCt_réf). Corrige les efficacités spécifiques; recommandé si différence > 10%.",
+        "pdf_s1_classic": "ΔΔCq classique (Livak & Schmittgen, 2001): ΔCq = Ct(cible) - Ct(référence);  ΔΔCt = ΔCt(échantillon) - ΔCt(contrôle);  Fold-Change = 2^(-ΔΔCt). Suppose des efficacités égales (E ≈ 2,0).",
+        "pdf_s1_pfaffl": "Méthode Pfaffl (Pfaffl, 2001): Ratio = (E_cible ^ ΔCq_cible) / (E_réf ^ ΔCt_réf). Corrige les efficacités spécifiques; recommandé si différence > 10%.",
         "pdf_s1_norm": "1.2 Normalisation",
-        "pdf_s1_norm_multi": "Gènes de référence multiples (n={n}) utilisés. NF = moyenne arithmétique des Ct des gènes de référence par échantillon (geNorm, Vandesompele et al. 2002).",
+        "pdf_s1_norm_multi": "Gènes de référence multiples (n={n}) utilisés. NF = moyenne arithmétique des Cq des gènes de référence par échantillon (geNorm, Vandesompele et al. 2002).",
         "pdf_s1_norm_single": "Un seul gène de référence utilisé. Les directives MIQE recommandent ≥2 gènes de référence.",
         "pdf_s1_eff": "1.3 Efficacité d'amplification",
         "pdf_s1_eff_range": "Plage d'efficacité acceptable: E = 1,8-2,2 (90-110%). Seuil de différence appliqué: {thr}%.",
@@ -1620,23 +1624,23 @@ Bustin SA et al. *Clin Chem* 2009 (directives MIQE).
         "pdf_s1_outlier_warn": "AVERTISSEMENT: L'exclusion des valeurs aberrantes nécessite une justification biologique ou technique.",
         "pdf_s1_outlier_off": "Détection des valeurs aberrantes désactivée pour cette analyse.",
         "pdf_s2_title": "2. Données d'entrée",
-        "pdf_s2_body": "Valeurs Ct brutes saisies par l'utilisateur après traitement des valeurs aberrantes.",
+        "pdf_s2_body": "Valeurs Cq brutes saisies par l'utilisateur après traitement des valeurs aberrantes.",
         "pdf_s3_title": "3. Résultats d'expression génique",
-        "pdf_s3_body": "Valeurs de fold-change calculées par ΔΔCt classique et méthode Pfaffl. Fold-change > 1 = expression plus élevée dans le groupe patient.",
+        "pdf_s3_body": "Valeurs de fold-change calculées par ΔΔCq classique et méthode Pfaffl. Fold-change > 1 = expression plus élevée dans le groupe patient.",
         "pdf_s4_title": "4. Analyse statistique",
         "pdf_s4_body": "Signification statistique des différences d'expression génique. Sélection automatique du test selon normalité (Shapiro-Wilk) et homogénéité des variances (Levene). Seuil: p < 0,05.",
         "pdf_s4_interp": "Interprétation des tests statistiques",
         "pdf_s4_interp_body": "t de Student: groupes normaux avec variances égales. t de Welch: normaux mais variances inégales. Mann-Whitney U: non-paramétrique. p < 0,05 = expression différentielle significative.",
-        "pdf_s5_title": "5. Graphiques de distribution Delta Ct",
-        "pdf_s5_body": "Distribution des valeurs ΔCt pour chaque gène cible. Chaque point = un réplicat. Barres horizontales = moyennes des groupes.",
+        "pdf_s5_title": "5. Graphiques de distribution Delta Cq",
+        "pdf_s5_body": "Distribution des valeurs ΔCq pour chaque gène cible. Chaque point = un réplicat. Barres horizontales = moyennes des groupes.",
         "pdf_s6_title": "6. Comment interpréter vos résultats",
         "pdf_s6_fc": "6.1 Interprétation du fold-change",
-        "pdf_s6_choose": "6.2 Choisir entre ΔΔCt et Pfaffl",
-        "pdf_s6_choose_body": "ΔΔCt classique si: efficacités 90-110% et différence < 10%. Pfaffl si: différence > 10%. Toujours rapporter les deux valeurs.",
+        "pdf_s6_choose": "6.2 Choisir entre ΔΔCq et Pfaffl",
+        "pdf_s6_choose_body": "ΔΔCq classique si: efficacités 90-110% et différence < 10%. Pfaffl si: différence > 10%. Toujours rapporter les deux valeurs.",
         "pdf_s6_stat": "6.3 Justification du choix du test",
         "pdf_s6_stat_body": "Normalité: test de Shapiro-Wilk (n < 50). Homogénéité des variances: test de Levene. Paramétrique/variances égales: t de Student. Variances inégales: t de Welch. Non-normal: Mann-Whitney U.",
         "pdf_s7_title": "7. Références",
-        "pdf_fc_interp_header": ["Fold-Change", "ΔΔCt", "Interprétation", "Signification biologique"],
+        "pdf_fc_interp_header": ["Fold-Change", "ΔΔCq", "Interprétation", "Signification biologique"],
         "pdf_fc_interp_rows": [
             [">2,0", "<-1,0", "Forte surexpression", "Biologiquement pertinent"],
             ["1,5-2,0", "-1,0 à -0,58", "Surexpression modérée", "Potentiellement pertinent"],
@@ -1658,15 +1662,15 @@ Bustin SA et al. *Clin Chem* 2009 (directives MIQE).
         "pdf_summary_norm_multi": "geNorm NF",
         "pdf_summary_norm_single": "Gène de référence unique",
         "pdf_summary_methods": "Méthodes de calcul",
-        "pdf_summary_methods_val": "ΔΔCt classique + Pfaffl",
+        "pdf_summary_methods_val": "ΔΔCq classique + Pfaffl",
         "pdf_disclaimer": "Ce rapport a été généré automatiquement par GeneQuantify conformément aux directives MIQE.",
         "pdf_footer": "GeneQuantify — Usage recherche et éducation uniquement. Non validé pour usage clinique.",
-        "pdf_fig1": "Figure 1. Comparaison du fold-change: ΔΔCt classique vs Pfaffl. Ligne pointillée y=1 = aucun changement.",
+        "pdf_fig1": "Figure 1. Comparaison du fold-change: ΔΔCq classique vs Pfaffl. Ligne pointillée y=1 = aucun changement.",
         "pdf_fig2": "Figure 2. Valeurs p de toutes les comparaisons. Barres rouges = significatif (p < 0,05).",
-        "pdf_fig3": "Figure. Distribution ΔCt pour {gene}. Points = réplicats; barres = moyennes des groupes.",
+        "pdf_fig3": "Figure. Distribution ΔCq pour {gene}. Points = réplicats; barres = moyennes des groupes.",
         "pdf_nochange": "Aucun changement",
         "pdf_stat_cols": ["Gène cible", "Comparaison", "Type de test", "Méthode", "Valeur p", "Signification"],
-        "pdf_res_cols": ["Gène cible", "Groupe", "ΔCt Contrôle", "ΔCt Échantillon", "ΔΔCt", "2^(-ΔΔCt)", "Ratio Pfaffl", "Régulation", "E cible", "E réf"],
+        "pdf_res_cols": ["Gène cible", "Groupe", "ΔCq Contrôle", "ΔCq Échantillon", "ΔΔCq", "2^(-ΔΔCq)", "Ratio Pfaffl", "Régulation", "E cible", "E réf"],
         "pdf_eff_cols": ["Gène", "E (cible)", "Eff% (cible)", "E (réf)", "Eff% (réf)", "Diff%", "Statut"],
         "pdf_eff_ok": "OK",
         "pdf_eff_warn": "AVERTISSEMENT: utiliser Pfaffl",
@@ -1705,10 +1709,10 @@ Bustin SA et al. *Clin Chem* 2009 (directives MIQE).
         "sample_number": "Número de muestra",
         "Grup": "Grupo",
         "x_axis_title": "Nombre del Grupo",
-        "ct_value": "Valor de Ct",
+        "ct_value": "Valor de Cq",
         "reference_ct": "Ct de Referencia",
-        "delta_ct_control": "ΔCt (Control)",
-        "delta_ct_patient": "ΔCt (Paciente)",
+        "delta_ct_control": "ΔCq (Control)",
+        "delta_ct_patient": "ΔCq (Paciente)",
         "warning_empty_input": "⚠️ Advertencia: Ingrese los datos uno debajo del otro o cópielos sin celdas vacías desde Excel.",
         "download_csv": "📥 Descargar CSV",
         "generate_pdf": "📥 Preparar Informe en PDF",
@@ -1721,7 +1725,7 @@ Bustin SA et al. *Clin Chem* 2009 (directives MIQE).
         "hst_trgt_ct": "🩸 Valores Ct del Gen Objetivo {j} para el Grupo Paciente",
         "hst_ref_ct": "🩸 Valores Ct del Gen de Referencia {j} para el Grupo Paciente",
         "warning_control_ct": "⚠️ Advertencia: Los datos del grupo control {i} deben ingresarse fila por fila o copiarse desde Excel sin celdas vacías.",
-        "warning_patient_ct": "⚠️ Advertencia: Ingrese los valores de Ct del grupo paciente fila por fila o cópielos desde Excel sin celdas vacías.",
+        "warning_patient_cq": "⚠️ Advertencia: Ingrese los valores de Ct del grupo paciente fila por fila o cópielos desde Excel sin celdas vacías.",
         "target_gene": "Gen Objetivo",
         "reference_gene": "Gen de Referencia",
         "target_ct": "Ct del Gen Objetivo", 
@@ -1732,8 +1736,8 @@ Bustin SA et al. *Clin Chem* 2009 (directives MIQE).
         "control": "Control",
         "sample": "Muestra",
         "patient": "Paciente",
-        "delta_ct_distribution": "Distribución ΔCt",
-        "delta_ct_value": "Valor ΔCt",
+        "delta_ct_distribution": "Distribución ΔCq",
+        "delta_ct_value": "Valor ΔCq",
         "parametric": "Paramétrico",
         "non_parametric": "No paramétrico",
         "t_test": "Test t",
@@ -1745,8 +1749,8 @@ Bustin SA et al. *Clin Chem* 2009 (directives MIQE).
         "test_method": "Método de Test",
         "test_pvalue": "P-valor del Test",
         "significance": "Significación",
-        "delta_delta_ct": "ΔΔCt",
-        "gene_expression_change": "Cambio de Expresión Génica (2^(-ΔΔCt))",
+        "delta_delta_ct": "ΔΔCq",
+        "gene_expression_change": "Cambio de Expresión Génica (2^(-ΔΔCq))",
         "regulation_status": "Estado de Regulación",
         "no_change": "Sin Cambio",
         "upregulated": "Upregulado",
@@ -1774,13 +1778,13 @@ Bustin SA et al. *Clin Chem* 2009 (directives MIQE).
         "efficiency_ref_slope_label": "Pendiente del Gen de Referencia {i}",
         "efficiency_threshold": "Umbral de diferencia de eficiencia aceptable (%)",
         "efficiency_ok": "✅ La diferencia de eficiencia es aceptable ({diff:.1f}%)",
-        "efficiency_warning": "⚠️ La diferencia de eficiencia supera el umbral ({diff:.1f}%) — ¡El método ΔΔCt puede no ser confiable!",
+        "efficiency_warning": "⚠️ La diferencia de eficiencia supera el umbral ({diff:.1f}%) — ¡El método ΔΔCq puede no ser confiable!",
         "efficiency_target_pct": "Eficiencia del Gen Objetivo",
         "efficiency_ref_pct": "Eficiencia del Gen de Referencia",
         "efficiency_diff": "Diferencia",
         "pfaffl_result": "Relación Pfaffl",
         "pfaffl_header": "Resultados del Método Pfaffl",
-        "classic_ddct": "Resultado ΔΔCt Clásico (2^(-ΔΔCt))",
+        "classic_ddct": "Resultado ΔΔCq Clásico (2^(-ΔΔCq))",
         "pfaffl_ratio": "Relación Pfaffl",
         "method_comparison": "📊 Comparación de Métodos",
         "efficiency_note": "Nota: E=2.0 representa eficiencia perfecta (100%). Rango aceptado: 1.8–2.2 (90–110%)",
@@ -1802,26 +1806,27 @@ Bustin SA et al. *Clin Chem* 2009 (directives MIQE).
         "outlier_iqr_label": "Multiplicador IQR (k)",
         "outlier_iqr_help": "k=1,5 = cercas de Tukey estándar. k=3,0 = solo valores extremos.",
         "outlier_expander": "ℹ️ Sobre la detección de valores atípicos en qPCR",
+        "grubbs_info": "ℹ️ **Requisitos del test de Grubbs:** Mínimo **n ≥ 3** réplicas por grupo. Umbral de significancia: **α = {alpha:.2f}**. El test asume normalidad; para n < 8, la normalidad no puede evaluarse de forma confiable. Se recomienda aplicar el test a los **valores Cq brutos** (antes de la normalización).",
         "outlier_excluded_no": "No",
         "outlier_excluded_yes": "Sí",
         # Outlier stage selector
         "outlier_stage_label": "🔬 Etapa de detección de valores atípicos",
         "outlier_stage_raw": "Ct bruto — antes de la normalización (recomendado)",
-        "outlier_stage_dct": "ΔCt — después de la normalización (comportamiento anterior)",
+        "outlier_stage_dct": "ΔCq — después de la normalización (comportamiento anterior)",
         "outlier_stage_help": (
             "**Ct bruto (recomendado):** Los valores atípicos se detectan en los valores Ct brutos "
-            "antes del cálculo del ΔCt. Aplicado por separado al gen objetivo y a cada gen de referencia.\n\n"
-            "**ΔCt:** Detección después de la normalización (comportamiento original)."
+            "antes del cálculo del ΔCq. Aplicado por separado al gen objetivo y a cada gen de referencia.\n\n"
+            "**ΔCq:** Detección después de la normalización (comportamiento original)."
         ),
         # Distribution plot mode selector
         "dist_plot_mode_label": "📊 Gráfico de distribución — Modo de visualización",
-        "dist_plot_rq":   "RQ (2^-ΔCt)  — recomendado",
-        "dist_plot_dct":  "ΔCt  — valores normalizados brutos",
-        "dist_plot_ddct": "ΔΔCt  — relativo a la media del control",
+        "dist_plot_rq":   "RQ (2^-ΔCq)  — recomendado",
+        "dist_plot_dct":  "ΔCq  — valores normalizados brutos",
+        "dist_plot_ddct": "ΔΔCq  — relativo a la media del control",
         "dist_plot_help": (
-            "**RQ (recomendado):** Convierte ΔCt a 2^(-ΔCt). Mayor valor = mayor expresión.\n\n"
-            "**ΔCt:** Valores logarítmicos brutos. Útil para verificar la distribución.\n\n"
-            "**ΔΔCt:** ΔCt de cada muestra menos la media del grupo control."
+            "**RQ (recomendado):** Convierte ΔCq a 2^(-ΔCt). Mayor valor = mayor expresión.\n\n"
+            "**ΔCq:** Valores logarítmicos brutos. Útil para verificar la distribución.\n\n"
+            "**ΔΔCq:** ΔCq de cada muestra menos la media del grupo control."
         ),
         "unequal_n_warning": (
             "⚠️ **Recuentos de réplicas desiguales detectados — {group}:**  \n"
@@ -1894,7 +1899,7 @@ Bustin SA et al. *Clin Chem* 2009 (directives MIQE).
         "sc_dilution_factor_input": "Factor de dilución",
         "sc_start_conc_label": "**Concentración inicial** (unidades arbitrarias, ej. 1)",
         "sc_start_conc_input": "Concentración inicial",
-        "sc_enter_ct": "**Ingrese el Ct medio para cada dilución:**",
+        "sc_enter_ct": "**Ingrese el Cq medio para cada dilución:**",
         "sc_calc_button": "📊 Calcular eficiencia",
         "sc_slope": "Pendiente",
         "sc_e_value": "Valor E",
@@ -1919,7 +1924,7 @@ Ingrese sus valores Ct de dilución en serie a continuación. La calculadora aju
 El factor de normalización (NF) es la media aritmética de los valores Ct de todos los genes de referencia por muestra,  
 lo que corresponde a la media geométrica de sus niveles de expresión.  
 `NF_muestra = media(Ct_ref1, Ct_ref2, ..., Ct_refN)` para cada muestra  
-`ΔCt = Ct_objetivo − NF`
+`ΔCq = Ct_objetivo − NF`
 
 **Valor M de geNorm** (puntuación de estabilidad)  
 Para cada gen de referencia, M = desviación estándar media de los log-ratios contra todos los demás genes de referencia.  
@@ -1965,8 +1970,8 @@ Bustin SA et al. *Clin Chem* 2009 (directrices MIQE).
         "pdf_s1_title": "1. Métodos y configuración del análisis",
         "pdf_s1_calc": "1.1 Métodos de cálculo",
         "pdf_s1_calc_body": "Se aplicaron dos métodos complementarios para el cálculo del fold-change:",
-        "pdf_s1_classic": "ΔΔCt clásico (Livak & Schmittgen, 2001): ΔCt = Ct(objetivo) - Ct(referencia);  ΔΔCt = ΔCt(muestra) - ΔCt(control);  Fold-Change = 2^(-ΔΔCt). Asume eficiencias iguales (E ≈ 2,0).",
-        "pdf_s1_pfaffl": "Método Pfaffl (Pfaffl, 2001): Ratio = (E_objetivo ^ ΔCt_objetivo) / (E_ref ^ ΔCt_ref). Corrige eficiencias específicas; recomendado si diferencia > 10%.",
+        "pdf_s1_classic": "ΔΔCq clásico (Livak & Schmittgen, 2001): ΔCq = Ct(objetivo) - Ct(referencia);  ΔΔCt = ΔCt(muestra) - ΔCt(control);  Fold-Change = 2^(-ΔΔCt). Asume eficiencias iguales (E ≈ 2,0).",
+        "pdf_s1_pfaffl": "Método Pfaffl (Pfaffl, 2001): Ratio = (E_objetivo ^ ΔCq_objetivo) / (E_ref ^ ΔCt_ref). Corrige eficiencias específicas; recomendado si diferencia > 10%.",
         "pdf_s1_norm": "1.2 Normalización",
         "pdf_s1_norm_multi": "Genes de referencia múltiples (n={n}) utilizados. NF calculado como media aritmética de Ct de referencia (geNorm, Vandesompele et al. 2002).",
         "pdf_s1_norm_single": "Un solo gen de referencia utilizado. Las directrices MIQE recomiendan ≥2 genes de referencia.",
@@ -1980,21 +1985,21 @@ Bustin SA et al. *Clin Chem* 2009 (directrices MIQE).
         "pdf_s2_title": "2. Datos de entrada",
         "pdf_s2_body": "Valores Ct brutos introducidos por el usuario tras el procesamiento de valores atípicos.",
         "pdf_s3_title": "3. Resultados de expresión génica",
-        "pdf_s3_body": "Valores de fold-change calculados por ΔΔCt clásico y método Pfaffl. Fold-change > 1 = expresión mayor en el grupo paciente.",
+        "pdf_s3_body": "Valores de fold-change calculados por ΔΔCq clásico y método Pfaffl. Fold-change > 1 = expresión mayor en el grupo paciente.",
         "pdf_s4_title": "4. Análisis estadístico",
         "pdf_s4_body": "Significación estadística de las diferencias de expresión. Selección automática según normalidad (Shapiro-Wilk) y homogeneidad de varianzas (Levene). Umbral: p < 0,05.",
         "pdf_s4_interp": "Interpretación de los tests estadísticos",
         "pdf_s4_interp_body": "t de Student: grupos normales con varianzas iguales. t de Welch: normales con varianzas desiguales. Mann-Whitney U: no paramétrico. p < 0,05 = expresión diferencial significativa.",
         "pdf_s5_title": "5. Gráficos de distribución Delta Ct",
-        "pdf_s5_body": "Distribución de valores ΔCt por gen objetivo. Cada punto = un réplica. Barras horizontales = medias de grupo.",
+        "pdf_s5_body": "Distribución de valores ΔCq por gen objetivo. Cada punto = un réplica. Barras horizontales = medias de grupo.",
         "pdf_s6_title": "6. Cómo interpretar los resultados",
         "pdf_s6_fc": "6.1 Interpretación del fold-change",
-        "pdf_s6_choose": "6.2 Elección entre ΔΔCt y Pfaffl",
-        "pdf_s6_choose_body": "ΔΔCt clásico si: eficiencias 90-110% y diferencia < 10%. Pfaffl si: diferencia > 10%. Reportar siempre ambos valores.",
+        "pdf_s6_choose": "6.2 Elección entre ΔΔCq y Pfaffl",
+        "pdf_s6_choose_body": "ΔΔCq clásico si: eficiencias 90-110% y diferencia < 10%. Pfaffl si: diferencia > 10%. Reportar siempre ambos valores.",
         "pdf_s6_stat": "6.3 Justificación de la selección del test",
         "pdf_s6_stat_body": "Normalidad: Shapiro-Wilk (n < 50). Homogeneidad: Levene. Paramétrico/varianzas iguales: t de Student. Desiguales: Welch. No normal: Mann-Whitney U.",
         "pdf_s7_title": "7. Referencias",
-        "pdf_fc_interp_header": ["Fold-Change", "ΔΔCt", "Interpretación", "Significado biológico"],
+        "pdf_fc_interp_header": ["Fold-Change", "ΔΔCq", "Interpretación", "Significado biológico"],
         "pdf_fc_interp_rows": [
             [">2,0", "<-1,0", "Fuerte sobreexpresión", "Considerar biológicamente relevante"],
             ["1,5-2,0", "-1,0 a -0,58", "Sobreexpresión moderada", "Puede ser relevante"],
@@ -2016,15 +2021,15 @@ Bustin SA et al. *Clin Chem* 2009 (directrices MIQE).
         "pdf_summary_norm_multi": "geNorm NF",
         "pdf_summary_norm_single": "Gen de referencia único",
         "pdf_summary_methods": "Métodos de cálculo",
-        "pdf_summary_methods_val": "ΔΔCt clásico + Pfaffl",
+        "pdf_summary_methods_val": "ΔΔCq clásico + Pfaffl",
         "pdf_disclaimer": "Este informe fue generado automáticamente por GeneQuantify siguiendo las directrices MIQE.",
         "pdf_footer": "GeneQuantify — Solo para investigación y educación. No validado para diagnóstico clínico.",
-        "pdf_fig1": "Figura 1. Comparación fold-change: ΔΔCt clásico vs Pfaffl. Línea discontinua y=1 = sin cambio.",
+        "pdf_fig1": "Figura 1. Comparación fold-change: ΔΔCq clásico vs Pfaffl. Línea discontinua y=1 = sin cambio.",
         "pdf_fig2": "Figura 2. Valores p de todas las comparaciones. Barras rojas = significativo (p < 0,05).",
-        "pdf_fig3": "Figura. Distribución ΔCt para {gene}. Puntos = réplicas; barras = medias de grupo.",
+        "pdf_fig3": "Figura. Distribución ΔCq para {gene}. Puntos = réplicas; barras = medias de grupo.",
         "pdf_nochange": "Sin cambio",
         "pdf_stat_cols": ["Gen objetivo", "Comparación", "Tipo de test", "Método", "Valor p", "Significación"],
-        "pdf_res_cols": ["Gen objetivo", "Grupo", "ΔCt Control", "ΔCt Muestra", "ΔΔCt", "2^(-ΔΔCt)", "Ratio Pfaffl", "Regulación", "E objetivo", "E ref"],
+        "pdf_res_cols": ["Gen objetivo", "Grupo", "ΔCq Control", "ΔCq Muestra", "ΔΔCq", "2^(-ΔΔCq)", "Ratio Pfaffl", "Regulación", "E objetivo", "E ref"],
         "pdf_eff_cols": ["Gen", "E (objetivo)", "Eff% (objetivo)", "E (ref)", "Eff% (ref)", "Dif%", "Estado"],
         "pdf_eff_ok": "OK",
         "pdf_eff_warn": "ADVERTENCIA: usar Pfaffl",
@@ -2063,10 +2068,10 @@ Bustin SA et al. *Clin Chem* 2009 (directrices MIQE).
         "sample_number": "رقم العينة",
         "Grup": "مجموعة",
         "x_axis_title": "اسم المجموعة",
-        "ct_value": "قيمة Ct",
+        "ct_value": "قيمة Cq",
         "reference_ct": "قيمة Ct المرجعية",
-        "delta_ct_control": "ΔCt (التحكم)",
-        "delta_ct_patient": "ΔCt (المريض)",
+        "delta_ct_control": "ΔCq (التحكم)",
+        "delta_ct_patient": "ΔCq (المريض)",
         "warning_empty_input": "⚠️ تحذير: أدخل البيانات واحدًا تلو الآخر أو انسخها دون خلايا فارغة من Excel.",
         "download_csv": "📥 تحميل CSV",
         "generate_pdf": "📥 إعداد تقرير PDF",
@@ -2079,7 +2084,7 @@ Bustin SA et al. *Clin Chem* 2009 (directrices MIQE).
         "hst_trgt_ct": "🩸 قيم Ct الجين المستهدف {j} لمجموعة المرضى",
         "hst_ref_ct": "🩸 قيم Ct الجين المرجعي {j} لمجموعة المرضى",
         "warning_control_ct": "⚠️ تحذير: يجب إدخال بيانات مجموعة التحكم {i} سطرًا بسطر أو نسخها من Excel دون خلايا فارغة.",
-        "warning_patient_ct": "⚠️ تحذير: أدخل قيم Ct لمجموعة المرضى سطرًا بسطر أو انسخها من Excel دون خلايا فارغة.",
+        "warning_patient_cq": "⚠️ تحذير: أدخل قيم Ct لمجموعة المرضى سطرًا بسطر أو انسخها من Excel دون خلايا فارغة.",
         "target_gene": "الجين المستهدف",
         "reference_gene": "الجين المرجعي",
         "target_ct": "قيمة Ct الجين المستهدف", 
@@ -2090,8 +2095,8 @@ Bustin SA et al. *Clin Chem* 2009 (directrices MIQE).
         "control": "التحكم",
         "sample": "عينة",
         "patient": "مريض",
-        "delta_ct_distribution": "توزيع ΔCt",
-        "delta_ct_value": "قيمة ΔCt",
+        "delta_ct_distribution": "توزيع ΔCq",
+        "delta_ct_value": "قيمة ΔCq",
         "parametric": "معلمي",
         "non_parametric": "غير معلمي",
         "t_test": "اختبار t",
@@ -2103,8 +2108,8 @@ Bustin SA et al. *Clin Chem* 2009 (directrices MIQE).
         "test_method": "طريقة الاختبار",
         "test_pvalue": "قيمة P للاختبار",
         "significance": "الدلالة",
-        "delta_delta_ct": "ΔΔCt",
-        "gene_expression_change": "تغيير التعبير الجيني (2^(-ΔΔCt))",
+        "delta_delta_ct": "ΔΔCq",
+        "gene_expression_change": "تغيير التعبير الجيني (2^(-ΔΔCq))",
         "regulation_status": "حالة التنظيم",
         "no_change": "لا تغيير",
         "upregulated": "مرتفع التنظيم",
@@ -2132,13 +2137,13 @@ Bustin SA et al. *Clin Chem* 2009 (directrices MIQE).
         "efficiency_ref_slope_label": "انحدار الجين المرجعي {i}",
         "efficiency_threshold": "عتبة فرق الكفاءة المقبول (%)",
         "efficiency_ok": "✅ فرق الكفاءة مقبول ({diff:.1f}%)",
-        "efficiency_warning": "⚠️ فرق الكفاءة يتجاوز العتبة ({diff:.1f}%) — قد لا تكون طريقة ΔΔCt موثوقة!",
+        "efficiency_warning": "⚠️ فرق الكفاءة يتجاوز العتبة ({diff:.1f}%) — قد لا تكون طريقة ΔΔCq موثوقة!",
         "efficiency_target_pct": "كفاءة الجين المستهدف",
         "efficiency_ref_pct": "كفاءة الجين المرجعي",
         "efficiency_diff": "الفرق",
         "pfaffl_result": "نسبة Pfaffl",
         "pfaffl_header": "نتائج طريقة Pfaffl",
-        "classic_ddct": "نتيجة ΔΔCt الكلاسيكية (2^(-ΔΔCt))",
+        "classic_ddct": "نتيجة ΔΔCq الكلاسيكية (2^(-ΔΔCq))",
         "pfaffl_ratio": "نسبة Pfaffl",
         "method_comparison": "📊 مقارنة الطرق",
         "efficiency_note": "ملاحظة: E=2.0 تمثل الكفاءة المثالية (100%). النطاق المقبول: 1.8–2.2 (90–110%)",
@@ -2160,26 +2165,27 @@ Bustin SA et al. *Clin Chem* 2009 (directrices MIQE).
         "outlier_iqr_label": "مُضاعف IQR (k)",
         "outlier_iqr_help": "k=1.5 = حدود Tukey القياسية. k=3.0 = القيم الشاذة الشديدة فقط.",
         "outlier_expander": "ℹ️ حول اكتشاف القيم الشاذة في qPCR",
+        "grubbs_info": "ℹ️ **متطلبات اختبار Grubbs:** الحد الأدنى **n ≥ 3** مكررات لكل مجموعة. عتبة الأهمية: **α = {alpha:.2f}**. يفترض الاختبار التوزيع الطبيعي؛ لـ n < 8، لا يمكن تقييم الطبيعية بشكل موثوق. يُنصح بتطبيق الاختبار على **قيم Cq الخام** (قبل التطبيع).",
         "outlier_excluded_no": "لا",
         "outlier_excluded_yes": "نعم",
         # Outlier stage selector
         "outlier_stage_label": "🔬 مرحلة اكتشاف القيم الشاذة",
         "outlier_stage_raw": "Ct الخام — قبل التطبيع (موصى به)",
-        "outlier_stage_dct": "ΔCt — بعد التطبيع (السلوك السابق)",
+        "outlier_stage_dct": "ΔCq — بعد التطبيع (السلوك السابق)",
         "outlier_stage_help": (
-            "**Ct الخام (موصى به):** يتم اكتشاف القيم الشاذة على قيم Ct الخام قبل حساب ΔCt. "
+            "**Ct الخام (موصى به):** يتم اكتشاف القيم الشاذة على قيم Ct الخام قبل حساب ΔCq. "
             "يُطبَّق بشكل منفصل على الجين المستهدف وكل جين مرجعي.\n\n"
-            "**ΔCt:** الاكتشاف بعد التطبيع (السلوك الأصلي)."
+            "**ΔCq:** الاكتشاف بعد التطبيع (السلوك الأصلي)."
         ),
         # Distribution plot mode selector
         "dist_plot_mode_label": "📊 مخطط التوزيع — وضع العرض",
-        "dist_plot_rq":   "RQ (2^-ΔCt)  — موصى به",
-        "dist_plot_dct":  "ΔCt  — القيم المطبَّعة الخام",
-        "dist_plot_ddct": "ΔΔCt  — بالنسبة لمتوسط المجموعة الضابطة",
+        "dist_plot_rq":   "RQ (2^-ΔCq)  — موصى به",
+        "dist_plot_dct":  "ΔCq  — القيم المطبَّعة الخام",
+        "dist_plot_ddct": "ΔΔCq  — بالنسبة لمتوسط المجموعة الضابطة",
         "dist_plot_help": (
-            "**RQ (موصى به):** يحوّل ΔCt إلى 2^(-ΔCt). قيمة أعلى = تعبير أعلى.\n\n"
-            "**ΔCt:** قيم لوغاريتمية خام. مفيد للتحقق من توزيع البيانات.\n\n"
-            "**ΔΔCt:** ΔCt لكل عينة ناقص متوسط مجموعة التحكم."
+            "**RQ (موصى به):** يحوّل ΔCq إلى 2^(-ΔCt). قيمة أعلى = تعبير أعلى.\n\n"
+            "**ΔCq:** قيم لوغاريتمية خام. مفيد للتحقق من توزيع البيانات.\n\n"
+            "**ΔΔCq:** ΔCq لكل عينة ناقص متوسط مجموعة التحكم."
         ),
         "unequal_n_warning": (
             "⚠️ **تم اكتشاف أعداد متكررة غير متساوية — {group}:**  \n"
@@ -2252,7 +2258,7 @@ Bustin SA et al. *Clin Chem* 2009 (directrices MIQE).
         "sc_dilution_factor_input": "عامل التخفيف",
         "sc_start_conc_label": "**التركيز الابتدائي** (وحدات اعتباطية، مثال: 1)",
         "sc_start_conc_input": "التركيز الابتدائي",
-        "sc_enter_ct": "**أدخل متوسط Ct لكل تخفيف:**",
+        "sc_enter_ct": "**أدخل متوسط Cq لكل تخفيف:**",
         "sc_calc_button": "📊 احسب الكفاءة",
         "sc_slope": "الميل",
         "sc_e_value": "قيمة E",
@@ -2277,7 +2283,7 @@ Bustin SA et al. *Clin Chem* 2009 (directrices MIQE).
 عامل التطبيع (NF) هو المتوسط الحسابي لقيم Ct عبر جميع الجينات المرجعية لكل عينة،  
 وهو ما يتوافق مع الوسط الهندسي لمستويات تعبيرها.  
 `NF_عينة = متوسط(Ct_ref1, Ct_ref2, ..., Ct_refN)` لكل عينة  
-`ΔCt = Ct_المستهدف − NF`
+`ΔCq = Ct_المستهدف − NF`
 
 **قيمة M لـ geNorm** (درجة الاستقرار)  
 لكل جين مرجعي، M = متوسط الانحراف المعياري للنسب اللوغاريتمية مقابل جميع الجينات المرجعية الأخرى.  
@@ -2323,8 +2329,8 @@ Bustin SA et al. *Clin Chem* 2009 (إرشادات MIQE).
         "pdf_s1_title": "1. الطرق وإعدادات التحليل",
         "pdf_s1_calc": "1.1 طرق الحساب",
         "pdf_s1_calc_body": "طُبِّقت طريقتان متكاملتان لحساب نسبة التضخيم:",
-        "pdf_s1_classic": "طريقة ΔΔCt الكلاسيكية: نسبة التضخيم = 2^(-ΔΔCt). تفترض كفاءة متساوية.",
-        "pdf_s1_pfaffl": "طريقة Pfaffl: النسبة = (E_الهدف ^ ΔCt_الهدف) / (E_مرجع ^ ΔCt_مرجع). موصى بها عند اختلاف الكفاءة > 10%.",
+        "pdf_s1_classic": "طريقة ΔΔCq الكلاسيكية: نسبة التضخيم = 2^(-ΔΔCq). تفترض كفاءة متساوية.",
+        "pdf_s1_pfaffl": "طريقة Pfaffl: النسبة = (E_الهدف ^ ΔCq_الهدف) / (E_مرجع ^ ΔCt_مرجع). موصى بها عند اختلاف الكفاءة > 10%.",
         "pdf_s1_norm": "1.2 التطبيع",
         "pdf_s1_norm_multi": "استُخدمت جينات مرجعية متعددة (n={n}) (geNorm, Vandesompele et al. 2002).",
         "pdf_s1_norm_single": "استُخدم جين مرجعي واحد. توصي MIQE باستخدام ≥2 جين.",
@@ -2338,21 +2344,21 @@ Bustin SA et al. *Clin Chem* 2009 (إرشادات MIQE).
         "pdf_s2_title": "2. بيانات الإدخال",
         "pdf_s2_body": "قيم Ct الخام بعد معالجة القيم الشاذة.",
         "pdf_s3_title": "3. نتائج التعبير الجيني",
-        "pdf_s3_body": "نسب التضخيم المحسوبة بطريقتي ΔΔCt الكلاسيكية و Pfaffl.",
+        "pdf_s3_body": "نسب التضخيم المحسوبة بطريقتي ΔΔCq الكلاسيكية و Pfaffl.",
         "pdf_s4_title": "4. التحليل الإحصائي",
         "pdf_s4_body": "الدلالة الإحصائية. اختيار الاختبار تلقائياً (Shapiro-Wilk، Levene). p < 0.05.",
         "pdf_s4_interp": "تفسير الاختبارات",
         "pdf_s4_interp_body": "t للطلاب: متساويا التباين. Welch: غير متساويا التباين. Mann-Whitney U: لامعلمي.",
         "pdf_s5_title": "5. مخططات توزيع Delta Ct",
-        "pdf_s5_body": "توزيع قيم ΔCt. كل نقطة = مكرر. الأشرطة = المتوسطات.",
+        "pdf_s5_body": "توزيع قيم ΔCq. كل نقطة = مكرر. الأشرطة = المتوسطات.",
         "pdf_s6_title": "6. تفسير النتائج",
         "pdf_s6_fc": "6.1 تفسير نسبة التضخيم",
-        "pdf_s6_choose": "6.2 الاختيار بين ΔΔCt و Pfaffl",
-        "pdf_s6_choose_body": "ΔΔCt إذا كانت الكفاءتان 90-110% والفارق < 10%. Pfaffl إذا كان > 10%.",
+        "pdf_s6_choose": "6.2 الاختيار بين ΔΔCq و Pfaffl",
+        "pdf_s6_choose_body": "ΔΔCq إذا كانت الكفاءتان 90-110% والفارق < 10%. Pfaffl إذا كان > 10%.",
         "pdf_s6_stat": "6.3 مبررات اختيار الاختبار",
         "pdf_s6_stat_body": "التوزيع الطبيعي: Shapiro-Wilk. تجانس التباين: Levene. Student/Welch/Mann-Whitney حسب النتيجة.",
         "pdf_s7_title": "7. المراجع",
-        "pdf_fc_interp_header": ["نسبة التضخيم", "ΔΔCt", "التفسير", "الأهمية البيولوجية"],
+        "pdf_fc_interp_header": ["نسبة التضخيم", "ΔΔCq", "التفسير", "الأهمية البيولوجية"],
         "pdf_fc_interp_rows": [
             [">2.0", "<-1.0", "زيادة تعبير قوية", "مهم بيولوجياً"],
             ["1.5-2.0", "-1.0 إلى -0.58", "زيادة معتدلة", "قد يكون مهماً"],
@@ -2368,15 +2374,15 @@ Bustin SA et al. *Clin Chem* 2009 (إرشادات MIQE).
         "pdf_summary_samples": "إجمالي العينات", "pdf_summary_excluded": "العينات المستبعدة",
         "pdf_summary_tests": "مقارنات", "pdf_summary_norm": "طريقة التطبيع",
         "pdf_summary_norm_multi": "geNorm NF", "pdf_summary_norm_single": "جين مرجعي واحد",
-        "pdf_summary_methods": "طرق الحساب", "pdf_summary_methods_val": "ΔΔCt الكلاسيكي + Pfaffl",
+        "pdf_summary_methods": "طرق الحساب", "pdf_summary_methods_val": "ΔΔCq الكلاسيكي + Pfaffl",
         "pdf_disclaimer": "تم إنشاء هذا التقرير تلقائياً بواسطة GeneQuantify وفق إرشادات MIQE.",
         "pdf_footer": "GeneQuantify — للبحث والتعليم فقط. غير مُصادَق لأغراض التشخيص السريري.",
         "pdf_fig1": "شكل 1. مقارنة نسبة التضخيم. الخط المتقطع y=1 = لا تغيير.",
         "pdf_fig2": "شكل 2. قيم p. الأشرطة الحمراء = دالة (p < 0.05).",
-        "pdf_fig3": "شكل. توزيع ΔCt لـ {gene}.",
+        "pdf_fig3": "شكل. توزيع ΔCq لـ {gene}.",
         "pdf_nochange": "لا تغيير",
         "pdf_stat_cols": ["الجين الهدف", "المقارنة", "نوع الاختبار", "الاختبار", "قيمة p", "الدلالة"],
-        "pdf_res_cols": ["الجين الهدف", "المجموعة", "ΔCt الضبط", "ΔCt العينة", "ΔΔCt", "2^(-ΔΔCt)", "نسبة Pfaffl", "التنظيم", "E الهدف", "E المرجع"],
+        "pdf_res_cols": ["الجين الهدف", "المجموعة", "ΔCq الضبط", "ΔCq العينة", "ΔΔCq", "2^(-ΔΔCq)", "نسبة Pfaffl", "التنظيم", "E الهدف", "E المرجع"],
         "pdf_eff_cols": ["الجين", "E (الهدف)", "Eff% (الهدف)", "E (المرجع)", "Eff% (المرجع)", "الفارق%", "الحالة"],
         "pdf_eff_ok": "مقبول", "pdf_eff_warn": "تحذير: استخدم Pfaffl",
         "pdf_outlier_col": "قيمة شاذة مستبعدة", "pdf_contact": "التواصل: mailtoburhanettin@gmail.com",
@@ -2881,6 +2887,8 @@ with tab_data:
                 key="grubbs_alpha", help=translations[language_code]["outlier_alpha_help"]
             )
             iqr_multiplier = 1.5
+            # REVIEWER RESPONSE (Comment 7): show minimum n and p-value info
+            st.info(_t.get("grubbs_info", "ℹ️ Grubbs test: min n ≥ 3, α = 0.05").format(alpha=grubbs_alpha))
         else:
             iqr_multiplier = st.number_input(
                 translations[language_code]["outlier_iqr_label"],
@@ -2890,7 +2898,7 @@ with tab_data:
             grubbs_alpha = 0.05
 
     # ── REVIEWER RESPONSE (Comment 3): Outlier detection stage selector ──────
-    # Reviewer suggested that applying Grubbs on already-normalized ΔCt values
+    # Reviewer suggested that applying Grubbs on already-normalized ΔCq values
     # may allow noisy raw Ct replicates to pass through undetected.
     # Option added: apply outlier detection on raw Ct values BEFORE normalization.
     outlier_stage = st.radio(
@@ -3065,10 +3073,10 @@ with tab_data:
         control_target_ct_values = control_target_ct_values[:min_control_len]
         ctrl_ref_arrays = [a[:min_control_len] for a in ctrl_ref_arrays]
 
-        # ── Outlier detection — Raw Ct stage (BEFORE normalization) ──────────────
+        # ── Outlier detection — Raw Cq stage (BEFORE normalization) ──────────────
         # REVIEWER RESPONSE (Comment 3):
         # When outlier_on_raw is True, Grubbs/IQR is applied to raw Ct values
-        # separately for target gene and each reference gene before ΔCt is computed.
+        # separately for target gene and each reference gene before ΔCq is computed.
         # This prevents noisy replicates from propagating into normalization.
         ctrl_excluded_target = []
 
@@ -3081,7 +3089,7 @@ with tab_data:
                 if detected_raw_tgt:
                     control_target_ct_values, ctrl_excluded_target = render_outlier_ui(
                         control_target_ct_values,
-                        f"Control Group {i+1} — Target Gene {i+1} (Raw Ct)",
+                        f"Control Group {i+1} — Target Gene {i+1} (Raw Cq)",
                         f"ctrl_raw_tgt_{i}",
                         outlier_method
                     )
@@ -3099,7 +3107,7 @@ with tab_data:
                     if detected_raw_ref:
                         cleaned_ref, excl_ref = render_outlier_ui(
                             ctrl_ref_arrays[r],
-                            f"Control Group {i+1} — Reference Gene {r+1} (Raw Ct)",
+                            f"Control Group {i+1} — Reference Gene {r+1} (Raw Cq)",
                             f"ctrl_raw_ref_{i}_{r}",
                             outlier_method
                         )
@@ -3110,7 +3118,7 @@ with tab_data:
                             ctrl_ref_arrays = [a[keep_ref] for a in ctrl_ref_arrays]
                             min_control_len = len(keep_ref)
 
-        # ── Outlier detection — Control Target Ct (ΔCt stage fallback) ──────────
+        # ── Outlier detection — Control Target Ct (ΔCq stage fallback) ──────────
         elif outlier_enabled and not outlier_on_raw and len(control_target_ct_values) >= 3:
             detected_ctrl_tgt = detect_outliers_grubbs(control_target_ct_values, alpha=grubbs_alpha) \
                                 if outlier_method == "Grubbs" \
@@ -3278,7 +3286,7 @@ with tab_data:
             sample_target_ct_values = np.array(parse_input_data(sample_target_ct))
 
             if len(sample_target_ct_values) == 0 or not all_smp_refs_valid or len(smp_ref_arrays) == 0:
-                st.error(translations[language_code]["warning_patient_ct"].format(j=j+1))
+                st.error(translations[language_code]["warning_patient_cq"].format(j=j+1))
                 continue
 
             # REVIEWER RESPONSE (Comment 12): warn if n differs between target and reference genes
@@ -3295,7 +3303,7 @@ with tab_data:
             sample_target_ct_values = sample_target_ct_values[:min_sample_len]
             smp_ref_arrays = [a[:min_sample_len] for a in smp_ref_arrays]
 
-            # ── Outlier detection — Raw Ct stage (BEFORE normalization) ──────────
+            # ── Outlier detection — Raw Cq stage (BEFORE normalization) ──────────
             # REVIEWER RESPONSE (Comment 3): same logic as control group above
             smp_excluded_target = []
 
@@ -3308,7 +3316,7 @@ with tab_data:
                     if detected_raw_smp_tgt:
                         sample_target_ct_values, smp_excluded_target = render_outlier_ui(
                             sample_target_ct_values,
-                            f"{translations[language_code]['patient_group']} {j+1} — Target Gene {i+1} (Raw Ct)",
+                            f"{translations[language_code]['patient_group']} {j+1} — Target Gene {i+1} (Raw Cq)",
                             f"smp_raw_tgt_{i}_{j}",
                             outlier_method
                         )
@@ -3326,7 +3334,7 @@ with tab_data:
                         if detected_raw_smp_ref:
                             cleaned_smp_ref, excl_smp_ref = render_outlier_ui(
                                 smp_ref_arrays[r],
-                                f"{translations[language_code]['patient_group']} {j+1} — Reference Gene {r+1} (Raw Ct)",
+                                f"{translations[language_code]['patient_group']} {j+1} — Reference Gene {r+1} (Raw Cq)",
                                 f"smp_raw_ref_{i}_{j}_{r}",
                                 outlier_method
                             )
@@ -3336,7 +3344,7 @@ with tab_data:
                                 smp_ref_arrays = [a[keep_ref_smp] for a in smp_ref_arrays]
                                 min_sample_len = len(keep_ref_smp)
 
-            # ── Outlier detection — Patient Target Ct (ΔCt stage fallback) ──────
+            # ── Outlier detection — Patient Target Ct (ΔCq stage fallback) ──────
             elif outlier_enabled and not outlier_on_raw and len(sample_target_ct_values) >= 3:
                 detected_smp_tgt = detect_outliers_grubbs(sample_target_ct_values, alpha=grubbs_alpha) \
                                    if outlier_method == "Grubbs" \
@@ -3432,7 +3440,7 @@ with tab_data:
                         f"{translations[language_code]['patient_group']} {j+1} are stable (M < 0.5)."
                     )
 
-            # ── Normalization factor & ΔCt ────────────────────────────────────────
+            # ── Normalization factor & ΔCq ────────────────────────────────────────
             # Re-sync lengths after any outlier removal
             min_sample_len = min(len(sample_target_ct_values), *[len(a) for a in smp_ref_arrays])
             sample_target_ct_values = sample_target_ct_values[:min_sample_len]
@@ -3473,7 +3481,7 @@ with tab_data:
                     "Outlier Excluded": f"Yes ({outlier_method})"
                 })
 
-            # ΔΔCt ve Gen Ekspresyon Değişimi Hesaplama
+            # ΔΔCq ve Gen Ekspresyon Değişimi Hesaplama
             if average_control_delta_ct is not None and average_sample_delta_ct is not None:
                 delta_delta_ct = average_sample_delta_ct - average_control_delta_ct
                 expression_change = 2 ** (-delta_delta_ct)
@@ -3528,7 +3536,7 @@ with tab_data:
 
                 # ── Per-group pairwise stats (control vs this patient group) ────
                 # REVIEWER RESPONSE (Comments 8 & 14):
-                # Statistical tests are now performed on RQ values (2^-ΔCt) instead of
+                # Statistical tests are now performed on RQ values (2^-ΔCq) instead of
                 # raw ΔCt values. ΔCt values are on a logarithmic scale; performing
                 # t-tests directly on ΔCt underestimates biological variability and can
                 # produce false significant differences compared to linear RQ-based tests.
@@ -3660,7 +3668,7 @@ with tab_data:
                 })
 
 # ─── MULTI-GROUP ANALYSIS (3+ patient groups per target gene) ────────────────
-# Collect all ΔCt arrays per target gene for omnibus testing
+# Collect all ΔCq arrays per target gene for omnibus testing
 multigroup_results = []   # records for display / PDF
 
 for i in range(num_target_genes):
@@ -3695,7 +3703,7 @@ for i in range(num_target_genes):
         continue
 
     # REVIEWER RESPONSE (Comments 8 & 14):
-    # Convert ΔCt lists to RQ (2^-ΔCt) for all statistical tests
+    # Convert ΔCq lists to RQ (2^-ΔCt) for all statistical tests
     all_groups_dct  = [ctrl_dct] + list(patient_dcts.values())
     all_groups      = [list(2 ** (-np.array(g))) for g in all_groups_dct]
     all_group_names = ["Control"] + list(patient_dcts.keys())
@@ -3890,10 +3898,10 @@ This addresses the limitation of pairwise-only testing, which inflates Type I er
             "__sample_num__":   _T.get("sample_number", "Sample #"),
             "__target_gene__":  _T.get("target_gene",   "Gene"),
             "Grup":             _T.get("Grup",          "Group"),
-            "__target_ct__":    _T.get("target_ct",     "Target Ct"),
+            "__target_ct__":    _T.get("target_ct",     "Target Cq"),
             "__ref_ct__":       _T.get("reference_ct",  "Ref Ct"),
-            "__dct_ctrl__":     _T.get("delta_ct_control", "ΔCt Control"),
-            "__dct_patient__":  _T.get("delta_ct_patient", "ΔCt Patient"),
+            "__dct_ctrl__":     _T.get("delta_ct_control", "ΔCq Control"),
+            "__dct_patient__":  _T.get("delta_ct_patient", "ΔCq Patient"),
             "Outlier Excluded": _T.get("pdf_outlier_col", "Outlier Excluded"),
         }
         input_df = pd.DataFrame(input_values_table).rename(columns=_ivt_rename)
@@ -3911,12 +3919,12 @@ This addresses the limitation of pairwise-only testing, which inflates Type I er
         _data_rename = {
             "__target_gene__":  _T.get("target_gene",   "Gene"),
             "__patient_group__":_T.get("patient_group", "Group"),
-            "__ddct__":         _T.get("delta_delta_ct","ΔΔCt"),
-            "__fc__":           _T.get("gene_expression_change", "2^(-ΔΔCt)"),
+            "__ddct__":         _T.get("delta_delta_ct","ΔΔCq"),
+            "__fc__":           _T.get("gene_expression_change", "2^(-ΔΔCq)"),
             "__pfaffl__":       _T.get("pfaffl_ratio",  "Pfaffl"),
             "__regulation__":   _T.get("regulation_status", "Regulation"),
-            "__dct_ctrl__":     _T.get("delta_ct_control", "ΔCt Control"),
-            "__dct_patient__":  _T.get("delta_ct_patient", "ΔCt Patient"),
+            "__dct_ctrl__":     _T.get("delta_ct_control", "ΔCq Control"),
+            "__dct_patient__":  _T.get("delta_ct_patient", "ΔCq Patient"),
         }
         df = pd.DataFrame(data).rename(columns=_data_rename)
         st.write(df)
@@ -4064,7 +4072,7 @@ Ge Y et al. *Bioinformatics* 2003; Storey JD. *J R Stat Soc B* 2002.
 
         method_choice = st.radio(
             "Method",
-            ["2^(-ΔΔCt)", "Pfaffl"],
+            ["2^(-ΔΔCq)", "Pfaffl"],
             horizontal=True,
             key="multigene_chart_method"
         )
@@ -4080,7 +4088,7 @@ Ge Y et al. *Bioinformatics* 2003; Storey JD. *J R Stat Soc B* 2002.
             for grp in groups:
                 match = [r for r in data if r[tg_key2] == gene and r[pg_key2] == grp]
                 if match:
-                    val = match[0][fc_key] if method_choice == "2^(-ΔΔCt)" else match[0][pf_key]
+                    val = match[0][fc_key] if method_choice == "2^(-ΔΔCq)" else match[0][pf_key]
                     y_vals.append(round(val, 4) if isinstance(val, float) else 0)
                 else:
                     y_vals.append(0)
@@ -4117,7 +4125,7 @@ Ge Y et al. *Bioinformatics* 2003; Storey JD. *J R Stat Soc B* 2002.
                 for grp in groups:
                     match = [r for r in data if r[tg_key2] == gene and r[pg_key2] == grp]
                     if match:
-                        val = match[0][fc_key] if method_choice == "2^(-ΔΔCt)" else match[0][pf_key]
+                        val = match[0][fc_key] if method_choice == "2^(-ΔΔCq)" else match[0][pf_key]
                         y_log.append(round(math.log2(val), 4) if isinstance(val, float) and val > 0 else 0)
                     else:
                         y_log.append(0)
@@ -4145,7 +4153,7 @@ Ge Y et al. *Bioinformatics* 2003; Storey JD. *J R Stat Soc B* 2002.
 
     # REVIEWER RESPONSE (Comment 3 — second part):
     # Allow user to choose which values to display in the distribution plot:
-    # RQ (2^-ΔCt), raw ΔCt, or ΔΔCt (relative to control mean).
+    # RQ (2^-ΔCq), raw ΔCt, or ΔΔCq (relative to control mean).
     plot_mode = st.radio(
         translations[language_code]["dist_plot_mode_label"],
         options=[
@@ -4204,9 +4212,9 @@ Ge Y et al. *Bioinformatics* 2003; Storey JD. *J R Stat Soc B* 2002.
                 return np.array(dct_array)
 
         def _yaxis_label(mode):
-            if mode == "RQ":    return "RQ (2^-ΔCt)"
-            elif mode == "DDCT": return "ΔΔCt (vs control mean)"
-            else:                return "ΔCt"
+            if mode == "RQ":    return "RQ (2^-ΔCq)"
+            elif mode == "DDCT": return "ΔΔCq (vs control mean)"
+            else:                return "ΔCq"
 
         ctrl_plot_vals = _transform(control_delta_ct, _plot_mode_id, average_control_delta_ct)
         avg_ctrl_plot  = float(np.mean(ctrl_plot_vals))
@@ -4588,7 +4596,7 @@ def create_pdf(results, stats, input_df, language_code):
     elements.append(Paragraph(s('pdf_s3_body'), body_style))
     elements.append(Spacer(1, 6))
 
-    res_cols = T.get('pdf_res_cols', ['Gene','Group','ΔCt Ctrl','ΔCt Sample','ΔΔCt','2^(-ΔΔCt)','Pfaffl','Reg','Et','Er'])
+    res_cols = T.get('pdf_res_cols', ['Gene','Group','ΔCq Ctrl','ΔCq Sample','ΔΔCq','2^(-ΔΔCq)','Pfaffl','Reg','Et','Er'])
     res_rows = [res_cols]
     for r in results:
         ddc = r.get("__ddct__", '')
@@ -4620,7 +4628,7 @@ def create_pdf(results, stats, input_df, language_code):
             vals_2  = [r.get("__fc__", 0) for r in results]
             vals_pf = [r.get("__pfaffl__", 0) for r in results]
             xr = range(len(labels_fc)); w = 0.35
-            b1 = ax_fc.bar([i-w/2 for i in xr], vals_2,  width=w, label='2^(-ΔΔCt)', color='#3f51b5', alpha=0.85)
+            b1 = ax_fc.bar([i-w/2 for i in xr], vals_2,  width=w, label='2^(-ΔΔCq)', color='#3f51b5', alpha=0.85)
             b2 = ax_fc.bar([i+w/2 for i in xr], vals_pf, width=w, label='Pfaffl',    color='#e91e63', alpha=0.85)
             ax_fc.axhline(y=1, color='black', linestyle='--', linewidth=0.8, alpha=0.6)
             ax_fc.set_xticks(list(xr)); ax_fc.set_xticklabels(labels_fc, fontsize=7)
@@ -4708,7 +4716,7 @@ def create_pdf(results, stats, input_df, language_code):
                 and d.get("Outlier Excluded", "No") == "No"
             ]
             # REVIEWER RESPONSE (Comments 9 & 13):
-            # Convert ΔCt to RQ = 2^(-ΔCt) for visualization.
+            # Convert ΔCq to RQ = 2^(-ΔCt) for visualization.
             # Plotting raw ΔCt is misleading because higher ΔCt = lower expression,
             # which is counter-intuitive. RQ values reflect actual expression levels.
             ctrl_vals = [2 ** (-v) for v in ctrl_dct_vals]
@@ -4732,7 +4740,7 @@ def create_pdf(results, stats, input_df, language_code):
                 ax_d.hlines(np.mean(vals), k+0.75, k+1.25, colors='black', linewidths=2, zorder=4)
             ax_d.set_xticks(range(1, len(all_labels)+1))
             ax_d.set_xticklabels(all_labels, fontsize=8)
-            ax_d.set_ylabel('RQ (2^-ΔCt)', fontsize=9)
+            ax_d.set_ylabel('RQ (2^-ΔCq)', fontsize=9)
             ax_d.set_title(f'{gene_label} — Relative Quantity (RQ)', fontsize=10, fontweight='bold')
             ax_d.spines['top'].set_visible(False); ax_d.spines['right'].set_visible(False)
             plt.tight_layout()
@@ -4749,7 +4757,7 @@ def create_pdf(results, stats, input_df, language_code):
     elements.append(hr())
 
     elements.append(Paragraph(s('pdf_s6_fc'), h2_style))
-    fc_hdr  = T.get('pdf_fc_interp_header', ['FC','ΔΔCt','Interpretation','Significance'])
+    fc_hdr  = T.get('pdf_fc_interp_header', ['FC','ΔΔCq','Interpretation','Significance'])
     fc_rows_data = T.get('pdf_fc_interp_rows', [])
     elements.append(make_table([fc_hdr] + fc_rows_data, col_widths=[(letter[0]-100)/4]*4))
     elements.append(Spacer(1, 6))
@@ -4766,7 +4774,7 @@ def create_pdf(results, stats, input_df, language_code):
     elements.append(Paragraph(s('pdf_s7_title'), h1_style))
     elements.append(hr())
     refs = [
-        "Livak KJ & Schmittgen TD (2001). Methods, 25(4), 402-408. (ΔΔCt)",
+        "Livak KJ & Schmittgen TD (2001). Methods, 25(4), 402-408. (ΔΔCq)",
         "Pfaffl MW (2001). Nucleic Acids Research, 29(9), e45. (Pfaffl)",
         "Vandesompele J et al. (2002). Genome Biology, 3(7). (geNorm)",
         "Bustin SA et al. (2009). Clinical Chemistry, 55(4), 611-622. (MIQE)",
