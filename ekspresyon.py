@@ -30,6 +30,169 @@ import glob
 
 
 
+# ─── RDML PARSER ──────────────────────────────────────────────────────────────
+def parse_rdml(file_bytes):
+    """
+    Parse an RDML file (.rdml is a ZIP containing rdml_data.xml).
+    Returns a dict: {target_name: {'unkn': [cq,...], 'ref': [cq,...]}}
+    Also returns a flat DataFrame for inspection.
+    """
+    import zipfile, io
+    try:
+        import xml.etree.ElementTree as ET
+    except ImportError:
+        return None, "xml.etree.ElementTree not available"
+
+    rows = []
+    try:
+        with zipfile.ZipFile(io.BytesIO(file_bytes)) as zf:
+            xml_name = next((n for n in zf.namelist() if n.endswith(".xml")), None)
+            if xml_name is None:
+                return None, "No XML found inside RDML file."
+            with zf.open(xml_name) as xf:
+                tree = ET.parse(xf)
+        root = tree.getroot()
+
+        # RDML uses namespaces like {http://www.rdml.org/rdml_v1_2.rng}
+        ns_raw = root.tag.split("}")[0].lstrip("{") if "}" in root.tag else ""
+        ns = f"{{{ns_raw}}}" if ns_raw else ""
+
+        # Build lookup dicts for targets and samples
+        target_types = {}   # id -> type ('toi' or 'ref')
+        target_names = {}   # id -> name
+        for t in root.findall(f"{ns}target"):
+            tid  = t.get("id", "")
+            tname = t.findtext(f"{ns}commercialAssay") or tid
+            ttype = t.findtext(f"{ns}type") or "toi"
+            target_types[tid] = ttype
+            target_names[tid] = tname
+
+        sample_types = {}  # id -> type ('unkn', 'ntc', 'std', etc.)
+        for s in root.findall(f"{ns}sample"):
+            sid   = s.get("id", "")
+            stype = s.findtext(f"{ns}type") or "unkn"
+            sample_types[sid] = stype
+
+        for exp in root.findall(f"{ns}experiment"):
+            for run in exp.findall(f"{ns}run"):
+                for react in run.findall(f"{ns}react"):
+                    sample_id = react.findtext(f"{ns}sample") or react.get("id", "")
+                    stype = sample_types.get(sample_id, "unkn")
+                    for data_el in react.findall(f"{ns}data"):
+                        target_id = data_el.findtext(f"{ns}tar") or ""
+                        cq_text   = data_el.findtext(f"{ns}cq")
+                        try:
+                            cq = float(cq_text) if cq_text else None
+                        except ValueError:
+                            cq = None
+                        rows.append({
+                            "Sample":      sample_id,
+                            "SampleType":  stype,
+                            "Target":      target_names.get(target_id, target_id),
+                            "TargetType":  target_types.get(target_id, "toi"),
+                            "Cq":          cq,
+                        })
+
+    except zipfile.BadZipFile:
+        # Some RDML files are plain XML, not ZIP
+        try:
+            tree = ET.parse(io.BytesIO(file_bytes))
+            root = tree.getroot()
+            ns_raw = root.tag.split("}")[0].lstrip("{") if "}" in root.tag else ""
+            ns = f"{{{ns_raw}}}" if ns_raw else ""
+            target_types = {}
+            target_names = {}
+            for t in root.findall(f"{ns}target"):
+                tid   = t.get("id", "")
+                ttype = t.findtext(f"{ns}type") or "toi"
+                target_types[tid] = ttype
+                target_names[tid] = tid
+            sample_types = {}
+            for s in root.findall(f"{ns}sample"):
+                sid   = s.get("id", "")
+                stype = s.findtext(f"{ns}type") or "unkn"
+                sample_types[sid] = stype
+            for exp in root.findall(f"{ns}experiment"):
+                for run in exp.findall(f"{ns}run"):
+                    for react in run.findall(f"{ns}react"):
+                        sample_id = react.findtext(f"{ns}sample") or react.get("id", "")
+                        stype = sample_types.get(sample_id, "unkn")
+                        for data_el in react.findall(f"{ns}data"):
+                            target_id = data_el.findtext(f"{ns}tar") or ""
+                            cq_text   = data_el.findtext(f"{ns}cq")
+                            try:
+                                cq = float(cq_text) if cq_text else None
+                            except ValueError:
+                                cq = None
+                            rows.append({
+                                "Sample":     sample_id,
+                                "SampleType": stype,
+                                "Target":     target_names.get(target_id, target_id),
+                                "TargetType": target_types.get(target_id, "toi"),
+                                "Cq":         cq,
+                            })
+        except Exception as e:
+            return None, f"RDML parse error: {e}"
+    except Exception as e:
+        return None, f"RDML parse error: {e}"
+
+    if not rows:
+        return None, "No reaction data found in RDML file."
+
+    df = pd.DataFrame(rows)
+    return df, None
+
+
+# ─── RDES PARSER ──────────────────────────────────────────────────────────────
+def parse_rdes(file_bytes):
+    """
+    Parse an RDES file (tab-separated, .tsv / .csv / .txt).
+    Required columns: Well, Sample, Sample Type, Target, Target Type, Dye, Cq
+    Returns DataFrame with columns: Sample, SampleType, Target, TargetType, Cq
+    """
+    try:
+        content = file_bytes.decode("utf-8", errors="replace")
+        lines   = [l.rstrip("\r") for l in content.split("\n") if l.strip()]
+        if not lines:
+            return None, "Empty RDES file."
+
+        header = [h.strip() for h in lines[0].split("\t")]
+        required = ["Well", "Sample", "Sample Type", "Target", "Target Type", "Dye", "Cq"]
+        missing  = [c for c in required if c not in header]
+        if missing:
+            return None, f"RDES file missing required columns: {missing}"
+
+        rows = []
+        for line in lines[1:]:
+            if not line.strip():
+                continue
+            cells = line.split("\t")
+            row   = dict(zip(header, cells))
+            cq_raw = row.get("Cq", "").strip()
+            try:
+                cq = float(cq_raw.replace(",", ".")) if cq_raw and cq_raw != "-1.0" else None
+            except ValueError:
+                cq = None
+            rows.append({
+                "Sample":     row.get("Sample", "").strip(),
+                "SampleType": row.get("Sample Type", "unkn").strip(),
+                "Target":     row.get("Target", "").strip(),
+                "TargetType": row.get("Target Type", "toi").strip(),
+                "Cq":         cq,
+            })
+
+        if not rows:
+            return None, "No data rows found in RDES file."
+        return pd.DataFrame(rows), None
+
+    except Exception as e:
+        return None, f"RDES parse error: {e}"
+
+
+# ─── RDML/RDES → session_state mapper ─────────────────────────────────────────
+
+
+
 st.set_page_config(page_title="GeneQuantify", layout="wide")
 
 if 'language' not in st.session_state:
@@ -2480,14 +2643,14 @@ with st.sidebar.expander(_t.get("rdml_expander", "📂 Import RDML / RDES File")
 # ═══════════════════════════════════════════════════════════════════════════════
 # ANA ALAN — Başlık + 3 sekme
 # ═══════════════════════════════════════════════════════════════════════════════
-st.markdown(f"<h2 style='margin-bottom:0'>{translations[language_code]['title']}</h2>", unsafe_allow_html=True)
-st.caption(translations[language_code]['subtitle'])
+st.markdown(f"<h2 style='margin-bottom:0'>{_t.get('title', "")}</h2>", unsafe_allow_html=True)
+st.caption(_t.get('subtitle', ""))
 st.markdown("---")
 
 tab_data, tab_results, tab_report = st.tabs([
-    f"📥 {translations[language_code].get('tab_data', 'Veri Girişi')}",
-    f"📊 {translations[language_code].get('tab_results', 'Sonuçlar')}",
-    f"📄 {translations[language_code].get('tab_report', 'Rapor')}",
+    f"📥 {_t.get('tab_data', 'Veri Girişi')}",
+    f"📊 {_t.get('tab_results', 'Sonuçlar')}",
+    f"📄 {_t.get('tab_report', 'Rapor')}",
 ])
 
 # ─── HELPER FUNCTIONS ─────────────────────────────────────────────────────────
@@ -2496,166 +2659,6 @@ def parse_input_data(input_data):
     return np.array([float(x) for x in values if x])
 
 
-# ─── RDML PARSER ──────────────────────────────────────────────────────────────
-def parse_rdml(file_bytes):
-    """
-    Parse an RDML file (.rdml is a ZIP containing rdml_data.xml).
-    Returns a dict: {target_name: {'unkn': [cq,...], 'ref': [cq,...]}}
-    Also returns a flat DataFrame for inspection.
-    """
-    import zipfile, io
-    try:
-        import xml.etree.ElementTree as ET
-    except ImportError:
-        return None, "xml.etree.ElementTree not available"
-
-    rows = []
-    try:
-        with zipfile.ZipFile(io.BytesIO(file_bytes)) as zf:
-            xml_name = next((n for n in zf.namelist() if n.endswith(".xml")), None)
-            if xml_name is None:
-                return None, "No XML found inside RDML file."
-            with zf.open(xml_name) as xf:
-                tree = ET.parse(xf)
-        root = tree.getroot()
-
-        # RDML uses namespaces like {http://www.rdml.org/rdml_v1_2.rng}
-        ns_raw = root.tag.split("}")[0].lstrip("{") if "}" in root.tag else ""
-        ns = f"{{{ns_raw}}}" if ns_raw else ""
-
-        # Build lookup dicts for targets and samples
-        target_types = {}   # id -> type ('toi' or 'ref')
-        target_names = {}   # id -> name
-        for t in root.findall(f"{ns}target"):
-            tid  = t.get("id", "")
-            tname = t.findtext(f"{ns}commercialAssay") or tid
-            ttype = t.findtext(f"{ns}type") or "toi"
-            target_types[tid] = ttype
-            target_names[tid] = tname
-
-        sample_types = {}  # id -> type ('unkn', 'ntc', 'std', etc.)
-        for s in root.findall(f"{ns}sample"):
-            sid   = s.get("id", "")
-            stype = s.findtext(f"{ns}type") or "unkn"
-            sample_types[sid] = stype
-
-        for exp in root.findall(f"{ns}experiment"):
-            for run in exp.findall(f"{ns}run"):
-                for react in run.findall(f"{ns}react"):
-                    sample_id = react.findtext(f"{ns}sample") or react.get("id", "")
-                    stype = sample_types.get(sample_id, "unkn")
-                    for data_el in react.findall(f"{ns}data"):
-                        target_id = data_el.findtext(f"{ns}tar") or ""
-                        cq_text   = data_el.findtext(f"{ns}cq")
-                        try:
-                            cq = float(cq_text) if cq_text else None
-                        except ValueError:
-                            cq = None
-                        rows.append({
-                            "Sample":      sample_id,
-                            "SampleType":  stype,
-                            "Target":      target_names.get(target_id, target_id),
-                            "TargetType":  target_types.get(target_id, "toi"),
-                            "Cq":          cq,
-                        })
-
-    except zipfile.BadZipFile:
-        # Some RDML files are plain XML, not ZIP
-        try:
-            tree = ET.parse(io.BytesIO(file_bytes))
-            root = tree.getroot()
-            ns_raw = root.tag.split("}")[0].lstrip("{") if "}" in root.tag else ""
-            ns = f"{{{ns_raw}}}" if ns_raw else ""
-            target_types = {}
-            target_names = {}
-            for t in root.findall(f"{ns}target"):
-                tid   = t.get("id", "")
-                ttype = t.findtext(f"{ns}type") or "toi"
-                target_types[tid] = ttype
-                target_names[tid] = tid
-            sample_types = {}
-            for s in root.findall(f"{ns}sample"):
-                sid   = s.get("id", "")
-                stype = s.findtext(f"{ns}type") or "unkn"
-                sample_types[sid] = stype
-            for exp in root.findall(f"{ns}experiment"):
-                for run in exp.findall(f"{ns}run"):
-                    for react in run.findall(f"{ns}react"):
-                        sample_id = react.findtext(f"{ns}sample") or react.get("id", "")
-                        stype = sample_types.get(sample_id, "unkn")
-                        for data_el in react.findall(f"{ns}data"):
-                            target_id = data_el.findtext(f"{ns}tar") or ""
-                            cq_text   = data_el.findtext(f"{ns}cq")
-                            try:
-                                cq = float(cq_text) if cq_text else None
-                            except ValueError:
-                                cq = None
-                            rows.append({
-                                "Sample":     sample_id,
-                                "SampleType": stype,
-                                "Target":     target_names.get(target_id, target_id),
-                                "TargetType": target_types.get(target_id, "toi"),
-                                "Cq":         cq,
-                            })
-        except Exception as e:
-            return None, f"RDML parse error: {e}"
-    except Exception as e:
-        return None, f"RDML parse error: {e}"
-
-    if not rows:
-        return None, "No reaction data found in RDML file."
-
-    df = pd.DataFrame(rows)
-    return df, None
-
-
-# ─── RDES PARSER ──────────────────────────────────────────────────────────────
-def parse_rdes(file_bytes):
-    """
-    Parse an RDES file (tab-separated, .tsv / .csv / .txt).
-    Required columns: Well, Sample, Sample Type, Target, Target Type, Dye, Cq
-    Returns DataFrame with columns: Sample, SampleType, Target, TargetType, Cq
-    """
-    try:
-        content = file_bytes.decode("utf-8", errors="replace")
-        lines   = [l.rstrip("\r") for l in content.split("\n") if l.strip()]
-        if not lines:
-            return None, "Empty RDES file."
-
-        header = [h.strip() for h in lines[0].split("\t")]
-        required = ["Well", "Sample", "Sample Type", "Target", "Target Type", "Dye", "Cq"]
-        missing  = [c for c in required if c not in header]
-        if missing:
-            return None, f"RDES file missing required columns: {missing}"
-
-        rows = []
-        for line in lines[1:]:
-            if not line.strip():
-                continue
-            cells = line.split("\t")
-            row   = dict(zip(header, cells))
-            cq_raw = row.get("Cq", "").strip()
-            try:
-                cq = float(cq_raw.replace(",", ".")) if cq_raw and cq_raw != "-1.0" else None
-            except ValueError:
-                cq = None
-            rows.append({
-                "Sample":     row.get("Sample", "").strip(),
-                "SampleType": row.get("Sample Type", "unkn").strip(),
-                "Target":     row.get("Target", "").strip(),
-                "TargetType": row.get("Target Type", "toi").strip(),
-                "Cq":         cq,
-            })
-
-        if not rows:
-            return None, "No data rows found in RDES file."
-        return pd.DataFrame(rows), None
-
-    except Exception as e:
-        return None, f"RDES parse error: {e}"
-
-
-# ─── RDML/RDES → session_state mapper ─────────────────────────────────────────
 def apply_import_to_session(df, ctrl_sample_label, patient_labels):
     """
     Given a parsed DataFrame (columns: Sample, SampleType, Target, TargetType, Cq),
@@ -2825,75 +2828,75 @@ last_control_delta_ct = None
 last_gene_index = None
 
 control_group = "Control"
-target_gene = translations[language_code]["target_gene"]
-reference_gene = translations[language_code]["reference_gene"]
-ct_value = translations[language_code]["ct_value"]
-patient_group = translations[language_code]["patient_group"]
+target_gene = _t.get('target_gene', '')
+reference_gene = _t.get('reference_gene', '')
+ct_value = _t.get('ct_value', '')
+patient_group = _t.get('patient_group', '')
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # SEKME 1: VERİ GİRİŞİ  (tüm girişler bu tab içinde)
 # ═══════════════════════════════════════════════════════════════════════════════
 with tab_data:
-    st.markdown(f"### {translations[language_code]['patient_data_header']}")
+    st.markdown(f"### {_t.get('patient_data_header', "")}")
 
     # ── Temel parametreler ────────────────────────────────────────────────────
     col_genes, col_groups = st.columns(2)
     with col_genes:
-        num_target_genes = st.number_input(translations[language_code]["num_target_genes"], min_value=1, step=1, key="gene_count")
+        num_target_genes = st.number_input(_t.get('num_target_genes', ''), min_value=1, step=1, key="gene_count")
     with col_groups:
-        num_patient_groups = st.number_input(translations[language_code]["num_patient_groups"], min_value=1, step=1, key="patient_count")
+        num_patient_groups = st.number_input(_t.get('num_patient_groups', ''), min_value=1, step=1, key="patient_count")
 
     # ── Referans gen ayarları ─────────────────────────────────────────────────
     st.markdown("---")
-    st.markdown(translations[language_code]["ref_gene_section_title"])
+    st.markdown(_t.get('ref_gene_section_title', ''))
     ref_col1, ref_col2 = st.columns([2, 3])
     with ref_col1:
         num_ref_genes = st.number_input(
-            translations[language_code]["ref_gene_num_label"],
+            _t.get('ref_gene_num_label', ''),
             min_value=1, max_value=10, value=1, step=1,
             key="num_ref_genes",
-            help=translations[language_code]["ref_gene_num_help"]
+            help=_t.get('ref_gene_num_help', '')
         )
     with ref_col2:
         if num_ref_genes == 1:
-            st.warning(translations[language_code]["ref_gene_1_warning"])
+            st.warning(_t.get('ref_gene_1_warning', ''))
         else:
-            st.success(translations[language_code]["ref_gene_multi_success"].format(n=num_ref_genes))
+            st.success(_t.get('ref_gene_multi_success', '').format(n=num_ref_genes))
     if num_ref_genes > 1:
-        with st.expander(translations[language_code]["ref_gene_expander"], expanded=False):
-            st.markdown(translations[language_code]["ref_multi_description"])
+        with st.expander(_t.get('ref_gene_expander', ''), expanded=False):
+            st.markdown(_t.get('ref_multi_description', ''))
 
     # ── Aykırı değer ayarları ─────────────────────────────────────────────────
     st.markdown("---")
-    st.markdown(translations[language_code]["outlier_section_title"])
+    st.markdown(_t.get('outlier_section_title', ''))
     out_c1, out_c2, out_c3 = st.columns([2, 2, 3])
     with out_c1:
         outlier_enabled = st.checkbox(
-            translations[language_code]["outlier_enable"],
+            _t.get('outlier_enable', ''),
             value=True, key="outlier_enabled",
-            help=translations[language_code]["outlier_enable_help"]
+            help=_t.get('outlier_enable_help', '')
         )
     with out_c2:
         outlier_method = st.radio(
-            translations[language_code]["outlier_method_label"],
+            _t.get('outlier_method_label', ''),
             options=["Grubbs", "IQR"], key="outlier_method",
-            horizontal=True, help=translations[language_code]["outlier_method_help"]
+            horizontal=True, help=_t.get('outlier_method_help', '')
         )
     with out_c3:
         if outlier_method == "Grubbs":
             grubbs_alpha = st.number_input(
-                translations[language_code]["outlier_alpha_label"],
+                _t.get('outlier_alpha_label', ''),
                 min_value=0.01, max_value=0.10, value=0.05, step=0.01, format="%.2f",
-                key="grubbs_alpha", help=translations[language_code]["outlier_alpha_help"]
+                key="grubbs_alpha", help=_t.get('outlier_alpha_help', '')
             )
             iqr_multiplier = 1.5
             # REVIEWER RESPONSE (Comment 7): show minimum n and p-value info
             st.info(_t.get("grubbs_info", "ℹ️ Grubbs test: min n ≥ 3, α = 0.05").format(alpha=grubbs_alpha))
         else:
             iqr_multiplier = st.number_input(
-                translations[language_code]["outlier_iqr_label"],
+                _t.get('outlier_iqr_label', ''),
                 min_value=1.0, max_value=3.0, value=1.5, step=0.25, format="%.2f",
-                key="iqr_mult", help=translations[language_code]["outlier_iqr_help"]
+                key="iqr_mult", help=_t.get('outlier_iqr_help', '')
             )
             grubbs_alpha = 0.05
 
@@ -2902,24 +2905,24 @@ with tab_data:
     # may allow noisy raw Ct replicates to pass through undetected.
     # Option added: apply outlier detection on raw Ct values BEFORE normalization.
     outlier_stage = st.radio(
-        translations[language_code]["outlier_stage_label"],
+        _t.get('outlier_stage_label', ''),
         options=[
-            translations[language_code]["outlier_stage_raw"],
-            translations[language_code]["outlier_stage_dct"],
+            _t.get('outlier_stage_raw', ''),
+            _t.get('outlier_stage_dct', ''),
         ],
         index=0,
         key="outlier_stage",
-        help=translations[language_code]["outlier_stage_help"]
+        help=_t.get('outlier_stage_help', '')
     )
-    outlier_on_raw = outlier_stage == translations[language_code]["outlier_stage_raw"]
+    outlier_on_raw = outlier_stage == _t.get('outlier_stage_raw', '')
 
-    with st.expander(translations[language_code]["outlier_expander"], expanded=False):
-        st.markdown(translations[language_code]["outlier_description"])
+    with st.expander(_t.get('outlier_expander', ''), expanded=False):
+        st.markdown(_t.get('outlier_description', ''))
 
     # ── Amplifikasyon verimliliği ─────────────────────────────────────────────
     st.markdown("---")
-    st.markdown(f"#### {translations[language_code]['efficiency_header']}")
-    st.info(translations[language_code]["efficiency_note"])
+    st.markdown(f"#### {_t.get('efficiency_header', "")}")
+    st.info(_t.get('efficiency_note', ''))
 
     with st.expander("ℹ️ How to obtain Efficiency (E)", expanded=False):
         st.markdown(
@@ -2934,30 +2937,30 @@ with tab_data:
     eff_c1, eff_c2 = st.columns(2)
     with eff_c1:
         efficiency_method = st.radio(
-            translations[language_code]["efficiency_method"],
-            options=[translations[language_code]["efficiency_manual"], translations[language_code]["efficiency_slope"]],
+            _t.get('efficiency_method', ''),
+            options=[_t.get('efficiency_manual', ''), _t.get('efficiency_slope', '')],
             key="eff_method", horizontal=True
         )
     with eff_c2:
         efficiency_threshold = st.number_input(
-            translations[language_code]["efficiency_threshold"],
+            _t.get('efficiency_threshold', ''),
             min_value=1.0, max_value=50.0, value=10.0, step=0.5, key="eff_threshold",
             help="Recommended: 10% (MIQE guidelines)."
         )
 
     # ── Standart eğri hesaplayıcı ─────────────────────────────────────────────
-    with st.expander(translations[language_code]["sc_expander"], expanded=False):
-        st.markdown(translations[language_code]["sc_description"])
+    with st.expander(_t.get('sc_expander', ''), expanded=False):
+        st.markdown(_t.get('sc_description', ''))
         sc_c1, sc_c2 = st.columns(2)
         with sc_c1:
-            sc_gene_label = st.text_input(translations[language_code]["sc_gene_label"], value="Target Gene 1", key="sc_label")
-            sc_num_points = st.number_input(translations[language_code]["sc_num_points"], min_value=3, max_value=10, value=5, step=1, key="sc_npts")
+            sc_gene_label = st.text_input(_t.get('sc_gene_label', ''), value="Target Gene 1", key="sc_label")
+            sc_num_points = st.number_input(_t.get('sc_num_points', ''), min_value=3, max_value=10, value=5, step=1, key="sc_npts")
         with sc_c2:
-            st.markdown(translations[language_code]["sc_dilution_factor_label"])
-            sc_dilution_factor = st.number_input(translations[language_code]["sc_dilution_factor_input"], min_value=2, max_value=100, value=10, step=1, key="sc_dilfactor")
-            st.markdown(translations[language_code]["sc_start_conc_label"])
-            sc_start_conc = st.number_input(translations[language_code]["sc_start_conc_input"], min_value=0.0001, value=1.0, format="%.4f", key="sc_startconc")
-        st.markdown(translations[language_code]["sc_enter_ct"])
+            st.markdown(_t.get('sc_dilution_factor_label', ''))
+            sc_dilution_factor = st.number_input(_t.get('sc_dilution_factor_input', ''), min_value=2, max_value=100, value=10, step=1, key="sc_dilfactor")
+            st.markdown(_t.get('sc_start_conc_label', ''))
+            sc_start_conc = st.number_input(_t.get('sc_start_conc_input', ''), min_value=0.0001, value=1.0, format="%.4f", key="sc_startconc")
+        st.markdown(_t.get('sc_enter_ct', ''))
         sc_ct_cols = st.columns(min(sc_num_points, 5))
         sc_ct_values = []
         sc_log_concs = []
@@ -2968,7 +2971,7 @@ with tab_data:
                 ct_val = st.number_input(f"Dil. {pt+1} (log={log_c:.2f})", value=18.0 + pt * 3.32, step=0.01, format="%.2f", key=f"sc_ct_{pt}")
             sc_ct_values.append(ct_val)
             sc_log_concs.append(log_c)
-        if st.button(translations[language_code]["sc_calc_button"], key="sc_calc"):
+        if st.button(_t.get('sc_calc_button', ''), key="sc_calc"):
             sc_log_concs_arr = np.array(sc_log_concs)
             sc_ct_arr = np.array(sc_ct_values)
             slope_val, intercept_val, r_val, p_val, se_val = stats.linregress(sc_log_concs_arr, sc_ct_arr)
@@ -2976,59 +2979,59 @@ with tab_data:
             E_calc = 10 ** (-1.0 / slope_val) if slope_val != 0 else float('nan')
             E_pct = (E_calc - 1) * 100
             rc1, rc2, rc3, rc4 = st.columns(4)
-            rc1.metric(translations[language_code]["sc_slope"], f"{slope_val:.4f}")
-            rc2.metric(translations[language_code]["sc_e_value"], f"{E_calc:.4f}")
-            rc3.metric(translations[language_code]["sc_efficiency_pct"], f"{E_pct:.1f}%")
+            rc1.metric(_t.get('sc_slope', ''), f"{slope_val:.4f}")
+            rc2.metric(_t.get('sc_e_value', ''), f"{E_calc:.4f}")
+            rc3.metric(_t.get('sc_efficiency_pct', ''), f"{E_pct:.1f}%")
             rc4.metric("R²", f"{r2:.4f}")
             if 1.8 <= E_calc <= 2.2 and r2 >= 0.99:
-                st.success(translations[language_code]["sc_excellent"].format(e=E_calc, pct=E_pct, r2=r2))
+                st.success(_t.get('sc_excellent', '').format(e=E_calc, pct=E_pct, r2=r2))
             elif 1.8 <= E_calc <= 2.2:
-                st.warning(translations[language_code]["sc_warning_r2"].format(pct=E_pct, r2=r2))
+                st.warning(_t.get('sc_warning_r2', '').format(pct=E_pct, r2=r2))
             else:
-                st.error(translations[language_code]["sc_error_range"].format(e=E_calc, pct=E_pct))
-            st.info(translations[language_code]["sc_copy_hint"].format(slope=slope_val, e=E_calc))
+                st.error(_t.get('sc_error_range', '').format(e=E_calc, pct=E_pct))
+            st.info(_t.get('sc_copy_hint', '').format(slope=slope_val, e=E_calc))
 
     # ── Per-gen efficiency girişi ─────────────────────────────────────────────
     gene_efficiencies = {}
-    use_slope = (efficiency_method == translations[language_code]["efficiency_slope"])
+    use_slope = (efficiency_method == _t.get('efficiency_slope', ''))
     for i in range(num_target_genes):
-        with st.expander(f"🔬 {translations[language_code]['target_gene']} {i+1} — Efficiency", expanded=(i == 0)):
+        with st.expander(f"🔬 {_t.get('target_gene', "")} {i+1} — Efficiency", expanded=(i == 0)):
             ec1, ec2 = st.columns(2)
             with ec1:
                 if use_slope:
-                    target_slope = st.number_input(translations[language_code]["efficiency_target_slope_label"].format(i=i+1), value=-3.32, step=0.01, format="%.4f", key=f"target_slope_{i}")
+                    target_slope = st.number_input(_t.get('efficiency_target_slope_label', '').format(i=i+1), value=-3.32, step=0.01, format="%.4f", key=f"target_slope_{i}")
                     target_E = 10 ** (-1.0 / target_slope) if target_slope != 0 else 2.0
                     st.markdown(f"**E (target) = {target_E:.4f}** ({(target_E-1)*100:.1f}%)")
                 else:
-                    target_E = st.number_input(translations[language_code]["efficiency_target_label"].format(i=i+1), min_value=1.0, max_value=3.0, value=2.0, step=0.01, format="%.4f", key=f"target_E_{i}")
+                    target_E = st.number_input(_t.get('efficiency_target_label', '').format(i=i+1), min_value=1.0, max_value=3.0, value=2.0, step=0.01, format="%.4f", key=f"target_E_{i}")
                     st.markdown(f"**{(target_E-1)*100:.1f}%**")
             with ec2:
                 if use_slope:
-                    ref_slope = st.number_input(translations[language_code]["efficiency_ref_slope_label"].format(i=i+1), value=-3.32, step=0.01, format="%.4f", key=f"ref_slope_{i}")
+                    ref_slope = st.number_input(_t.get('efficiency_ref_slope_label', '').format(i=i+1), value=-3.32, step=0.01, format="%.4f", key=f"ref_slope_{i}")
                     ref_E = 10 ** (-1.0 / ref_slope) if ref_slope != 0 else 2.0
                     st.markdown(f"**E (ref) = {ref_E:.4f}** ({(ref_E-1)*100:.1f}%)")
                 else:
-                    ref_E = st.number_input(translations[language_code]["efficiency_ref_label"].format(i=i+1), min_value=1.0, max_value=3.0, value=2.0, step=0.01, format="%.4f", key=f"ref_E_{i}")
+                    ref_E = st.number_input(_t.get('efficiency_ref_label', '').format(i=i+1), min_value=1.0, max_value=3.0, value=2.0, step=0.01, format="%.4f", key=f"ref_E_{i}")
                     st.markdown(f"**{(ref_E-1)*100:.1f}%**")
             diff = abs((target_E-1)*100 - (ref_E-1)*100)
             if diff <= efficiency_threshold:
-                st.success(translations[language_code]["efficiency_ok"].format(diff=diff))
+                st.success(_t.get('efficiency_ok', '').format(diff=diff))
             else:
-                st.warning(translations[language_code]["efficiency_warning"].format(diff=diff))
+                st.warning(_t.get('efficiency_warning', '').format(diff=diff))
             gene_efficiencies[i] = {"target_E": target_E, "ref_E": ref_E}
 
     st.markdown("---")
-    st.markdown(f"### {translations[language_code]['patient_data_header']}")
+    st.markdown(f"### {_t.get('patient_data_header', "")}")
 
     # Kontrol + Hasta Grubu Veri Giriş Döngüsü
     for i in range(num_target_genes):
         st.markdown(
-            f"<h4>Control {i+1} - {translations[language_code]['target_gene']} {i+1}</h4>",
+            f"<h4>Control {i+1} - {_t.get('target_gene', "")} {i+1}</h4>",
             unsafe_allow_html=True
         )
 
         control_target_ct = st.text_area(
-            f"Control {i+1} - {translations[language_code]['target_gene']} {i+1} - {translations[language_code]['ct_value']}",
+            f"Control {i+1} - {_t.get('target_gene', "")} {i+1} - {_t.get('ct_value', "")}",
             value=st.session_state.get(f"control_target_ct_{i}", ""),
             key=f"control_target_ct_{i}"
         )
@@ -3039,9 +3042,9 @@ with tab_data:
         all_ctrl_refs_valid = True
 
         for r in range(num_ref_genes):
-            ref_label = f"Ref Gene {r+1}" if num_ref_genes > 1 else translations[language_code]["reference_gene"]
+            ref_label = f"Ref Gene {r+1}" if num_ref_genes > 1 else _t.get('reference_gene', '')
             ctrl_ref_ct_raw = st.text_area(
-                f"Control {i+1} — {ref_label} {i+1} — {translations[language_code]['ct_value']}",
+                f"Control {i+1} — {ref_label} {i+1} — {_t.get('ct_value', "")}",
                 value=st.session_state.get(f"control_reference_ct_{i}_{r}", ""),
                 key=f"control_reference_ct_{i}_{r}"
             )
@@ -3055,7 +3058,7 @@ with tab_data:
         control_target_ct_values = np.array(parse_input_data(control_target_ct))
 
         if len(control_target_ct_values) == 0 or not all_ctrl_refs_valid or len(ctrl_ref_arrays) == 0:
-            st.error(translations[language_code]["warning_control_ct"].format(i=i+1))
+            st.error(_t.get('warning_control_ct', '').format(i=i+1))
             continue
 
         # Trim all arrays to common length
@@ -3065,7 +3068,7 @@ with tab_data:
         if len(set(all_ctrl_lengths)) > 1:
             details = f"Target Gene: n={len(control_target_ct_values)}" + \
                       "".join([f", Ref Gene {r+1}: n={len(ctrl_ref_arrays[r])}" for r in range(len(ctrl_ref_arrays))])
-            st.warning(translations[language_code]["unequal_n_warning"].format(
+            st.warning(_t.get('unequal_n_warning', '').format(
                 group=f"Control Group {i+1}",
                 details=details,
                 min_n=min_control_len
@@ -3256,12 +3259,12 @@ with tab_data:
 
         for j in range(num_patient_groups):
             st.markdown(
-                f"<h4>{translations[language_code]['patient_group']} {j+1} - {translations[language_code]['target_gene']} {i+1}</h4>",
+                f"<h4>{_t.get('patient_group', "")} {j+1} - {_t.get('target_gene', "")} {i+1}</h4>",
                 unsafe_allow_html=True
             )
 
             sample_target_ct = st.text_area(
-                f"{translations[language_code]['patient_group']} {j+1} - {translations[language_code]['target_gene']} {i+1} - {translations[language_code]['ct_value']}",
+                f"{_t.get('patient_group', "")} {j+1} - {_t.get('target_gene', "")} {i+1} - {_t.get('ct_value', "")}",
                 value=st.session_state.get(f"sample_target_ct_{i}_{j}", ""),
                 key=f"sample_target_ct_{i}_{j}"
             )
@@ -3271,9 +3274,9 @@ with tab_data:
             all_smp_refs_valid = True
 
             for r in range(num_ref_genes):
-                ref_label = f"Ref Gene {r+1}" if num_ref_genes > 1 else translations[language_code]["reference_gene"]
+                ref_label = f"Ref Gene {r+1}" if num_ref_genes > 1 else _t.get('reference_gene', '')
                 smp_ref_ct_raw = st.text_area(
-                    f"{translations[language_code]['patient_group']} {j+1} — {ref_label} {i+1} — {translations[language_code]['ct_value']}",
+                    f"{_t.get('patient_group', "")} {j+1} — {ref_label} {i+1} — {_t.get('ct_value', "")}",
                     value=st.session_state.get(f"sample_reference_ct_{i}_{j}_{r}", ""),
                     key=f"sample_reference_ct_{i}_{j}_{r}"
                 )
@@ -3286,7 +3289,7 @@ with tab_data:
             sample_target_ct_values = np.array(parse_input_data(sample_target_ct))
 
             if len(sample_target_ct_values) == 0 or not all_smp_refs_valid or len(smp_ref_arrays) == 0:
-                st.error(translations[language_code]["warning_patient_cq"].format(j=j+1))
+                st.error(_t.get('warning_patient_cq', '').format(j=j+1))
                 continue
 
             # REVIEWER RESPONSE (Comment 12): warn if n differs between target and reference genes
@@ -3295,8 +3298,8 @@ with tab_data:
             if len(set(all_smp_lengths)) > 1:
                 details = f"Target Gene: n={len(sample_target_ct_values)}" + \
                           "".join([f", Ref Gene {r+1}: n={len(smp_ref_arrays[r])}" for r in range(len(smp_ref_arrays))])
-                st.warning(translations[language_code]["unequal_n_warning"].format(
-                    group=f"{translations[language_code]['patient_group']} {j+1}, Gene {i+1}",
+                st.warning(_t.get('unequal_n_warning', '').format(
+                    group=f"{_t.get('patient_group', "")} {j+1}, Gene {i+1}",
                     details=details,
                     min_n=min_sample_len
                 ))
@@ -3316,7 +3319,7 @@ with tab_data:
                     if detected_raw_smp_tgt:
                         sample_target_ct_values, smp_excluded_target = render_outlier_ui(
                             sample_target_ct_values,
-                            f"{translations[language_code]['patient_group']} {j+1} — Target Gene {i+1} (Raw Cq)",
+                            f"{_t.get('patient_group', "")} {j+1} — Target Gene {i+1} (Raw Cq)",
                             f"smp_raw_tgt_{i}_{j}",
                             outlier_method
                         )
@@ -3334,7 +3337,7 @@ with tab_data:
                         if detected_raw_smp_ref:
                             cleaned_smp_ref, excl_smp_ref = render_outlier_ui(
                                 smp_ref_arrays[r],
-                                f"{translations[language_code]['patient_group']} {j+1} — Reference Gene {r+1} (Raw Cq)",
+                                f"{_t.get('patient_group', "")} {j+1} — Reference Gene {r+1} (Raw Cq)",
                                 f"smp_raw_ref_{i}_{j}_{r}",
                                 outlier_method
                             )
@@ -3352,7 +3355,7 @@ with tab_data:
                 if detected_smp_tgt:
                     sample_target_ct_values, smp_excluded_target = render_outlier_ui(
                         sample_target_ct_values,
-                        f"{translations[language_code]['patient_group']} {j+1} — Target Gene {i+1}",
+                        f"{_t.get('patient_group', "")} {j+1} — Target Gene {i+1}",
                         f"smp_tgt_{i}_{j}",
                         outlier_method
                     )
@@ -3370,7 +3373,7 @@ with tab_data:
                 unstable_smp   = [r for r, m in enumerate(smp_m_values) if m >= 1.0]
                 borderline_smp = [r for r, m in enumerate(smp_m_values) if 0.5 <= m < 1.0]
 
-                st.markdown(f"##### 📊 Reference Gene Stability — {translations[language_code]['patient_group']} {j+1}")
+                st.markdown(f"##### 📊 Reference Gene Stability — {_t.get('patient_group', "")} {j+1}")
                 smp_stab_cols = st.columns(num_ref_genes)
                 for r, col in enumerate(smp_stab_cols):
                     m_ok = smp_m_values[r] < 1.0
@@ -3403,7 +3406,7 @@ with tab_data:
                 fig_stab_smp.add_hline(y=1.0, line_dash="dash", line_color="orange",
                                    annotation_text="M=1.0 (acceptable)", annotation_position="right")
                 fig_stab_smp.update_layout(
-                    title=f"geNorm M-value — {translations[language_code]['patient_group']} {j+1} Reference Genes",
+                    title=f"geNorm M-value — {_t.get('patient_group', "")} {j+1} Reference Genes",
                     yaxis_title="M-value (lower = more stable)",
                     height=280
                 )
@@ -3414,7 +3417,7 @@ with tab_data:
                     unstable_names = ", ".join([f"Ref Gene {r+1}" for r in unstable_smp])
                     st.warning(
                         f"⚠️ **Unstable reference gene(s) detected in "
-                        f"{translations[language_code]['patient_group']} {j+1}: {unstable_names}**\n\n"
+                        f"{_t.get('patient_group', "")} {j+1}: {unstable_names}**\n\n"
                         f"geNorm M-value ≥ 1.0 indicates considerable expression variability across "
                         f"samples in this group, which may compromise normalization reliability.\n\n"
                         f"**Analysis will continue**, but interpret results with caution.\n\n"
@@ -3430,14 +3433,14 @@ with tab_data:
                     borderline_names = ", ".join([f"Ref Gene {r+1}" for r in borderline_smp])
                     st.info(
                         f"ℹ️ **Borderline stability in "
-                        f"{translations[language_code]['patient_group']} {j+1}: {borderline_names}** (M = 0.5–1.0)\n\n"
+                        f"{_t.get('patient_group', "")} {j+1}: {borderline_names}** (M = 0.5–1.0)\n\n"
                         f"Stability is within MIQE acceptable range. Consider adding a third reference "
                         f"gene to confirm robustness of normalization."
                     )
                 else:
                     st.success(
                         f"✅ All reference genes in "
-                        f"{translations[language_code]['patient_group']} {j+1} are stable (M < 0.5)."
+                        f"{_t.get('patient_group', "")} {j+1} are stable (M < 0.5)."
                     )
 
             # ── Normalization factor & ΔCq ────────────────────────────────────────
@@ -3503,32 +3506,32 @@ with tab_data:
                 # ────────────────────────────────────────────────────────────────
             
                 if expression_change == 1:
-                    regulation_status = translations[language_code]["no_change"]
+                    regulation_status = _t.get('no_change', '')
                 elif expression_change > 1:
-                    regulation_status = translations[language_code]["upregulated"]
+                    regulation_status = _t.get('upregulated', '')
                 else:
-                    regulation_status = translations[language_code]["downregulated"]
+                    regulation_status = _t.get('downregulated', '')
 
                 # Pfaffl regulation
                 if pfaffl_ratio > 1:
-                    pfaffl_regulation = translations[language_code]["upregulated"]
+                    pfaffl_regulation = _t.get('upregulated', '')
                 elif pfaffl_ratio < 1:
-                    pfaffl_regulation = translations[language_code]["downregulated"]
+                    pfaffl_regulation = _t.get('downregulated', '')
                 else:
-                    pfaffl_regulation = translations[language_code]["no_change"]
+                    pfaffl_regulation = _t.get('no_change', '')
 
                 # ── Method comparison display ─────────────────────────────────
-                st.markdown(f"#### {translations[language_code]['method_comparison']} — {translations[language_code]['target_gene']} {i+1} / {translations[language_code]['patient_group']} {j+1}")
+                st.markdown(f"#### {_t.get('method_comparison', "")} — {_t.get('target_gene', "")} {i+1} / {_t.get('patient_group', "")} {j+1}")
                 comp_col1, comp_col2 = st.columns(2)
                 with comp_col1:
                     st.metric(
-                        label=translations[language_code]["classic_ddct"],
+                        label=_t.get('classic_ddct', ''),
                         value=f"{expression_change:.4f}",
                         delta=regulation_status
                     )
                 with comp_col2:
                     st.metric(
-                        label=translations[language_code]["pfaffl_ratio"],
+                        label=_t.get('pfaffl_ratio', ''),
                         value=f"{pfaffl_ratio:.4f}",
                         delta=pfaffl_regulation
                     )
@@ -3572,42 +3575,42 @@ with tab_data:
                 if control_normal and sample_normal:
                     if equal_variance:
                         test_pvalue = stats.ttest_ind(control_rq, sample_rq).pvalue
-                        test_method = translations[language_code]["t_test"]
+                        test_method = _t.get('t_test', '')
                     else:
                         test_pvalue = stats.ttest_ind(control_rq, sample_rq, equal_var=False).pvalue
-                        test_method = translations[language_code]["welch_t_test"]
-                    test_type = translations[language_code]["parametric"]
+                        test_method = _t.get('welch_t_test', '')
+                    test_type = _t.get('parametric', '')
                 else:
                     test_pvalue = stats.mannwhitneyu(control_rq, sample_rq,
                                                       alternative='two-sided').pvalue
-                    test_method = translations[language_code]["mann_whitney_u_test"]
-                    test_type   = translations[language_code]["non_parametric"]
+                    test_method = _t.get('mann_whitney_u_test', '')
+                    test_type   = _t.get('non_parametric', '')
 
-                significance = translations[language_code]["significant"] if test_pvalue < 0.05 \
-                               else translations[language_code]["insignificant"]
+                significance = _t.get('significant', '') if test_pvalue < 0.05 \
+                               else _t.get('insignificant', '')
 
                 # ── Decision pathway display ──────────────────────────────────
                 with st.expander(
-                    f"{translations[language_code]['stat_decision_title']} — "
-                    f"{translations[language_code]['target_gene']} {i+1} / "
+                    f"{_t.get('stat_decision_title', "")} — "
+                    f"{_t.get('target_gene', "")} {i+1} / "
                     f"Group {j+1}",
                     expanded=False
                 ):
-                    st.markdown(translations[language_code]["stat_decision_steps"])
+                    st.markdown(_t.get('stat_decision_steps', ''))
 
                     sw_ctrl_sym = "✅" if control_normal else "❌"
                     sw_smp_sym  = "✅" if sample_normal  else "❌"
 
                     if n_ctrl >= _MIN_N_SHAPIRO and n_smp >= _MIN_N_SHAPIRO:
                         st.markdown(
-                            f"{translations[language_code]['stat_shapiro_title']}  \n"
+                            f"{_t.get('stat_shapiro_title', "")}  \n"
                             f"- Control: W={shapiro_control.statistic:.4f}, "
                             f"p={shapiro_control.pvalue:.4f} {sw_ctrl_sym} "
-                            f"{translations[language_code]['stat_normal'] if control_normal else translations[language_code]['stat_nonnormal']}  \n"
-                            f"- {translations[language_code]['patient_group']} {j+1}: "
+                            f"{_t.get('stat_normal', "") if control_normal else _t.get('stat_nonnormal', "")}  \n"
+                            f"- {_t.get('patient_group', "")} {j+1}: "
                             f"W={shapiro_sample.statistic:.4f}, "
                             f"p={shapiro_sample.pvalue:.4f} {sw_smp_sym} "
-                            f"{translations[language_code]['stat_normal'] if sample_normal else translations[language_code]['stat_nonnormal']}"
+                            f"{_t.get('stat_normal', "") if sample_normal else _t.get('stat_nonnormal', "")}"
                         )
                     else:
                         st.info(
@@ -3620,28 +3623,28 @@ with tab_data:
                     if control_normal and sample_normal:
                         lev_sym = "✅" if equal_variance else "⚠️"
                         st.markdown(
-                            f"{translations[language_code]['stat_levene_title']}  \n"
+                            f"{_t.get('stat_levene_title', "")}  \n"
                             f"- F={levene_test.statistic:.4f}, p={levene_test.pvalue:.4f} "
-                            f"{lev_sym} {translations[language_code]['stat_equal_var'] if equal_variance else translations[language_code]['stat_unequal_var']}"
+                            f"{lev_sym} {_t.get('stat_equal_var', "") if equal_variance else _t.get('stat_unequal_var', "")}"
                         )
                     else:
-                        st.markdown(translations[language_code]["stat_levene_skipped"])
+                        st.markdown(_t.get('stat_levene_skipped', ''))
 
                     if not control_normal or not sample_normal:
-                        reason = translations[language_code]["stat_reason_nonnormal"]
+                        reason = _t.get('stat_reason_nonnormal', '')
                     elif equal_variance:
-                        reason = translations[language_code]["stat_reason_normal_equal"]
+                        reason = _t.get('stat_reason_normal_equal', '')
                     else:
-                        reason = translations[language_code]["stat_reason_normal_unequal"]
+                        reason = _t.get('stat_reason_normal_unequal', '')
 
                     st.success(
-                        f"{translations[language_code]['stat_selected_test']} {test_method}  \n"
-                        f"{translations[language_code]['stat_reason']} {reason}  \n"
-                        f"{translations[language_code]['stat_result']} p = {test_pvalue:.4f} → **{significance}**"
+                        f"{_t.get('stat_selected_test', "")} {test_method}  \n"
+                        f"{_t.get('stat_reason', "")} {reason}  \n"
+                        f"{_t.get('stat_result', "")} p = {test_pvalue:.4f} → **{significance}**"
                     )
 
                     if num_patient_groups >= 2:
-                        st.caption(translations[language_code]["stat_multigroup_note"])
+                        st.caption(_t.get('stat_multigroup_note', ''))
                 # ─────────────────────────────────────────────────────────────
 
                 stats_data.append({
@@ -3751,7 +3754,7 @@ for i in range(num_target_genes):
         omnibus_type   = "non-parametric"
         posthoc_method = "Dunn (pairwise Mann-Whitney U)"
 
-    omnibus_sig = translations[language_code]["multigroup_significant"] if omnibus_p < 0.05 else translations[language_code]["multigroup_not_significant"]
+    omnibus_sig = _t.get('multigroup_significant', '') if omnibus_p < 0.05 else _t.get('multigroup_not_significant', '')
 
     # ── Post-hoc pairwise comparisons ────────────────────────────────────────
     pairs      = []
@@ -3818,9 +3821,9 @@ with tab_results:
     # ── Multi-group display ───────────────────────────────────────────────────
     if any(r["n_groups"] >= 3 for r in multigroup_results):
         st.markdown("---")
-        st.markdown(translations[language_code]["multigroup_title"])
+        st.markdown(_t.get('multigroup_title', ''))
 
-        with st.expander(translations[language_code]["multigroup_expander"], expanded=False):
+        with st.expander(_t.get('multigroup_expander', ''), expanded=False):
             st.markdown("""
 **When is multi-group analysis applied?**  
 Automatically activated when **≥ 3 groups** (control + 2 or more patient groups) are present for a target gene.  
@@ -3846,24 +3849,24 @@ This addresses the limitation of pairwise-only testing, which inflates Type I er
             if res["n_groups"] < 3:
                 continue
 
-            st.markdown(f"### 🧬 {res['gene']} — {res['n_groups']} {translations[language_code]['patient_group'].replace('🩸 ', '')}")
+            st.markdown(f"### 🧬 {res['gene']} — {res['n_groups']} {_t.get('patient_group', "").replace('🩸 ', '')}")
 
             if res["normality_ok"] and res["variance_ok"]:
-                st.success(translations[language_code]["multigroup_decision_normal_equal"])
+                st.success(_t.get('multigroup_decision_normal_equal', ''))
             elif res["normality_ok"] and not res["variance_ok"]:
-                st.warning(translations[language_code]["multigroup_decision_normal_unequal"])
+                st.warning(_t.get('multigroup_decision_normal_unequal', ''))
             else:
-                st.warning(translations[language_code]["multigroup_decision_nonnormal"])
+                st.warning(_t.get('multigroup_decision_nonnormal', ''))
 
             omni_col1, omni_col2, omni_col3 = st.columns(3)
-            omni_col1.metric(translations[language_code]["multigroup_omnibus_test"], res["omnibus_test"])
-            omni_col2.metric(translations[language_code]["multigroup_pvalue"], f"{res['omnibus_p']:.4f}")
-            omni_col3.metric(translations[language_code]["multigroup_result"], res["omnibus_sig"])
+            omni_col1.metric(_t.get('multigroup_omnibus_test', ''), res["omnibus_test"])
+            omni_col2.metric(_t.get('multigroup_pvalue', ''), f"{res['omnibus_p']:.4f}")
+            omni_col3.metric(_t.get('multigroup_result', ''), res["omnibus_sig"])
 
             if res["omnibus_p"] >= 0.05:
-                st.info(translations[language_code]["multigroup_omnibus_ns"])
+                st.info(_t.get('multigroup_omnibus_ns', ''))
 
-            st.markdown(f"{translations[language_code]['multigroup_posthoc_label']} {res['posthoc_method']} — Bonferroni & FDR")
+            st.markdown(f"{_t.get('multigroup_posthoc_label', "")} {res['posthoc_method']} — Bonferroni & FDR")
             ph_df = pd.DataFrame(res["posthoc_rows"])
             st.dataframe(ph_df, use_container_width=True)
 
@@ -3878,7 +3881,7 @@ This addresses the limitation of pairwise-only testing, which inflates Type I er
 
             ph_csv = ph_df.to_csv(index=False).encode("utf-8")
             st.download_button(
-                label=f"{translations[language_code]['multigroup_dl_button']} {res['gene']}",
+                label=f"{_t.get('multigroup_dl_button', "")} {res['gene']}",
                 data=ph_csv,
                 file_name=f"posthoc_{res['gene'].replace(' ', '_')}.csv",
                 mime="text/csv",
@@ -3887,65 +3890,62 @@ This addresses the limitation of pairwise-only testing, which inflates Type I er
 
     elif num_patient_groups >= 2 and multigroup_results:
         st.markdown("---")
-        st.info(translations[language_code]["multigroup_2group_note"])
+        st.info(_t.get('multigroup_2group_note', ''))
 
 
     if input_values_table:
-        st.subheader(f" {translations[language_code]['gr_tbl']}")
-        _T = translations[language_code]
+        st.subheader(f" {_t.get('gr_tbl', "")}")
         # Rename fixed keys to translated column headers for display
         _ivt_rename = {
-            "__sample_num__":   _T.get("sample_number", "Sample #"),
-            "__target_gene__":  _T.get("target_gene",   "Gene"),
-            "Grup":             _T.get("Grup",          "Group"),
-            "__target_ct__":    _T.get("target_ct",     "Target Cq"),
-            "__ref_ct__":       _T.get("reference_ct",  "Ref Ct"),
-            "__dct_ctrl__":     _T.get("delta_ct_control", "ΔCq Control"),
-            "__dct_patient__":  _T.get("delta_ct_patient", "ΔCq Patient"),
-            "Outlier Excluded": _T.get("pdf_outlier_col", "Outlier Excluded"),
+            "__sample_num__":   _t.get("sample_number", "Sample #"),
+            "__target_gene__":  _t.get("target_gene",   "Gene"),
+            "Grup":             _t.get("Grup",          "Group"),
+            "__target_ct__":    _t.get("target_ct",     "Target Cq"),
+            "__ref_ct__":       _t.get("reference_ct",  "Ref Ct"),
+            "__dct_ctrl__":     _t.get("delta_ct_control", "ΔCq Control"),
+            "__dct_patient__":  _t.get("delta_ct_patient", "ΔCq Patient"),
+            "Outlier Excluded": _t.get("pdf_outlier_col", "Outlier Excluded"),
         }
         input_df = pd.DataFrame(input_values_table).rename(columns=_ivt_rename)
         st.write(input_df)
         csv = input_df.to_csv(index=False).encode("utf-8")
         st.download_button(
-            label=_T["download_csv"],
+            label=_t.get('download_csv', ''),
             data=csv, file_name="giris_verileri.csv", mime="text/csv",
             key="dl_input_csv")
 
     # Sonuçlar Tablosunu Göster
     if data:
-        st.subheader(f" {translations[language_code]['nil_mine']}")
-        _T = translations[language_code]
+        st.subheader(f" {_t.get('nil_mine', "")}")
         _data_rename = {
-            "__target_gene__":  _T.get("target_gene",   "Gene"),
-            "__patient_group__":_T.get("patient_group", "Group"),
-            "__ddct__":         _T.get("delta_delta_ct","ΔΔCq"),
-            "__fc__":           _T.get("gene_expression_change", "2^(-ΔΔCq)"),
-            "__pfaffl__":       _T.get("pfaffl_ratio",  "Pfaffl"),
-            "__regulation__":   _T.get("regulation_status", "Regulation"),
-            "__dct_ctrl__":     _T.get("delta_ct_control", "ΔCq Control"),
-            "__dct_patient__":  _T.get("delta_ct_patient", "ΔCq Patient"),
+            "__target_gene__":  _t.get("target_gene",   "Gene"),
+            "__patient_group__":_t.get("patient_group", "Group"),
+            "__ddct__":         _t.get("delta_delta_ct","ΔΔCq"),
+            "__fc__":           _t.get("gene_expression_change", "2^(-ΔΔCq)"),
+            "__pfaffl__":       _t.get("pfaffl_ratio",  "Pfaffl"),
+            "__regulation__":   _t.get("regulation_status", "Regulation"),
+            "__dct_ctrl__":     _t.get("delta_ct_control", "ΔCq Control"),
+            "__dct_patient__":  _t.get("delta_ct_patient", "ΔCq Patient"),
         }
         df = pd.DataFrame(data).rename(columns=_data_rename)
         st.write(df)
 
     # İstatistik Sonuçları
     if stats_data:
-        st.subheader(f" {translations[language_code]['statistical_results']}")
-        _T = translations[language_code]
+        st.subheader(f" {_t.get('statistical_results', "")}")
         _stats_rename = {
-            "__target_gene__":  _T.get("target_gene",  "Gene"),
-            "__patient_group__":_T.get("patient_group","Group"),
-            "__test_type__":    _T.get("test_type",    "Test Type"),
-            "__test_method__":  _T.get("test_method",  "Test Method"),
-            "__pvalue__":       _T.get("test_pvalue",  "p-value"),
-            "__significance__": _T.get("significance", "Significance"),
+            "__target_gene__":  _t.get("target_gene",  "Gene"),
+            "__patient_group__":_t.get("patient_group","Group"),
+            "__test_type__":    _t.get("test_type",    "Test Type"),
+            "__test_method__":  _t.get("test_method",  "Test Method"),
+            "__pvalue__":       _t.get("test_pvalue",  "p-value"),
+            "__significance__": _t.get("significance", "Significance"),
         }
         stats_df = pd.DataFrame(stats_data).rename(columns=_stats_rename)
         st.write(stats_df)
         csv_stats = stats_df.to_csv(index=False).encode("utf-8")
         st.download_button(
-            label=_T["download_csv"],
+            label=_t.get('download_csv', ''),
             data=csv_stats,
             file_name="istatistik_sonuclari.csv",
             mime="text/csv",
@@ -3954,9 +3954,9 @@ This addresses the limitation of pairwise-only testing, which inflates Type I er
     # ─── MULTI-GENE P-VALUE CORRECTION ───────────────────────────────────────────
     if stats_data and num_target_genes >= 2:
         st.markdown("---")
-        st.markdown(translations[language_code]["multigene_title"])
+        st.markdown(_t.get('multigene_title', ''))
 
-        with st.expander(translations[language_code]["multigene_expander"], expanded=False):
+        with st.expander(_t.get('multigene_expander', ''), expanded=False):
             st.markdown("""
 When testing **multiple target genes** simultaneously, the probability of obtaining 
 at least one false positive increases with the number of tests performed 
@@ -3990,7 +3990,7 @@ Ge Y et al. *Bioinformatics* 2003; Storey JD. *J R Stat Soc B* 2002.
         ]
 
         if not correction_rows:
-            st.info(translations[language_code]["multigene_no_data"])
+            st.info(_t.get('multigene_no_data', ''))
         else:
             n_tests   = len(correction_rows)
             raw_pvals = [r["Raw p"] for r in correction_rows]
@@ -4019,16 +4019,16 @@ Ge Y et al. *Bioinformatics* 2003; Storey JD. *J R Stat Soc B* 2002.
             n_fdr_sig  = sum(1 for p in fdr         if p < 0.05)
 
             sum_col1, sum_col2, sum_col3 = st.columns(3)
-            sum_col1.metric(translations[language_code]["multigene_sig_raw"],  f"{n_raw_sig} / {n_tests}")
-            sum_col2.metric(translations[language_code]["multigene_sig_bonf"], f"{n_bonf_sig} / {n_tests}")
-            sum_col3.metric(translations[language_code]["multigene_sig_fdr"],  f"{n_fdr_sig} / {n_tests}")
+            sum_col1.metric(_t.get('multigene_sig_raw', ''),  f"{n_raw_sig} / {n_tests}")
+            sum_col2.metric(_t.get('multigene_sig_bonf', ''), f"{n_bonf_sig} / {n_tests}")
+            sum_col3.metric(_t.get('multigene_sig_fdr', ''),  f"{n_fdr_sig} / {n_tests}")
 
             if n_raw_sig > n_fdr_sig:
-                st.warning(translations[language_code]["multigene_warning"].format(lost=n_raw_sig - n_fdr_sig))
+                st.warning(_t.get('multigene_warning', '').format(lost=n_raw_sig - n_fdr_sig))
             elif n_raw_sig == n_fdr_sig and n_raw_sig > 0:
-                st.success(translations[language_code]["multigene_success"].format(n=n_raw_sig))
+                st.success(_t.get('multigene_success', '').format(n=n_raw_sig))
             elif n_raw_sig == 0:
-                st.info(translations[language_code]["multigene_no_sig"])
+                st.info(_t.get('multigene_no_sig', ''))
 
             fig_corr = go.Figure()
             labels = [f"{r['Gene']} / {r['Group']}" for r in correction_rows]
@@ -4038,16 +4038,16 @@ Ge Y et al. *Bioinformatics* 2003; Storey JD. *J R Stat Soc B* 2002.
             fig_corr.add_hline(y=0.05, line_dash="dash", line_color="red", annotation_text="a = 0.05", annotation_position="right")
             fig_corr.update_layout(
                 barmode="group",
-                title=translations[language_code]["multigene_chart_title"],
+                title=_t.get('multigene_chart_title', ''),
                 yaxis_title="p-value",
-                xaxis_title=f"{translations[language_code]['target_gene']} / {translations[language_code]['patient_group']}",
+                xaxis_title=f"{_t.get('target_gene', "")} / {_t.get('patient_group', "")}",
                 height=380
             )
             st.plotly_chart(fig_corr, use_container_width=True, key="multigene_corr_chart")
 
             corr_csv = corr_df.to_csv(index=False).encode("utf-8")
             st.download_button(
-                label=translations[language_code]["multigene_dl_button"],
+                label=_t.get('multigene_dl_button', ''),
                 data=corr_csv,
                 file_name="multi_gene_correction.csv",
                 mime="text/csv",
@@ -4056,12 +4056,12 @@ Ge Y et al. *Bioinformatics* 2003; Storey JD. *J R Stat Soc B* 2002.
 
     elif stats_data and num_target_genes == 1:
         st.markdown("---")
-        st.info(translations[language_code]["multigene_1gene_note"])
+        st.info(_t.get('multigene_1gene_note', ''))
 
     # ── Çoklu Gen Karşılaştırma Grafiği ──────────────────────────────────────
     st.markdown("---")
     if data and num_target_genes >= 2:
-        st.subheader(f"📊 {translations[language_code].get('multigene_fc_chart_title', 'Multi-Gene Expression Comparison')}")
+        st.subheader(f"📊 {_t.get('multigene_fc_chart_title', 'Multi-Gene Expression Comparison')}")
 
         # Collect fold changes per gene per group
         fc_key  = "__fc__"
@@ -4107,9 +4107,9 @@ Ge Y et al. *Bioinformatics* 2003; Storey JD. *J R Stat Soc B* 2002.
         fig_multi.update_layout(
             barmode='group',
             title=f"Gene Expression Fold Change — {method_choice}",
-            xaxis_title=translations[language_code]["patient_group"],
+            xaxis_title=_t.get('patient_group', ''),
             yaxis_title=f"Fold Change ({method_choice})",
-            legend_title=translations[language_code]["target_gene"],
+            legend_title=_t.get('target_gene', ''),
             height=420,
             plot_bgcolor='white',
             yaxis=dict(gridcolor='#eeeeee'),
@@ -4139,9 +4139,9 @@ Ge Y et al. *Bioinformatics* 2003; Storey JD. *J R Stat Soc B* 2002.
             fig_log.update_layout(
                 barmode='group',
                 title=f"Gene Expression log2(Fold Change) — {method_choice}",
-                xaxis_title=translations[language_code]["patient_group"],
+                xaxis_title=_t.get('patient_group', ''),
                 yaxis_title="log2(Fold Change)",
-                legend_title=translations[language_code]["target_gene"],
+                legend_title=_t.get('target_gene', ''),
                 height=420, plot_bgcolor='white',
                 yaxis=dict(gridcolor='#eeeeee', zeroline=True, zerolinecolor='black'),
             )
@@ -4155,28 +4155,28 @@ Ge Y et al. *Bioinformatics* 2003; Storey JD. *J R Stat Soc B* 2002.
     # Allow user to choose which values to display in the distribution plot:
     # RQ (2^-ΔCq), raw ΔCt, or ΔΔCq (relative to control mean).
     plot_mode = st.radio(
-        translations[language_code]["dist_plot_mode_label"],
+        _t.get('dist_plot_mode_label', ''),
         options=[
-            translations[language_code]["dist_plot_rq"],
-            translations[language_code]["dist_plot_dct"],
-            translations[language_code]["dist_plot_ddct"],
+            _t.get('dist_plot_rq', ''),
+            _t.get('dist_plot_dct', ''),
+            _t.get('dist_plot_ddct', ''),
         ],
         index=0,
         horizontal=True,
         key="dist_plot_mode",
-        help=translations[language_code]["dist_plot_help"]
+        help=_t.get('dist_plot_help', '')
     )
 
     # Map selected option back to mode identifier
-    if plot_mode == translations[language_code]["dist_plot_rq"]:
+    if plot_mode == _t.get('dist_plot_rq', ''):
         _plot_mode_id = "RQ"
-    elif plot_mode == translations[language_code]["dist_plot_ddct"]:
+    elif plot_mode == _t.get('dist_plot_ddct', ''):
         _plot_mode_id = "DDCT"
     else:
         _plot_mode_id = "DCT"
 
     for i in range(num_target_genes):
-        st.subheader(f"{translations[language_code]['target_gene']} {i+1} - {translations[language_code]['distribution_graph']}")
+        st.subheader(f"{_t.get('target_gene', "")} {i+1} - {_t.get('distribution_graph', "")}")
 
         control_target_ct_values = [
             d["__target_ct__"] 
@@ -4196,7 +4196,7 @@ Ge Y et al. *Bioinformatics* 2003; Storey JD. *J R Stat Soc B* 2002.
         ]
 
         if len(control_target_ct_values) == 0 or len(control_reference_ct_values) == 0:
-            st.error(f" {translations[language_code]['error_missing_control_data'].format(i=i+1)}")
+            st.error(f" {_t.get('error_missing_control_data', "").format(i=i+1)}")
             continue
 
         control_delta_ct = np.array(control_target_ct_values, dtype=float) - np.array(control_reference_ct_values, dtype=float)
@@ -4225,7 +4225,7 @@ Ge Y et al. *Bioinformatics* 2003; Storey JD. *J R Stat Soc B* 2002.
             y=[avg_ctrl_plot, avg_ctrl_plot],
             mode='lines',
             line=dict(color='black', width=4),
-            name=translations[language_code]["control_group_avg"]
+            name=_t.get('control_group_avg', '')
         ))
 
         for j in range(num_patient_groups):
@@ -4246,7 +4246,7 @@ Ge Y et al. *Bioinformatics* 2003; Storey JD. *J R Stat Soc B* 2002.
                 y=[avg_smp_plot, avg_smp_plot],
                 mode='lines',
                 line=dict(color='black', width=4),
-                name=f"{translations[language_code]['patient_group']} {j+1} {translations[language_code]['avg']}"
+                name=f"{_t.get('patient_group', "")} {j+1} {_t.get('avg', "")}"
             ))
 
         fig.add_trace(go.Scatter(
@@ -4284,11 +4284,11 @@ Ge Y et al. *Bioinformatics* 2003; Storey JD. *J R Stat Soc B* 2002.
             ))
 
         fig.update_layout(
-            title=f"{translations[language_code]['target_gene']} {i+1} — {_yaxis_label(plot_mode)} Distribution",
+            title=f"{_t.get('target_gene', "")} {i+1} — {_yaxis_label(plot_mode)} Distribution",
             xaxis=dict(
                 tickvals=[1] + [j + 2 for j in range(num_patient_groups)],
                 ticktext=["Control"] + [f"Group {j+1}" for j in range(num_patient_groups)],
-                title=translations[language_code]['x_axis_title']
+                title=_t.get('x_axis_title', "")
             ),
             yaxis=dict(title=_yaxis_label(plot_mode)),
             showlegend=True
@@ -4404,7 +4404,7 @@ def get_pdf_fonts(lang):
         return ARABIC_FONT, ARABIC_FONT_BOLD
     return PDF_FONT, PDF_FONT_BOLD
 
-def create_pdf(results, stats, input_df, language_code):
+def create_pdf(results, stat_rows, input_df, language_code):
     T   = translations[language_code]  # shorthand
     RTL = language_code == 'ar'        # sağdan sola dil mi?
     fn, fnb = get_pdf_fonts(language_code)
@@ -4509,7 +4509,7 @@ def create_pdf(results, stats, input_df, language_code):
         [s('pdf_summary_groups'),  str(n_groups)],
         [s('pdf_summary_samples'), str(n_samples)],
         [s('pdf_summary_excluded'),str(n_excluded)],
-        [s('pdf_summary_tests'),   f"{len(stats)} {s('pdf_summary_tests')}"],
+        [s('pdf_summary_tests'),   f"{len(stat_rows)} {s('pdf_summary_tests')}"],
         [s('pdf_summary_norm'),    norm_method],
         [s('pdf_summary_methods'), s('pdf_summary_methods_val')],
     ]
@@ -4655,25 +4655,25 @@ def create_pdf(results, stats, input_df, language_code):
 
     stat_cols = T.get('pdf_stat_cols', ['Gene','Comparison','Type','Method','p','Sig'])
     stat_rows = [stat_cols]
-    for st in stats:
+    for st_row in stat_rows:
         stat_rows.append([
-            str(st.get("__target_gene__", '')),
-            str(st.get('Comparison', '')),
-            str(st.get("__test_type__", '')),
-            str(st.get("__test_method__", '')),
-            f"{st.get("__pvalue__", 0):.4f}",
-            str(st.get("__significance__", '')),
+            str(st_row.get("__target_gene__", '')),
+            str(st_row.get('Comparison', '')),
+            str(st_row.get("__test_type__", '')),
+            str(st_row.get("__test_method__", '')),
+            f"{st_row.get("__pvalue__", 0):.4f}",
+            str(st_row.get("__significance__", '')),
         ])
     cw6 = (letter[0]-100)/6
     elements.append(make_table(stat_rows, col_widths=[cw6]*6))
     elements.append(Spacer(1, 8))
 
     # p-value chart
-    if stats:
+    if stat_rows:
         try:
             fig_p, ax_p = plt.subplots(figsize=(7, 3))
-            labels_p = [f"{st.get("__target_gene__",'')} / {st.get('Comparison','')}" for st in stats]
-            pvals = [st.get("__pvalue__", 1) for st in stats]
+            labels_p = [f"{st_row.get("__target_gene__",'')} / {st_row.get('Comparison','')}" for st_row in stat_rows]
+            pvals = [st_row.get("__pvalue__", 1) for st_row in stat_rows]
             bar_colors = ['#e53935' if p < 0.05 else '#90a4ae' for p in pvals]
             ax_p.barh(labels_p, pvals, color=bar_colors, alpha=0.85)
             ax_p.axvline(x=0.05, color='black', linestyle='--', linewidth=0.9)
@@ -4799,23 +4799,23 @@ def create_pdf(results, stats, input_df, language_code):
 
 
 with tab_report:
-    st.markdown(f"### 📄 {translations[language_code]['pdf_report']}")
+    st.markdown(f"### 📄 {_t.get('pdf_report', "")}")
     st.markdown("---")
     if not input_values_table:
-        st.info(translations[language_code]["error_no_data"])
+        st.info(_t.get('error_no_data', ''))
     else:
-        st.success(f"✅ " + translations[language_code].get("pdf_ready", "{n} records ready").format(n=len(input_values_table)))
-        if st.button(f"📥 {translations[language_code]['generate_pdf']}", key="pdf_btn"):
+        st.success('✅ ' + _t.get('pdf_ready', '{n} records ready').format(n=len(input_values_table)))
+        if st.button(f"📥 {_t.get('generate_pdf', "")}", key="pdf_btn"):
             pdf_buffer = create_pdf(data, stats_data, pd.DataFrame(input_values_table), language_code)
             st.download_button(
-                label=f"⬇️ {translations[language_code]['pdf_report']}",
+                label=f"⬇️ {_t.get('pdf_report', "")}",
                 data=pdf_buffer,
                 file_name="gen_ekspresyon_raporu.pdf",
                 mime="application/pdf",
                 key="pdf_dl"
             )
 
-st.markdown(f"<h4 style='font-size: 12px; font-family: Arial, sans-serif; color: #555;'><a href='mailto:mailtoburhanettin@gmail.com' style='color: #555; text-decoration: none;'>{translations[language_code]['subtitle']}</a></h4>", unsafe_allow_html=True)
+st.markdown(f"<h4 style='font-size: 12px; font-family: Arial, sans-serif; color: #555;'><a href='mailto:mailtoburhanettin@gmail.com' style='color: #555; text-decoration: none;'>{_t.get('subtitle', "")}</a></h4>", unsafe_allow_html=True)
 
 st.sidebar.markdown("---")
 st.sidebar.markdown(_t.get("sidebar_desktop_title", "### 💻 Desktop Application"))
