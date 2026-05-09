@@ -4654,26 +4654,27 @@ def create_pdf(results, stat_rows, input_df, language_code):
     elements.append(Spacer(1, 6))
 
     stat_cols = T.get('pdf_stat_cols', ['Gene','Comparison','Type','Method','p','Sig'])
-    stat_rows = [stat_cols]
+    # stat_rows = parameter (incoming data), stat_table_rows = local PDF table rows
+    stat_table_rows = [stat_cols]
     for st_row in stat_rows:
-        stat_rows.append([
+        stat_table_rows.append([
             str(st_row.get("__target_gene__", '')),
             str(st_row.get('Comparison', '')),
             str(st_row.get("__test_type__", '')),
             str(st_row.get("__test_method__", '')),
-            f"{st_row.get("__pvalue__", 0):.4f}",
+            f"{st_row.get('__pvalue__', 0):.4f}",
             str(st_row.get("__significance__", '')),
         ])
     cw6 = (letter[0]-100)/6
-    elements.append(make_table(stat_rows, col_widths=[cw6]*6))
+    elements.append(make_table(stat_table_rows, col_widths=[cw6]*6))
     elements.append(Spacer(1, 8))
 
     # p-value chart
     if stat_rows:
         try:
             fig_p, ax_p = plt.subplots(figsize=(7, 3))
-            labels_p = [f"{st_row.get("__target_gene__",'')} / {st_row.get('Comparison','')}" for st_row in stat_rows]
-            pvals = [st_row.get("__pvalue__", 1) for st_row in stat_rows]
+            labels_p = [f"{sr.get('__target_gene__','')} / {sr.get('Comparison','')}" for sr in stat_rows]
+            pvals = [sr.get("__pvalue__", 1) for sr in stat_rows]
             bar_colors = ['#e53935' if p < 0.05 else '#90a4ae' for p in pvals]
             ax_p.barh(labels_p, pvals, color=bar_colors, alpha=0.85)
             ax_p.axvline(x=0.05, color='black', linestyle='--', linewidth=0.9)
