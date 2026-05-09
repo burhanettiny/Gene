@@ -565,6 +565,10 @@ translations = {
         "sidebar_opensource_title": "### 🔓 Açık Kaynak",
         "sidebar_opensource_body": "GeneQuantify açık kaynaklıdır (GPL-3.0).  \nKaynak kod GitHub'da mevcuttur:",
         "sidebar_github_btn": "⭐ GitHub'da Kaynak Kodu Görüntüle",
+        "sidebar_scenarios_title": "📋 Doğrulama Senaryosu Yükle",
+        "sidebar_scenario_select": "Senaryo seçin",
+        "sidebar_load_scenario_btn": "▶ Senaryoyu Yükle",
+        "sidebar_scenario_loaded": "✅ {s} yüklendi! Veri Girişi sekmesine geçin.",
         # Statistical decision
         "stat_decision_title": "🔬 İstatistiksel karar",
         "stat_decision_steps": "**Adım adım test seçimi:**",
@@ -932,6 +936,10 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE kılavuzları).
         "sidebar_opensource_title": "### 🔓 Open Source",
         "sidebar_opensource_body": "GeneQuantify is open source (GPL-3.0).  \nSource code available on GitHub:",
         "sidebar_github_btn": "⭐ View Source on GitHub",
+        "sidebar_scenarios_title": "📋 Load Validation Scenario",
+        "sidebar_scenario_select": "Select scenario",
+        "sidebar_load_scenario_btn": "▶ Load Scenario",
+        "sidebar_scenario_loaded": "✅ {s} loaded! Switch to Data Entry tab.",
         "stat_decision_title": "🔬 Statistical decision",
         "stat_decision_steps": "**Step-by-step test selection:**",
         "stat_shapiro_title": "**1. Shapiro-Wilk normality test**",
@@ -1294,6 +1302,10 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE guidelines).
         "sidebar_opensource_title": "### 🔓 Open Source",
         "sidebar_opensource_body": "GeneQuantify ist Open Source (GPL-3.0).  \nQuellcode auf GitHub verfügbar:",
         "sidebar_github_btn": "⭐ Quellcode auf GitHub ansehen",
+        "sidebar_scenarios_title": "📋 Validierungsszenario laden",
+        "sidebar_scenario_select": "Szenario auswählen",
+        "sidebar_load_scenario_btn": "▶ Szenario laden",
+        "sidebar_scenario_loaded": "✅ {s} geladen! Zur Dateneingabe wechseln.",
         "outlier_excluded_no": "Nein",
         "outlier_excluded_yes": "Ja",
         "stat_decision_title": "🔬 Statistische Entscheidung",
@@ -1645,6 +1657,10 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE-Richtlinien).
         "sidebar_opensource_title": "### 🔓 Open Source",
         "sidebar_opensource_body": "GeneQuantify est open source (GPL-3.0).  \nCode source disponible sur GitHub :",
         "sidebar_github_btn": "⭐ Voir le code source sur GitHub",
+        "sidebar_scenarios_title": "📋 Charger un scénario de validation",
+        "sidebar_scenario_select": "Sélectionner un scénario",
+        "sidebar_load_scenario_btn": "▶ Charger le scénario",
+        "sidebar_scenario_loaded": "✅ {s} chargé ! Allez à la saisie des données.",
         "outlier_excluded_no": "Non",
         "outlier_excluded_yes": "Oui",
         "stat_decision_title": "🔬 Décision statistique",
@@ -2004,6 +2020,10 @@ Bustin SA et al. *Clin Chem* 2009 (directives MIQE).
         "sidebar_opensource_title": "### 🔓 Código abierto",
         "sidebar_opensource_body": "GeneQuantify es de código abierto (GPL-3.0).  \nCódigo fuente disponible en GitHub:",
         "sidebar_github_btn": "⭐ Ver código fuente en GitHub",
+        "sidebar_scenarios_title": "📋 Cargar escenario de validación",
+        "sidebar_scenario_select": "Seleccionar escenario",
+        "sidebar_load_scenario_btn": "▶ Cargar escenario",
+        "sidebar_scenario_loaded": "✅ {s} cargado. Vaya a Entrada de datos.",
         "outlier_excluded_no": "No",
         "outlier_excluded_yes": "Sí",
         "stat_decision_title": "🔬 Decisión estadística",
@@ -2363,6 +2383,10 @@ Bustin SA et al. *Clin Chem* 2009 (directrices MIQE).
         "sidebar_opensource_title": "### 🔓 مفتوح المصدر",
         "sidebar_opensource_body": "GeneQuantify مفتوح المصدر (GPL-3.0).  \nالكود المصدري متاح على GitHub:",
         "sidebar_github_btn": "⭐ عرض الكود المصدري على GitHub",
+        "sidebar_scenarios_title": "📋 تحميل سيناريو التحقق",
+        "sidebar_scenario_select": "اختر سيناريو",
+        "sidebar_load_scenario_btn": "▶ تحميل السيناريو",
+        "sidebar_scenario_loaded": "✅ تم تحميل {s}! انتقل إلى تبويب إدخال البيانات.",
         "outlier_excluded_no": "لا",
         "outlier_excluded_yes": "نعم",
         "stat_decision_title": "🔬 القرار الإحصائي",
@@ -2577,14 +2601,140 @@ Bustin SA et al. *Clin Chem* 2009 (إرشادات MIQE).
 # ═══════════════════════════════════════════════════════════════════════════════
 _t = translations[language_code]
 
-# ── REVIEWER RESPONSE (Reviewer 2): One-click example data loader ─────────────
+# ── REVIEWER RESPONSE (Reviewer 2): Scenario-based example data loader ────────
 st.sidebar.markdown("---")
-if st.sidebar.button(_t.get("sidebar_load_example", "📂 Load Example Data")):
-    st.session_state["control_target_ct_0"] = "23.15\n22.90\n25.20\n24.88\n23.45"
-    st.session_state["control_reference_ct_0_0"] = "18.20\n17.90\n18.50\n18.30\n18.10"
-    st.session_state["sample_target_ct_0_0"] = "27.30\n28.10\n26.80\n27.60\n28.40"
-    st.session_state["sample_reference_ct_0_0_0"] = "18.30\n18.00\n18.60\n18.20\n18.40"
-    st.sidebar.success(_t.get("sidebar_example_loaded", "✅ Example data loaded! Switch to Data Entry tab."))
+st.sidebar.markdown(f"### {_t.get('sidebar_scenarios_title', '📋 Load Validation Scenario')}")
+
+# Scenario definitions — all 7 validation datasets from Supplementary Data S1
+SCENARIOS = {
+    "S1 — Basic (n=3, t-test)": {
+        "gene_count": 1, "patient_count": 1, "num_ref_genes": 1,
+        "outlier_method": "Grubbs", "outlier_enabled": True,
+        "description": "1 gene, 1 group, n=3. Strong upregulation (~4.1x). n<8 → t-test assumed.",
+        "control_target_ct_0": "23.15\n22.98\n23.42",
+        "control_reference_ct_0_0": "18.22\n18.05\n18.38",
+        "sample_target_ct_0_0": "21.05\n20.88\n21.23",
+        "sample_reference_ct_0_0_0": "18.15\n17.98\n18.28",
+        "target_E_0": 2.0, "ref_E_0": 2.0,
+    },
+    "S2 — Multi-gene + dual ref (n=4)": {
+        "gene_count": 3, "patient_count": 2, "num_ref_genes": 2,
+        "outlier_method": "IQR", "outlier_enabled": True,
+        "description": "3 genes, 2 groups, n=4. Dual reference (geNorm). Gene 2: Pfaffl recommended (E diff >10%).",
+        # Gene 1 control
+        "control_target_ct_0": "23.88\n24.12\n23.95\n24.32",
+        "control_reference_ct_0_0": "18.32\n18.55\n18.44\n18.68",
+        "control_reference_ct_0_1": "19.95\n20.18\n20.05\n20.28",
+        # Gene 2 control
+        "control_target_ct_1": "19.05\n19.28\n19.15\n19.38",
+        "control_reference_ct_1_0": "18.32\n18.55\n18.44\n18.68",
+        "control_reference_ct_1_1": "19.95\n20.18\n20.05\n20.28",
+        # Gene 3 control
+        "control_target_ct_2": "24.92\n25.15\n25.02\n25.28",
+        "control_reference_ct_2_0": "18.32\n18.55\n18.44\n18.68",
+        "control_reference_ct_2_1": "19.95\n20.18\n20.05\n20.28",
+        # Gene 1 Group 1
+        "sample_target_ct_0_0": "21.50\n21.82\n21.65\n21.95",
+        "sample_reference_ct_0_0_0": "18.35\n18.58\n18.47\n18.70",
+        "sample_reference_ct_0_0_1": "19.98\n20.22\n20.08\n20.30",
+        # Gene 1 Group 2
+        "sample_target_ct_0_1": "22.45\n22.68\n22.55\n22.78",
+        "sample_reference_ct_0_1_0": "18.35\n18.58\n18.47\n18.70",
+        "sample_reference_ct_0_1_1": "19.98\n20.22\n20.08\n20.30",
+        # Gene 2 Group 1
+        "sample_target_ct_1_0": "22.10\n22.38\n22.22\n22.48",
+        "sample_reference_ct_1_0_0": "18.35\n18.58\n18.47\n18.70",
+        "sample_reference_ct_1_0_1": "19.98\n20.22\n20.08\n20.30",
+        # Gene 2 Group 2
+        "sample_target_ct_1_1": "23.75\n24.02\n23.88\n24.15",
+        "sample_reference_ct_1_1_0": "18.35\n18.58\n18.47\n18.70",
+        "sample_reference_ct_1_1_1": "19.98\n20.22\n20.08\n20.30",
+        # Gene 3 Group 1
+        "sample_target_ct_2_0": "25.05\n25.28\n25.15\n25.38",
+        "sample_reference_ct_2_0_0": "18.35\n18.58\n18.47\n18.70",
+        "sample_reference_ct_2_0_1": "19.98\n20.22\n20.08\n20.30",
+        # Gene 3 Group 2
+        "sample_target_ct_2_1": "25.02\n25.25\n25.12\n25.35",
+        "sample_reference_ct_2_1_0": "18.35\n18.58\n18.47\n18.70",
+        "sample_reference_ct_2_1_1": "19.98\n20.22\n20.08\n20.30",
+        "target_E_0": 2.0, "ref_E_0": 2.0,
+        "target_E_1": 2.103, "ref_E_1": 1.952,
+        "target_E_2": 1.99, "ref_E_2": 2.0,
+    },
+    "S3 — Outlier detection (Grubbs, n=6)": {
+        "gene_count": 1, "patient_count": 1, "num_ref_genes": 1,
+        "outlier_method": "Grubbs", "outlier_enabled": True, "grubbs_alpha": 0.05,
+        "description": "1 gene, 1 group, n=6. Sample 5 is an outlier (Cq=27.82). Grubbs on raw Cq detects it.",
+        "control_target_ct_0": "23.12\n22.95\n23.38\n23.05\n27.82\n23.22",
+        "control_reference_ct_0_0": "18.15\n17.98\n18.32\n18.08\n18.22\n18.12",
+        "sample_target_ct_0_0": "21.05\n20.88\n21.23\n20.95\n21.15\n20.72",
+        "sample_reference_ct_0_0_0": "18.15\n17.98\n18.28\n18.05\n18.20\n17.88",
+        "target_E_0": 2.0, "ref_E_0": 2.0,
+    },
+    "S4 — ANOVA 3 groups (n=5)": {
+        "gene_count": 1, "patient_count": 3, "num_ref_genes": 1,
+        "outlier_method": "Grubbs", "outlier_enabled": True,
+        "description": "1 gene, 3 groups, n=5. One-way ANOVA + Tukey HSD. Group 3 = no change.",
+        "control_target_ct_0": "24.12\n23.95\n24.38\n24.05\n24.22",
+        "control_reference_ct_0_0": "18.50\n18.38\n18.72\n18.42\n18.55",
+        # Group 1: mild upregulation
+        "sample_target_ct_0_0": "23.28\n23.05\n23.52\n23.18\n23.38",
+        "sample_reference_ct_0_0_0": "18.52\n18.40\n18.75\n18.45\n18.58",
+        # Group 2: strong upregulation
+        "sample_target_ct_0_1": "21.05\n20.88\n21.23\n20.95\n21.15",
+        "sample_reference_ct_0_1_0": "18.52\n18.40\n18.75\n18.45\n18.58",
+        # Group 3: no change
+        "sample_target_ct_0_2": "24.10\n23.92\n24.35\n24.02\n24.18",
+        "sample_reference_ct_0_2_0": "18.52\n18.40\n18.75\n18.45\n18.58",
+        "target_E_0": 2.0, "ref_E_0": 2.0,
+    },
+    "S1B — Student t-test (n=8, equal var)": {
+        "gene_count": 1, "patient_count": 1, "num_ref_genes": 1,
+        "outlier_method": "Grubbs", "outlier_enabled": True,
+        "description": "n=8, normal distribution, equal variance → Student t-test. FC ≈ 4.15.",
+        "control_target_ct_0": "23.15\n22.98\n23.42\n23.05\n23.28\n22.88\n23.52\n23.18",
+        "control_reference_ct_0_0": "18.22\n18.05\n18.38\n18.12\n18.30\n17.95\n18.45\n18.18",
+        "sample_target_ct_0_0": "21.05\n20.88\n21.23\n20.95\n21.15\n20.72\n21.38\n21.02",
+        "sample_reference_ct_0_0_0": "18.15\n17.98\n18.28\n18.05\n18.20\n17.88\n18.35\n18.10",
+        "target_E_0": 2.0, "ref_E_0": 2.0,
+    },
+    "S1C — Welch t-test (n=8, unequal var)": {
+        "gene_count": 1, "patient_count": 1, "num_ref_genes": 1,
+        "outlier_method": "Grubbs", "outlier_enabled": True,
+        "description": "n=8, normal distribution, unequal variance → Welch t-test. FC ≈ 3.86.",
+        "control_target_ct_0": "23.15\n22.98\n23.42\n23.05\n23.28\n22.88\n23.52\n23.18",
+        "control_reference_ct_0_0": "18.22\n18.05\n18.38\n18.12\n18.30\n17.95\n18.45\n18.18",
+        "sample_target_ct_0_0": "21.20\n20.50\n21.80\n20.85\n21.55\n20.65\n21.90\n20.75",
+        "sample_reference_ct_0_0_0": "18.15\n17.98\n18.28\n18.05\n18.20\n17.88\n18.35\n18.10",
+        "target_E_0": 2.0, "ref_E_0": 2.0,
+    },
+    "S1D — Mann-Whitney U (n=8, bimodal)": {
+        "gene_count": 1, "patient_count": 1, "num_ref_genes": 1,
+        "outlier_method": "Grubbs", "outlier_enabled": True,
+        "description": "n=8, bimodal (responder/non-responder) → Mann-Whitney U. FC ≈ 12.43.",
+        "control_target_ct_0": "23.15\n22.98\n23.42\n23.05\n23.28\n22.88\n23.52\n23.18",
+        "control_reference_ct_0_0": "18.22\n18.05\n18.38\n18.12\n18.30\n17.95\n18.45\n18.18",
+        "sample_target_ct_0_0": "20.05\n19.88\n20.23\n17.50\n20.15\n19.72\n20.38\n17.80",
+        "sample_reference_ct_0_0_0": "18.15\n17.98\n18.28\n18.05\n18.20\n17.88\n18.35\n18.10",
+        "target_E_0": 2.0, "ref_E_0": 2.0,
+    },
+}
+
+selected_scenario = st.sidebar.selectbox(
+    _t.get('sidebar_scenario_select', 'Select scenario'),
+    options=["—"] + list(SCENARIOS.keys()),
+    key="scenario_selector"
+)
+
+if selected_scenario != "—":
+    sc = SCENARIOS[selected_scenario]
+    st.sidebar.caption(sc.get("description", ""))
+    if st.sidebar.button(_t.get('sidebar_load_scenario_btn', '▶ Load Scenario'), key="load_scenario_btn"):
+        for key, val in sc.items():
+            if key == "description":
+                continue
+            st.session_state[key] = val
+        st.sidebar.success(_t.get('sidebar_scenario_loaded', f'✅ {selected_scenario} loaded! Go to Data Entry tab.').format(s=selected_scenario))
 st.sidebar.markdown("---")
 with st.sidebar.expander(_t.get("rdml_expander", "📂 Import RDML / RDES File"), expanded=False):
     st.markdown(_t.get("rdml_description", "Upload an RDML or RDES file to auto-fill Cq values."))
