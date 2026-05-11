@@ -4554,7 +4554,7 @@ def get_pdf_fonts(lang):
         return ARABIC_FONT, ARABIC_FONT_BOLD
     return PDF_FONT, PDF_FONT_BOLD
 
-def create_pdf(results, stat_rows, input_df, language_code):
+def create_pdf(results, stat_rows, input_df, language_code, multigroup_results=None):
     T   = translations[language_code]  # shorthand
     RTL = language_code == 'ar'        # sağdan sola dil mi?
     fn, fnb = get_pdf_fonts(language_code)
@@ -4803,42 +4803,196 @@ def create_pdf(results, stat_rows, input_df, language_code):
     elements.append(Paragraph(s('pdf_s4_body'), body_style))
     elements.append(Spacer(1, 6))
 
-    stat_cols = T.get('pdf_stat_cols', ['Gene','Comparison','Type','Method','p','Sig'])
-    # stat_rows = parameter (incoming data), stat_table_rows = local PDF table rows
-    stat_table_rows = [stat_cols]
-    for st_row in stat_rows:
-        stat_table_rows.append([
-            str(st_row.get("__target_gene__", '')),
-            str(st_row.get('Comparison', '')),
-            str(st_row.get("__test_type__", '')),
-            str(st_row.get("__test_method__", '')),
-            f"{st_row.get('__pvalue__', 0):.4f}",
-            str(st_row.get("__significance__", '')),
-        ])
-    cw6 = (letter[0]-100)/6
-    elements.append(make_table(stat_table_rows, col_widths=[cw6]*6))
-    elements.append(Spacer(1, 8))
+    # Determine if any gene has 3+ groups (multigroup scenario)
+    _has_multigroup = (
+        multigroup_results is not None
+        and any(r.get("n_groups", 0) >= 3 for r in multigroup_results)
+    )
 
-    # p-value chart
-    if stat_rows:
-        try:
-            fig_p, ax_p = plt.subplots(figsize=(7, 3))
-            labels_p = [f"{sr.get('__target_gene__','')} / {sr.get('Comparison','')}" for sr in stat_rows]
-            pvals = [sr.get("__pvalue__", 1) for sr in stat_rows]
-            bar_colors = ['#e53935' if p < 0.05 else '#90a4ae' for p in pvals]
-            ax_p.barh(labels_p, pvals, color=bar_colors, alpha=0.85)
-            ax_p.axvline(x=0.05, color='black', linestyle='--', linewidth=0.9)
-            ax_p.set_xlabel('p-value', fontsize=9)
-            ax_p.set_title('Statistical Test p-values', fontsize=10, fontweight='bold')
-            for i, v in enumerate(pvals):
-                ax_p.text(v+0.005, i, f'{v:.4f}', va='center', fontsize=7)
-            ax_p.spines['top'].set_visible(False); ax_p.spines['right'].set_visible(False)
-            plt.tight_layout()
-            ib2 = BytesIO(); plt.savefig(ib2, format='png', dpi=150, bbox_inches='tight'); plt.close(); ib2.seek(0)
-            elements.append(RLImage(ib2, width=460, height=200))
-            elements.append(Paragraph(s('pdf_fig2'), caption_style))
-        except Exception:
-            pass
+    if _has_multigroup:
+        # ── 4a. Pairwise Control comparisons (t-test) for all genes ──────────
+        # Still show pairwise tests for genes with only 2 groups
+        _pairwise_rows = [r for r in stat_rows]
+        _2group_genes = set()
+        if multigroup_results:
+            for _mg in multigroup_results:
+                if _mg.get("n_groups", 0) < 3:
+                    _2group_genes.add(_mg.get("gene", ""))
+
+        _pairwise_show = [r for r in _pairwise_rows if r.get("__target_gene__", "") in _2group_genes]
+
+        if _pairwise_show:
+            elements.append(Paragraph(
+                safe_str("4.1 Pairwise Comparisons (Control vs Group) — 2-Group Genes"),
+                h2_style
+            ))
+            stat_cols = T.get('pdf_stat_cols', ['Gene','Comparison','Type','Method','p','Sig'])
+            _pw_table = [stat_cols]
+            for _r in _pairwise_show:
+                _pw_table.append([
+                    str(_r.get("__target_gene__", '')),
+                    str(_r.get('Comparison', '')),
+                    str(_r.get("__test_type__", '')),
+                    str(_r.get("__test_method__", '')),
+                    f"{_r.get('__pvalue__', 0):.4f}",
+                    str(_r.get("__significance__", '')),
+                ])
+            cw6 = (letter[0]-100)/6
+            elements.append(make_table(_pw_table, col_widths=[cw6]*6))
+            elements.append(Spacer(1, 10))
+
+        # ── 4b. Multi-group ANOVA/Kruskal-Wallis results ─────────────────────
+        elements.append(Paragraph(
+            safe_str("4.2 Multi-Group Comparison (≥3 Groups) — Omnibus + Post-hoc"),
+            h2_style
+        ))
+        elements.append(Paragraph(
+            safe_str(
+                "All inferential tests are performed on RQ values (2^\u2212\u0394Cq). "
+                "With \u22653 groups, an omnibus test (One-way ANOVA or Kruskal-Wallis) is applied first, "
+                "followed by pairwise post-hoc comparisons with Bonferroni and FDR correction. "
+                "Test selection is automatic based on normality (Shapiro-Wilk, n\u22658) and variance homogeneity (Levene)."
+            ),
+            body_style
+        ))
+        elements.append(Spacer(1, 6))
+
+        for _mg in (multigroup_results or []):
+            if _mg.get("n_groups", 0) < 3:
+                continue
+            _gene = _mg.get("gene", "")
+            _omni_test = _mg.get("omnibus_test", "—")
+            _omni_p    = _mg.get("omnibus_p", None)
+            _omni_sig  = _mg.get("omnibus_sig", "—")
+            _norm_ok   = _mg.get("normality_ok", True)
+            _var_ok    = _mg.get("variance_ok", True)
+            _posthoc   = _mg.get("posthoc_method", "—")
+
+            # Decision pathway text
+            if _norm_ok and _var_ok:
+                _decision_txt = "Normal distribution + equal variances \u2192 One-way ANOVA + Tukey HSD"
+            elif _norm_ok and not _var_ok:
+                _decision_txt = "Normal distribution + unequal variances \u2192 Welch ANOVA + Games-Howell"
+            else:
+                _decision_txt = "Non-normal distribution \u2192 Kruskal-Wallis + Dunn (Mann-Whitney U)"
+
+            elements.append(Paragraph(safe_str(f"\u25b6 {_gene}"), h2_style))
+            elements.append(Paragraph(safe_str(f"Test selection: {_decision_txt}"), body_style))
+
+            _omni_p_str = f"{_omni_p:.4f}" if _omni_p is not None else "—"
+            _omni_table = [
+                [safe_str("Omnibus Test"), safe_str("p-value"), safe_str("Result")],
+                [safe_str(_omni_test), safe_str(_omni_p_str), safe_str(_omni_sig)],
+            ]
+            elements.append(make_table(_omni_table, col_widths=[240, 120, 100]))
+            elements.append(Spacer(1, 6))
+
+            # Post-hoc table
+            _ph_rows = _mg.get("posthoc_rows", [])
+            if _ph_rows:
+                elements.append(Paragraph(
+                    safe_str(f"Post-hoc comparisons ({_posthoc}) — RQ-based:"),
+                    body_style
+                ))
+                _ph_header = [
+                    safe_str("Comparison"),
+                    safe_str("Raw p"),
+                    safe_str("Bonferroni p"),
+                    safe_str("FDR p (B-H)"),
+                    safe_str("Sig (raw)"),
+                    safe_str("Sig (FDR)"),
+                ]
+                _ph_table_rows = [_ph_header]
+                # collect all pvals for chart
+                _ph_labels_chart = []
+                _ph_pvals_chart  = []
+                for _ph in _ph_rows:
+                    _raw_p = _ph.get("Raw p", 1)
+                    _sig_raw = "Sig" if _raw_p < 0.05 else "n.s."
+                    _fdr_p   = _ph.get("FDR p (B-H)", 1)
+                    _sig_fdr = "Sig" if _fdr_p < 0.05 else "n.s."
+                    _ph_table_rows.append([
+                        safe_str(str(_ph.get("Comparison",""))),
+                        safe_str(f"{_raw_p:.4f}"),
+                        safe_str(f"{_ph.get('Bonferroni p', 1):.4f}"),
+                        safe_str(f"{_fdr_p:.4f}"),
+                        safe_str(_sig_raw),
+                        safe_str(_sig_fdr),
+                    ])
+                    _ph_labels_chart.append(f"{_gene} / {_ph.get('Comparison','')}")
+                    _ph_pvals_chart.append(_raw_p)
+
+                cw6b = (letter[0]-100)/6
+                elements.append(make_table(_ph_table_rows, col_widths=[cw6b]*6))
+                elements.append(Spacer(1, 6))
+
+                # p-value bar chart for this gene's post-hoc
+                try:
+                    _fig_mg, _ax_mg = plt.subplots(figsize=(7, max(2.5, 0.4 * len(_ph_labels_chart) + 1)))
+                    _bar_c = ['#e53935' if p < 0.05 else '#90a4ae' for p in _ph_pvals_chart]
+                    _ax_mg.barh(_ph_labels_chart, _ph_pvals_chart, color=_bar_c, alpha=0.85)
+                    _ax_mg.axvline(x=0.05, color='black', linestyle='--', linewidth=0.9)
+                    _ax_mg.set_xlabel('p-value (raw)', fontsize=9)
+                    _ax_mg.set_title(f'Post-hoc p-values — {_gene}', fontsize=10, fontweight='bold')
+                    for _ii, _vv in enumerate(_ph_pvals_chart):
+                        _ax_mg.text(min(_vv + 0.002, 0.045), _ii, f'{_vv:.4f}', va='center', fontsize=7)
+                    _ax_mg.spines['top'].set_visible(False); _ax_mg.spines['right'].set_visible(False)
+                    plt.tight_layout()
+                    _ib_mg = BytesIO()
+                    plt.savefig(_ib_mg, format='png', dpi=150, bbox_inches='tight')
+                    plt.close()
+                    _ib_mg.seek(0)
+                    _img_h = max(130, 40 * len(_ph_labels_chart) + 60)
+                    elements.append(RLImage(_ib_mg, width=460, height=min(_img_h, 260)))
+                    elements.append(Paragraph(
+                        safe_str(
+                            f"Figure. Post-hoc p-values for {_gene}. "
+                            "Red bars = significant (p < 0.05). Dashed line = significance threshold."
+                        ),
+                        caption_style
+                    ))
+                except Exception:
+                    pass
+
+            elements.append(Spacer(1, 10))
+
+    else:
+        # ── Standard 2-group: pairwise stat table ─────────────────────────────
+        stat_cols = T.get('pdf_stat_cols', ['Gene','Comparison','Type','Method','p','Sig'])
+        stat_table_rows = [stat_cols]
+        for st_row in stat_rows:
+            stat_table_rows.append([
+                str(st_row.get("__target_gene__", '')),
+                str(st_row.get('Comparison', '')),
+                str(st_row.get("__test_type__", '')),
+                str(st_row.get("__test_method__", '')),
+                f"{st_row.get('__pvalue__', 0):.4f}",
+                str(st_row.get("__significance__", '')),
+            ])
+        cw6 = (letter[0]-100)/6
+        elements.append(make_table(stat_table_rows, col_widths=[cw6]*6))
+        elements.append(Spacer(1, 8))
+
+        # p-value chart
+        if stat_rows:
+            try:
+                fig_p, ax_p = plt.subplots(figsize=(7, max(2.5, 0.4 * len(stat_rows) + 1)))
+                labels_p = [f"{sr.get('__target_gene__','')} / {sr.get('Comparison','')}" for sr in stat_rows]
+                pvals = [sr.get("__pvalue__", 1) for sr in stat_rows]
+                bar_colors = ['#e53935' if p < 0.05 else '#90a4ae' for p in pvals]
+                ax_p.barh(labels_p, pvals, color=bar_colors, alpha=0.85)
+                ax_p.axvline(x=0.05, color='black', linestyle='--', linewidth=0.9)
+                ax_p.set_xlabel('p-value', fontsize=9)
+                ax_p.set_title('Statistical Test p-values', fontsize=10, fontweight='bold')
+                for i, v in enumerate(pvals):
+                    ax_p.text(v+0.005, i, f'{v:.4f}', va='center', fontsize=7)
+                ax_p.spines['top'].set_visible(False); ax_p.spines['right'].set_visible(False)
+                plt.tight_layout()
+                ib2 = BytesIO(); plt.savefig(ib2, format='png', dpi=150, bbox_inches='tight'); plt.close(); ib2.seek(0)
+                elements.append(RLImage(ib2, width=460, height=200))
+                elements.append(Paragraph(s('pdf_fig2'), caption_style))
+            except Exception:
+                pass
 
     elements.append(Spacer(1, 10))
     elements.append(Paragraph(s('pdf_s4_interp'), h2_style))
@@ -4957,7 +5111,7 @@ with tab_report:
     else:
         st.success('✅ ' + _t.get('pdf_ready', '{n} records ready').format(n=len(input_values_table)))
         if st.button(f"📥 {_t.get('generate_pdf', "")}", key="pdf_btn"):
-            pdf_buffer = create_pdf(data, stats_data, pd.DataFrame(input_values_table), language_code)
+            pdf_buffer = create_pdf(data, stats_data, pd.DataFrame(input_values_table), language_code, multigroup_results=multigroup_results)
             st.download_button(
                 label=f"⬇️ {_t.get('pdf_report', "")}",
                 data=pdf_buffer,
