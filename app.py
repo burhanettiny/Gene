@@ -1089,7 +1089,7 @@ Bustin SA et al. *Clin Chem* 2009 (MIQE guidelines).
         "pdf_s3_title": "3. Gene Expression Results",
         "pdf_s3_body": "Fold change values calculated by both Classic ΔΔCq and Pfaffl methods. Fold change > 1 indicates higher expression in patient group relative to control.",
         "pdf_s4_title": "4. Statistical Analysis",
-        "pdf_s4_body": "Statistical significance of gene expression differences between control and patient groups. All tests are performed on RQ values (2^-ΔCq) rather than raw ΔCt, because ΔCt is on a logarithmic scale and direct parametric testing on ΔCt underestimates biological variability (Tellez-Sosa et al., Sci Rep 2025; Willems et al., Sci Rep 2021). Test selection is automatic based on normality (Shapiro-Wilk) and variance homogeneity (Levene). Significance threshold: p < 0.05.",
+        "pdf_s4_body": "Statistical significance of gene expression differences between control and patient groups. All tests are performed on RQ values (2^-ΔCq) rather than raw ΔCt, because ΔCt is on a logarithmic scale and direct parametric testing on ΔCt underestimates biological variability. Test selection is automatic based on normality (Shapiro-Wilk) and variance homogeneity (Levene). Significance threshold: p < 0.05.",
         "pdf_s4_interp": "Interpretation of Statistical Tests",
         "pdf_s4_interp_body": "Student's t-test: Used when both groups are normal with equal variances. Welch's t-test: Used when groups are normal but variances differ. Mann-Whitney U: Non-parametric test when normality is violated. p < 0.05 = statistically significant differential expression.",
         "pdf_s5_title": "5. Relative Quantity (RQ) Distribution Plots",
