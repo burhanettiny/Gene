@@ -1,11 +1,8 @@
 [server]
 headless = true
-enableCORS = false
-enableXsrfProtection = false
-runOnSave = true
-
-[browser]
-gatherUsageStats = false
+# Cloud ortamında bu ayarları varsayılanda bırakmak daha sağlıklıdır
+# enableCORS = false 
+# enableXsrfProtection = false
 
 [theme]
 primaryColor = "#FF4B4B"
@@ -13,16 +10,10 @@ backgroundColor = "#FFFFFF"
 secondaryBackgroundColor = "#F0F2F6"
 textColor = "#262730"
 
-[global]
-disableWidgetStateDuplicationWarning = true
-
-[logger]
-level = "error"
+[browser]
+gatherUsageStats = false
 
 [client]
-showErrorDetails = false
+# Hata ayrıntılarını görmek için geçici olarak true yapabilirsin
+showErrorDetails = true 
 toolbarMode = "minimal"
-showSidebarNavigation = false
-
-[deprecation]
-showfileUploaderEncoding = false
