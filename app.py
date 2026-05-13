@@ -531,7 +531,7 @@ translations = {
         "grubbs_info": "ℹ️ **Grubbs testi gereksinimleri:** Her grup için minimum **n ≥ 3** replikat. Anlamlılık eşiği: **α = {alpha:.2f}**. Test normallik varsayar; n < 8 için normallik güvenilir biçimde değerlendirilemez — sonuçlar dikkatli yorumlanmalıdır. Gürültülü replikatların ΔCq hesabına yansımasını önlemek için **ham Cq değerlerine** (normalizasyon öncesi) uygulanması önerilir.",
         "outlier_excluded_no": "Hayır",
         "outlier_excluded_yes": "Evet",
-        # Outlier stage selector (Reviewer 1, Yorum 3)
+        # Outlier stage selector 
         "outlier_stage_label": "🔬 Aykırı Değer Uygulama Aşaması",
         "outlier_stage_raw": "Ham Cq — normalizasyon öncesi (önerilen)",
         "outlier_stage_dct": "ΔCq — normalizasyon sonrası (eski davranış)",
@@ -541,7 +541,7 @@ translations = {
             "Gürültülü replikatların normalizasyona sızması engellenir.\n\n"
             "**ΔCq:** Aykırı değerler normalizasyon sonrası uygulanır (orijinal davranış)."
         ),
-        # Distribution plot mode selector (Reviewer 1, Yorum 3 & 9)
+        # Distribution plot mode selector 
         "dist_plot_mode_label": "📊 Dağılım Grafiği — Görüntüleme Modu",
         "dist_plot_rq":   "RQ (2^-ΔCq)  — önerilen",
         "dist_plot_dct":  "ΔCq  — ham normalize değerler",
@@ -2597,11 +2597,11 @@ Bustin SA et al. *Clin Chem* 2009 (إرشادات MIQE).
 
                   
 # ═══════════════════════════════════════════════════════════════════════════════
-# RDML / RDES SIDEBAR (burada language_code ve translations hazır)
+# RDML / RDES SIDEBAR
 # ═══════════════════════════════════════════════════════════════════════════════
 _t = translations[language_code]
 
-# ── REVIEWER RESPONSE (Reviewer 2): Scenario-based example data loader ────────
+# ──Scenario-based example data loader ────────
 st.sidebar.markdown("---")
 st.sidebar.markdown(f"### {_t.get('sidebar_scenarios_title', '📋 Load Validation Scenario')}")
 
@@ -3040,7 +3040,7 @@ with tab_data:
                 key="grubbs_alpha", help=_t.get('outlier_alpha_help', '')
             )
             iqr_multiplier = 1.5
-            # REVIEWER RESPONSE (Comment 7): show minimum n and p-value info
+            #show minimum n and p-value info
             st.info(_t.get("grubbs_info", "ℹ️ Grubbs test: min n ≥ 3, α = 0.05").format(alpha=grubbs_alpha))
         else:
             iqr_multiplier = st.number_input(
@@ -3050,8 +3050,7 @@ with tab_data:
             )
             grubbs_alpha = 0.05
 
-    # ── REVIEWER RESPONSE (Comment 3): Outlier detection stage selector ──────
-    # Reviewer suggested that applying Grubbs on already-normalized ΔCq values
+    # Outlier detection stage selector ──────
     # may allow noisy raw Ct replicates to pass through undetected.
     # Option added: apply outlier detection on raw Ct values BEFORE normalization.
     outlier_stage = st.radio(
@@ -3212,7 +3211,7 @@ with tab_data:
             continue
 
         # Trim all arrays to common length
-        # REVIEWER RESPONSE (Comment 12): warn user if n differs between target and reference genes
+        # warn user if n differs between target and reference genes
         min_control_len = min(len(control_target_ct_values), *[len(a) for a in ctrl_ref_arrays])
         all_ctrl_lengths = [len(control_target_ct_values)] + [len(a) for a in ctrl_ref_arrays]
         if len(set(all_ctrl_lengths)) > 1:
@@ -3227,7 +3226,6 @@ with tab_data:
         ctrl_ref_arrays = [a[:min_control_len] for a in ctrl_ref_arrays]
 
         # ── Outlier detection — Raw Cq stage (BEFORE normalization) ──────────────
-        # REVIEWER RESPONSE (Comment 3):
         # When outlier_on_raw is True, Grubbs/IQR is applied to raw Ct values
         # separately for target gene and each reference gene before ΔCq is computed.
         # This prevents noisy replicates from propagating into normalization.
@@ -3442,7 +3440,7 @@ with tab_data:
                 st.error(_t.get('warning_patient_cq', '').format(j=j+1))
                 continue
 
-            # REVIEWER RESPONSE (Comment 12): warn if n differs between target and reference genes
+            # warn if n differs between target and reference genes
             min_sample_len = min(len(sample_target_ct_values), *[len(a) for a in smp_ref_arrays])
             all_smp_lengths = [len(sample_target_ct_values)] + [len(a) for a in smp_ref_arrays]
             if len(set(all_smp_lengths)) > 1:
@@ -3457,7 +3455,7 @@ with tab_data:
             smp_ref_arrays = [a[:min_sample_len] for a in smp_ref_arrays]
 
             # ── Outlier detection — Raw Cq stage (BEFORE normalization) ──────────
-            # REVIEWER RESPONSE (Comment 3): same logic as control group above
+            # same logic as control group above
             smp_excluded_target = []
 
             if outlier_enabled and outlier_on_raw:
@@ -3688,13 +3686,10 @@ with tab_data:
                 # ─────────────────────────────────────────────────────────────
 
                 # ── Per-group pairwise stats (control vs this patient group) ────
-                # REVIEWER RESPONSE (Comments 8 & 14):
                 # Statistical tests are now performed on RQ values (2^-ΔCq) instead of
                 # raw ΔCt values. ΔCt values are on a logarithmic scale; performing
                 # t-tests directly on ΔCt underestimates biological variability and can
                 # produce false significant differences compared to linear RQ-based tests.
-                # References: https://www.nature.com/articles/s41598-025-11822-0
-                #             https://www.nature.com/articles/s41598-021-99727-6
                 control_rq = 2 ** (-np.array(control_delta_ct))
                 sample_rq  = 2 ** (-np.array(sample_delta_ct))
 
@@ -3855,7 +3850,6 @@ for i in range(num_target_genes):
     if not ctrl_dct or not patient_dcts:
         continue
 
-    # REVIEWER RESPONSE (Comments 8 & 14):
     # Convert ΔCq lists to RQ (2^-ΔCt) for all statistical tests
     all_groups_dct  = [ctrl_dct] + list(patient_dcts.values())
     all_groups      = [list(2 ** (-np.array(g))) for g in all_groups_dct]
@@ -4301,7 +4295,6 @@ Ge Y et al. *Bioinformatics* 2003; Storey JD. *J R Stat Soc B* 2002.
     # ── Dağılım Grafikleri ────────────────────────────────────────────────────
     st.markdown("---")
 
-    # REVIEWER RESPONSE (Comment 3 — second part):
     # Allow user to choose which values to display in the distribution plot:
     # RQ (2^-ΔCq), raw ΔCt, or ΔΔCq (relative to control mean).
     plot_mode = st.radio(
@@ -5020,7 +5013,6 @@ def create_pdf(results, stat_rows, input_df, language_code, multigroup_results=N
                 and d.get("__dct_ctrl__") not in ("EXCLUDED", None)
                 and d.get("Outlier Excluded", "No") == "No"
             ]
-            # REVIEWER RESPONSE (Comments 9 & 13):
             # Convert ΔCq to RQ = 2^(-ΔCt) for visualization.
             # Plotting raw ΔCt is misleading because higher ΔCt = lower expression,
             # which is counter-intuitive. RQ values reflect actual expression levels.
@@ -5130,7 +5122,7 @@ st.sidebar.link_button(
     use_container_width=True
 )
 
-# ── REVIEWER RESPONSE (Reviewer 2): Open-source source code on GitHub ─────────
+# Open-source source code on GitHub ─────────
 st.sidebar.markdown("---")
 st.sidebar.markdown(_t.get("sidebar_opensource_title", "### 🔓 Open Source"))
 st.sidebar.markdown(_t.get("sidebar_opensource_body", "GeneQuantify is open source (GPL-3.0).  \nSource code available on GitHub:"))
