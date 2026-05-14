@@ -16,7 +16,7 @@ from reportlab.pdfbase import pdfmetrics
 import plotly.io as pio
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as _mpl_fm
-# Türkçe karakter desteği: DejaVu Sans kullan
+
 try:
     plt.rcParams['font.family'] = 'DejaVu Sans'
     plt.rcParams['axes.unicode_minus'] = False
