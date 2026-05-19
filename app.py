@@ -2997,28 +2997,8 @@ st.markdown("""
 /* Bölümler arası boşluğu azalt */
 .block-container { padding-top: 1rem !important; }
 div[data-testid="stVerticalBlock"] > div { gap: 0.4rem; }
-
-/* Kart stili */
-.settings-card {
-    background: #f8faff;
-    border: 1px solid #dde3f0;
-    border-radius: 10px;
-    padding: 14px 18px 10px 18px;
-    margin-bottom: 10px;
-}
-.settings-card-title {
-    font-size: 13px;
-    font-weight: 700;
-    color: #1a237e;
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
 /* st.info kutusunu küçült */
 div[data-testid="stAlert"] { padding: 6px 12px !important; font-size: 12px !important; }
-
 /* number_input ve radio margin azalt */
 div[data-testid="stNumberInput"] { margin-bottom: 0 !important; }
 div[data-testid="stRadio"] { margin-bottom: 0 !important; }
@@ -3028,108 +3008,111 @@ div[data-testid="stRadio"] { margin-bottom: 0 !important; }
 with tab_data:
 
     # ── KART 1: Çalışma Tasarımı ──────────────────────────────────────────────
-    st.markdown('<div class="settings-card"><div class="settings-card-title">⚙️ Study Design</div>', unsafe_allow_html=True)
-    sd_c1, sd_c2, sd_c3 = st.columns(3)
-    with sd_c1:
-        num_target_genes = st.number_input(_t.get('num_target_genes', '🔹 Target Genes'), min_value=1, step=1, key="gene_count")
-    with sd_c2:
-        num_patient_groups = st.number_input(_t.get('num_patient_groups', '🔹 Patient Groups'), min_value=1, step=1, key="patient_count")
-    with sd_c3:
-        num_ref_genes = st.number_input(
-            _t.get('ref_gene_num_label', 'Reference Genes'),
-            min_value=1, max_value=10, value=1, step=1,
-            key="num_ref_genes",
-            help=_t.get('ref_gene_num_help', '')
-        )
-    st.markdown('</div>', unsafe_allow_html=True)
-
-    # Referans gen uyarısı — sadece gerektiğinde göster
-    if num_ref_genes == 1:
-        st.caption("⚠️ " + _t.get('ref_gene_1_warning', 'Single reference gene limits normalization robustness. ≥2 recommended (MIQE).').replace("⚠️ **Methodological note:** ", ""))
-    else:
-        st.caption("✅ " + _t.get('ref_gene_multi_success', '{n} reference genes selected.').format(n=num_ref_genes))
-    if num_ref_genes > 1:
-        with st.expander(_t.get('ref_gene_expander', 'ℹ️ About multi-reference normalization'), expanded=False):
-            st.markdown(_t.get('ref_multi_description', ''))
-
-    # ── KART 2: Aykırı Değer Ayarları ────────────────────────────────────────
-    st.markdown('<div class="settings-card"><div class="settings-card-title">🔍 Outlier Detection</div>', unsafe_allow_html=True)
-    out_c1, out_c2, out_c3, out_c4 = st.columns([1.5, 2, 2, 2])
-    with out_c1:
-        outlier_enabled = st.checkbox(
-            _t.get('outlier_enable', 'Enable'),
-            value=True, key="outlier_enabled",
-            help=_t.get('outlier_enable_help', '')
-        )
-    with out_c2:
-        outlier_method = st.radio(
-            _t.get('outlier_method_label', 'Method'),
-            options=["Grubbs", "IQR"], key="outlier_method",
-            horizontal=True, help=_t.get('outlier_method_help', '')
-        )
-    with out_c3:
-        if outlier_method == "Grubbs":
-            grubbs_alpha = st.number_input(
-                _t.get('outlier_alpha_label', 'α'),
-                min_value=0.01, max_value=0.10, value=0.05, step=0.01, format="%.2f",
-                key="grubbs_alpha", help=_t.get('outlier_alpha_help', '')
+    with st.container(border=True):
+        st.markdown("**⚙️ Study Design**")
+        sd_c1, sd_c2, sd_c3 = st.columns(3)
+        with sd_c1:
+            num_target_genes = st.number_input(
+                "🔹 Target Genes",
+                min_value=1, step=1, key="gene_count",
+                help=_t.get('num_target_genes', '')
             )
-            iqr_multiplier = 1.5
+        with sd_c2:
+            num_patient_groups = st.number_input(
+                "🔹 Patient Groups",
+                min_value=1, step=1, key="patient_count",
+                help=_t.get('num_patient_groups', '')
+            )
+        with sd_c3:
+            num_ref_genes = st.number_input(
+                "🔹 Reference Genes",
+                min_value=1, max_value=10, value=1, step=1,
+                key="num_ref_genes",
+                help=_t.get('ref_gene_num_help', 'MIQE: ≥2 reference genes recommended')
+            )
+        # Referans gen durumu — tek satır
+        if num_ref_genes == 1:
+            st.caption("⚠️ Single reference gene — MIQE recommends ≥2. Normalization robustness limited.")
         else:
-            iqr_multiplier = st.number_input(
-                _t.get('outlier_iqr_label', 'k'),
-                min_value=1.0, max_value=3.0, value=1.5, step=0.25, format="%.2f",
-                key="iqr_mult", help=_t.get('outlier_iqr_help', '')
+            st.caption(f"✅ {num_ref_genes} reference genes — geometric mean normalization + geNorm M-value will be calculated.")
+        if num_ref_genes > 1:
+            with st.expander(_t.get('ref_gene_expander', 'ℹ️ About multi-reference normalization'), expanded=False):
+                st.markdown(_t.get('ref_multi_description', ''))
+
+    # ── KART 2: Aykırı Değer + Stage (2 sütun layout) ────────────────────────
+    with st.container(border=True):
+        st.markdown("**🔍 Outlier Detection**")
+        out_c1, out_c2, out_c3 = st.columns([1, 2, 2])
+        with out_c1:
+            outlier_enabled = st.checkbox(
+                "Enable",
+                value=True, key="outlier_enabled",
+                help=_t.get('outlier_enable_help', '')
             )
-            grubbs_alpha = 0.05
-    with out_c4:
-        outlier_stage = st.radio(
-            _t.get('outlier_stage_label', '🔬 Stage'),
-            options=[
-                _t.get('outlier_stage_raw', 'Raw Cq (recommended)'),
-                _t.get('outlier_stage_dct', 'ΔCq'),
-            ],
-            index=0, key="outlier_stage",
-            help=_t.get('outlier_stage_help', '')
-        )
-    # Grubbs bilgisini küçük caption olarak göster
-    if outlier_method == "Grubbs" and outlier_enabled:
-        st.caption(f"ℹ️ Grubbs: min n ≥ 3, α = {grubbs_alpha:.2f}. Normality assumed. Raw Cq detection recommended.")
-    st.markdown('</div>', unsafe_allow_html=True)
+            outlier_method = st.radio(
+                "Method",
+                options=["Grubbs", "IQR"], key="outlier_method",
+                help=_t.get('outlier_method_help', '')
+            )
+        with out_c2:
+            if outlier_method == "Grubbs":
+                grubbs_alpha = st.number_input(
+                    _t.get('outlier_alpha_label', 'Significance level (α)'),
+                    min_value=0.01, max_value=0.10, value=0.05, step=0.01, format="%.2f",
+                    key="grubbs_alpha", help=_t.get('outlier_alpha_help', '')
+                )
+                iqr_multiplier = 1.5
+                st.caption(f"ℹ️ min n ≥ 3, normality assumed, α = {grubbs_alpha:.2f}")
+            else:
+                iqr_multiplier = st.number_input(
+                    _t.get('outlier_iqr_label', 'IQR multiplier (k)'),
+                    min_value=1.0, max_value=3.0, value=1.5, step=0.25, format="%.2f",
+                    key="iqr_mult", help=_t.get('outlier_iqr_help', '')
+                )
+                grubbs_alpha = 0.05
+                st.caption("ℹ️ Flags values outside Q1−k×IQR / Q3+k×IQR")
+        with out_c3:
+            outlier_stage = st.radio(
+                _t.get('outlier_stage_label', '🔬 Detection Stage'),
+                options=[
+                    "Raw Cq — before normalization (recommended)",
+                    "ΔCq — after normalization",
+                ],
+                index=0, key="outlier_stage",
+                help=_t.get('outlier_stage_help', '')
+            )
+        with st.expander(_t.get('outlier_expander', 'ℹ️ About outlier detection in qPCR'), expanded=False):
+            st.markdown(_t.get('outlier_description', ''))
 
-    outlier_on_raw = outlier_stage == _t.get('outlier_stage_raw', 'Raw Cq (recommended)')
-
-    with st.expander(_t.get('outlier_expander', 'ℹ️ About outlier detection in qPCR'), expanded=False):
-        st.markdown(_t.get('outlier_description', ''))
+    outlier_on_raw = st.session_state.get("outlier_stage", "Raw Cq — before normalization (recommended)") == "Raw Cq — before normalization (recommended)"
 
     # ── KART 3: Amplifikasyon Verimliliği ─────────────────────────────────────
-    st.markdown('<div class="settings-card"><div class="settings-card-title">🔬 Amplification Efficiency</div>', unsafe_allow_html=True)
-    eff_c1, eff_c2, eff_c3 = st.columns([2, 2, 3])
-    with eff_c1:
-        efficiency_method = st.radio(
-            _t.get('efficiency_method', 'Input Method'),
-            options=[_t.get('efficiency_manual', 'Manual E'), _t.get('efficiency_slope', 'From slope')],
-            key="eff_method", horizontal=True
-        )
-    with eff_c2:
-        efficiency_threshold = st.number_input(
-            _t.get('efficiency_threshold', 'Diff threshold (%)'),
-            min_value=1.0, max_value=50.0, value=10.0, step=0.5, key="eff_threshold",
-            help="Recommended: 10% (MIQE guidelines)."
-        )
-    with eff_c3:
-        st.caption(_t.get('efficiency_note', 'E=2.0 = perfect (100%). Accepted: 1.8–2.2 (90–110%)'))
-    st.markdown('</div>', unsafe_allow_html=True)
-
-    with st.expander("ℹ️ How to obtain Efficiency (E)", expanded=False):
-        st.markdown(
-            "**Method 1 — Standard Curve** *(recommended)*  \n"
-            "Run qPCR on 4-5 serial dilutions (e.g. 10x each) for each primer.  \n"
-            "`E = 10^(-1 / slope)`\n\n"
-            "**Method 2 — Software tools:** LinRegPCR, qBase+, Bio-Rad CFX Maestro, QuantStudio\n\n"
-            "**Method 3 — Primer/Kit datasheet**  \n"
-            "**Acceptable range:** E = 1.8-2.2 (90-110%)"
-        )
+    with st.container(border=True):
+        st.markdown("**🔬 Amplification Efficiency**")
+        eff_c1, eff_c2, eff_c3 = st.columns([2, 2, 3])
+        with eff_c1:
+            efficiency_method = st.radio(
+                _t.get('efficiency_method', 'Input Method'),
+                options=[_t.get('efficiency_manual', 'Manual E value'), _t.get('efficiency_slope', 'Calculate from slope')],
+                key="eff_method", horizontal=True
+            )
+        with eff_c2:
+            efficiency_threshold = st.number_input(
+                _t.get('efficiency_threshold', 'Max diff threshold (%)'),
+                min_value=1.0, max_value=50.0, value=10.0, step=0.5, key="eff_threshold",
+                help="Recommended: 10% (MIQE guidelines)."
+            )
+        with eff_c3:
+            st.caption("E = 2.0 → 100% efficiency (perfect).  Accepted range: **1.8 – 2.2** (90–110%).  If |E_target − E_ref| > threshold → use Pfaffl method.")
+        with st.expander("ℹ️ How to obtain Efficiency (E)", expanded=False):
+            st.markdown(
+                "**Method 1 — Standard Curve** *(recommended)*  \n"
+                "Run qPCR on 4-5 serial dilutions (e.g. 10x each) for each primer.  \n"
+                "`E = 10^(-1 / slope)`\n\n"
+                "**Method 2 — Software tools:** LinRegPCR, qBase+, Bio-Rad CFX Maestro, QuantStudio\n\n"
+                "**Method 3 — Primer/Kit datasheet**  \n"
+                "**Acceptable range:** E = 1.8-2.2 (90-110%)"
+            )
 
     st.divider()
 
