@@ -205,30 +205,8 @@ if 'language' not in st.session_state:
 # ── Global CSS ─────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
-/* Ana içerik üst boşluğunu azalt */
-.block-container { padding-top: 0.5rem !important; padding-bottom: 1rem !important; }
-
-/* Başlık bandı */
-.gq-header {
-    background: linear-gradient(90deg, #1a237e 0%, #3949ab 100%);
-    color: white;
-    padding: 10px 20px;
-    border-radius: 8px;
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-.gq-header-title { font-size: 22px; font-weight: 800; letter-spacing: 0.5px; }
-.gq-header-sub   { font-size: 11px; opacity: 0.75; margin-top: 2px; }
-
-/* Sidebar sıkıştır */
-section[data-testid="stSidebar"] > div:first-child { padding-top: 0.5rem !important; }
-section[data-testid="stSidebar"] .block-container   { padding-top: 0 !important; }
-
-/* Sidebar'daki boşlukları azalt */
-section[data-testid="stSidebar"] hr { margin: 4px 0 !important; }
-section[data-testid="stSidebar"] .stButton > button { margin-top: 2px !important; }
+/* Başlığın üstten kesilmesini önle */
+.block-container { padding-top: 1.2rem !important; padding-bottom: 1rem !important; }
 
 /* Alert kutularını küçült */
 div[data-testid="stAlert"] { padding: 5px 10px !important; font-size: 12px !important; }
@@ -236,6 +214,10 @@ div[data-testid="stAlert"] { padding: 5px 10px !important; font-size: 12px !impo
 /* Widget margin azalt */
 div[data-testid="stNumberInput"] { margin-bottom: 0 !important; }
 div[data-testid="stRadio"]       { margin-bottom: 0 !important; }
+
+/* Sidebar sıkıştır */
+section[data-testid="stSidebar"] > div:first-child { padding-top: 0.8rem !important; }
+section[data-testid="stSidebar"] hr { margin: 4px 0 !important; }
 </style>
 """, unsafe_allow_html=True)
     
@@ -250,8 +232,23 @@ flags = {
 }
 default_index = list(flags.keys()).index(st.session_state.language)
 
-# Sidebar — kompakt
-st.sidebar.image("geneq.jpg", use_container_width=True)
+# Sidebar — logo küçük ve ortalı
+try:
+    import base64 as _b64, os as _os
+    _logo_path = "geneq.jpg"
+    if _os.path.exists(_logo_path):
+        with open(_logo_path, "rb") as _f:
+            _logo_b64 = _b64.b64encode(_f.read()).decode()
+        st.sidebar.markdown(
+            f"<div style='text-align:center;padding:4px 0 6px 0;'>"
+            f"<img src='data:image/jpeg;base64,{_logo_b64}' width='130' style='border-radius:8px;'/>"
+            f"</div>",
+            unsafe_allow_html=True
+        )
+    else:
+        st.sidebar.image("geneq.jpg", width=140)
+except Exception:
+    st.sidebar.image("geneq.jpg", width=140)
 selected_language = st.sidebar.selectbox(
     "🌐 Language",
     options=[f"{flags[lang]} {lang}" for lang in flags],
