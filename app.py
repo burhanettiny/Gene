@@ -239,9 +239,7 @@ st.markdown("""
 
 
 st.sidebar.markdown("---")
-
-st.sidebar.markdown("---")
-instruction_clicked = st.sidebar.button("📘 Instruction ")
+instruction_clicked = st.sidebar.button("📘 Instruction")
 
 if instruction_clicked or selected_language_name == "Instruction":
 
@@ -2793,9 +2791,15 @@ with st.sidebar.expander(_t.get("rdml_expander", "📂 Import RDML / RDES File")
 # ═══════════════════════════════════════════════════════════════════════════════
 # ANA ALAN — Başlık + 3 sekme
 # ═══════════════════════════════════════════════════════════════════════════════
-st.markdown(f"<h2 style='margin-bottom:0'>{_t.get('title', "")}</h2>", unsafe_allow_html=True)
-st.caption(_t.get('subtitle', ""))
-st.markdown("---")
+_title_txt = _t.get('title', 'GeneQuantify')
+_sub_txt   = _t.get('subtitle', '')
+st.markdown(
+    f"<div style='display:flex;align-items:center;gap:10px;margin-bottom:2px;'>"
+    f"<span style='font-size:24px;font-weight:800;color:#1a237e;'>{_title_txt}</span>"
+    f"</div>"
+    f"<p style='margin:0 0 6px 0;color:#888;font-size:12px;'>{_sub_txt}</p>",
+    unsafe_allow_html=True
+)
 
 tab_data, tab_results, tab_report = st.tabs([
     f"📥 {_t.get('tab_data', 'Veri Girişi')}",
@@ -2986,92 +2990,136 @@ patient_group = _t.get('patient_group', '')
 # ═══════════════════════════════════════════════════════════════════════════════
 # SEKME 1: VERİ GİRİŞİ  (tüm girişler bu tab içinde)
 # ═══════════════════════════════════════════════════════════════════════════════
+
+# ── Genel CSS: boşlukları azalt, kartları güzelleştir ─────────────────────────
+st.markdown("""
+<style>
+/* Bölümler arası boşluğu azalt */
+.block-container { padding-top: 1rem !important; }
+div[data-testid="stVerticalBlock"] > div { gap: 0.4rem; }
+
+/* Kart stili */
+.settings-card {
+    background: #f8faff;
+    border: 1px solid #dde3f0;
+    border-radius: 10px;
+    padding: 14px 18px 10px 18px;
+    margin-bottom: 10px;
+}
+.settings-card-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1a237e;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* st.info kutusunu küçült */
+div[data-testid="stAlert"] { padding: 6px 12px !important; font-size: 12px !important; }
+
+/* number_input ve radio margin azalt */
+div[data-testid="stNumberInput"] { margin-bottom: 0 !important; }
+div[data-testid="stRadio"] { margin-bottom: 0 !important; }
+</style>
+""", unsafe_allow_html=True)
+
 with tab_data:
-    st.markdown(f"### {_t.get('patient_data_header', "")}")
 
-    # ── Temel parametreler ────────────────────────────────────────────────────
-    col_genes, col_groups = st.columns(2)
-    with col_genes:
-        num_target_genes = st.number_input(_t.get('num_target_genes', ''), min_value=1, step=1, key="gene_count")
-    with col_groups:
-        num_patient_groups = st.number_input(_t.get('num_patient_groups', ''), min_value=1, step=1, key="patient_count")
-
-    # ── Referans gen ayarları ─────────────────────────────────────────────────
-    st.markdown("---")
-    st.markdown(_t.get('ref_gene_section_title', ''))
-    ref_col1, ref_col2 = st.columns([2, 3])
-    with ref_col1:
+    # ── KART 1: Çalışma Tasarımı ──────────────────────────────────────────────
+    st.markdown('<div class="settings-card"><div class="settings-card-title">⚙️ Study Design</div>', unsafe_allow_html=True)
+    sd_c1, sd_c2, sd_c3 = st.columns(3)
+    with sd_c1:
+        num_target_genes = st.number_input(_t.get('num_target_genes', '🔹 Target Genes'), min_value=1, step=1, key="gene_count")
+    with sd_c2:
+        num_patient_groups = st.number_input(_t.get('num_patient_groups', '🔹 Patient Groups'), min_value=1, step=1, key="patient_count")
+    with sd_c3:
         num_ref_genes = st.number_input(
-            _t.get('ref_gene_num_label', ''),
+            _t.get('ref_gene_num_label', 'Reference Genes'),
             min_value=1, max_value=10, value=1, step=1,
             key="num_ref_genes",
             help=_t.get('ref_gene_num_help', '')
         )
-    with ref_col2:
-        if num_ref_genes == 1:
-            st.warning(_t.get('ref_gene_1_warning', ''))
-        else:
-            st.success(_t.get('ref_gene_multi_success', '').format(n=num_ref_genes))
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # Referans gen uyarısı — sadece gerektiğinde göster
+    if num_ref_genes == 1:
+        st.caption("⚠️ " + _t.get('ref_gene_1_warning', 'Single reference gene limits normalization robustness. ≥2 recommended (MIQE).').replace("⚠️ **Methodological note:** ", ""))
+    else:
+        st.caption("✅ " + _t.get('ref_gene_multi_success', '{n} reference genes selected.').format(n=num_ref_genes))
     if num_ref_genes > 1:
-        with st.expander(_t.get('ref_gene_expander', ''), expanded=False):
+        with st.expander(_t.get('ref_gene_expander', 'ℹ️ About multi-reference normalization'), expanded=False):
             st.markdown(_t.get('ref_multi_description', ''))
 
-    # ── Aykırı değer ayarları ─────────────────────────────────────────────────
-    st.markdown("---")
-    st.markdown(_t.get('outlier_section_title', ''))
-    out_c1, out_c2, out_c3 = st.columns([2, 2, 3])
+    # ── KART 2: Aykırı Değer Ayarları ────────────────────────────────────────
+    st.markdown('<div class="settings-card"><div class="settings-card-title">🔍 Outlier Detection</div>', unsafe_allow_html=True)
+    out_c1, out_c2, out_c3, out_c4 = st.columns([1.5, 2, 2, 2])
     with out_c1:
         outlier_enabled = st.checkbox(
-            _t.get('outlier_enable', ''),
+            _t.get('outlier_enable', 'Enable'),
             value=True, key="outlier_enabled",
             help=_t.get('outlier_enable_help', '')
         )
     with out_c2:
         outlier_method = st.radio(
-            _t.get('outlier_method_label', ''),
+            _t.get('outlier_method_label', 'Method'),
             options=["Grubbs", "IQR"], key="outlier_method",
             horizontal=True, help=_t.get('outlier_method_help', '')
         )
     with out_c3:
         if outlier_method == "Grubbs":
             grubbs_alpha = st.number_input(
-                _t.get('outlier_alpha_label', ''),
+                _t.get('outlier_alpha_label', 'α'),
                 min_value=0.01, max_value=0.10, value=0.05, step=0.01, format="%.2f",
                 key="grubbs_alpha", help=_t.get('outlier_alpha_help', '')
             )
             iqr_multiplier = 1.5
-            #show minimum n and p-value info
-            st.info(_t.get("grubbs_info", "ℹ️ Grubbs test: min n ≥ 3, α = 0.05").format(alpha=grubbs_alpha))
         else:
             iqr_multiplier = st.number_input(
-                _t.get('outlier_iqr_label', ''),
+                _t.get('outlier_iqr_label', 'k'),
                 min_value=1.0, max_value=3.0, value=1.5, step=0.25, format="%.2f",
                 key="iqr_mult", help=_t.get('outlier_iqr_help', '')
             )
             grubbs_alpha = 0.05
+    with out_c4:
+        outlier_stage = st.radio(
+            _t.get('outlier_stage_label', '🔬 Stage'),
+            options=[
+                _t.get('outlier_stage_raw', 'Raw Cq (recommended)'),
+                _t.get('outlier_stage_dct', 'ΔCq'),
+            ],
+            index=0, key="outlier_stage",
+            help=_t.get('outlier_stage_help', '')
+        )
+    # Grubbs bilgisini küçük caption olarak göster
+    if outlier_method == "Grubbs" and outlier_enabled:
+        st.caption(f"ℹ️ Grubbs: min n ≥ 3, α = {grubbs_alpha:.2f}. Normality assumed. Raw Cq detection recommended.")
+    st.markdown('</div>', unsafe_allow_html=True)
 
-    # Outlier detection stage selector ──────
-    # may allow noisy raw Ct replicates to pass through undetected.
-    # Option added: apply outlier detection on raw Ct values BEFORE normalization.
-    outlier_stage = st.radio(
-        _t.get('outlier_stage_label', ''),
-        options=[
-            _t.get('outlier_stage_raw', ''),
-            _t.get('outlier_stage_dct', ''),
-        ],
-        index=0,
-        key="outlier_stage",
-        help=_t.get('outlier_stage_help', '')
-    )
-    outlier_on_raw = outlier_stage == _t.get('outlier_stage_raw', '')
+    outlier_on_raw = outlier_stage == _t.get('outlier_stage_raw', 'Raw Cq (recommended)')
 
-    with st.expander(_t.get('outlier_expander', ''), expanded=False):
+    with st.expander(_t.get('outlier_expander', 'ℹ️ About outlier detection in qPCR'), expanded=False):
         st.markdown(_t.get('outlier_description', ''))
 
-    # ── Amplifikasyon verimliliği ─────────────────────────────────────────────
-    st.markdown("---")
-    st.markdown(f"#### {_t.get('efficiency_header', "")}")
-    st.info(_t.get('efficiency_note', ''))
+    # ── KART 3: Amplifikasyon Verimliliği ─────────────────────────────────────
+    st.markdown('<div class="settings-card"><div class="settings-card-title">🔬 Amplification Efficiency</div>', unsafe_allow_html=True)
+    eff_c1, eff_c2, eff_c3 = st.columns([2, 2, 3])
+    with eff_c1:
+        efficiency_method = st.radio(
+            _t.get('efficiency_method', 'Input Method'),
+            options=[_t.get('efficiency_manual', 'Manual E'), _t.get('efficiency_slope', 'From slope')],
+            key="eff_method", horizontal=True
+        )
+    with eff_c2:
+        efficiency_threshold = st.number_input(
+            _t.get('efficiency_threshold', 'Diff threshold (%)'),
+            min_value=1.0, max_value=50.0, value=10.0, step=0.5, key="eff_threshold",
+            help="Recommended: 10% (MIQE guidelines)."
+        )
+    with eff_c3:
+        st.caption(_t.get('efficiency_note', 'E=2.0 = perfect (100%). Accepted: 1.8–2.2 (90–110%)'))
+    st.markdown('</div>', unsafe_allow_html=True)
 
     with st.expander("ℹ️ How to obtain Efficiency (E)", expanded=False):
         st.markdown(
@@ -3083,19 +3131,7 @@ with tab_data:
             "**Acceptable range:** E = 1.8-2.2 (90-110%)"
         )
 
-    eff_c1, eff_c2 = st.columns(2)
-    with eff_c1:
-        efficiency_method = st.radio(
-            _t.get('efficiency_method', ''),
-            options=[_t.get('efficiency_manual', ''), _t.get('efficiency_slope', '')],
-            key="eff_method", horizontal=True
-        )
-    with eff_c2:
-        efficiency_threshold = st.number_input(
-            _t.get('efficiency_threshold', ''),
-            min_value=1.0, max_value=50.0, value=10.0, step=0.5, key="eff_threshold",
-            help="Recommended: 10% (MIQE guidelines)."
-        )
+    st.divider()
 
     # ── Standart eğri hesaplayıcı ─────────────────────────────────────────────
     with st.expander(_t.get('sc_expander', ''), expanded=False):
@@ -3169,18 +3205,26 @@ with tab_data:
                 st.warning(_t.get('efficiency_warning', '').format(diff=diff))
             gene_efficiencies[i] = {"target_E": target_E, "ref_E": ref_E}
 
-    st.markdown("---")
-    st.markdown(f"### {_t.get('patient_data_header', "")}")
+    st.divider()
+
+    # ── Gen verisi giriş başlığı ───────────────────────────────────────────────
+    st.markdown(
+        f"<div style='font-size:15px;font-weight:700;color:#1a237e;margin-bottom:6px;'>"
+        f"📥 {_t.get('patient_data_header', 'Enter Patient and Control Group Data')}"
+        f"</div>",
+        unsafe_allow_html=True
+    )
 
     # Kontrol + Hasta Grubu Veri Giriş Döngüsü
     for i in range(num_target_genes):
         st.markdown(
-            f"<h4>Control {i+1} - {_t.get('target_gene', "")} {i+1}</h4>",
+            f"<h4 style='margin-top:12px;margin-bottom:4px;color:#283593;'>"
+            f"🧬 {_t.get('target_gene', 'Target Gene')} {i+1}</h4>",
             unsafe_allow_html=True
         )
 
         control_target_ct = st.text_area(
-            f"Control {i+1} - {_t.get('target_gene', "")} {i+1} - {_t.get('ct_value', "")}",
+            f"Control {i+1} - {_t.get('target_gene', '')} {i+1} - {_t.get('ct_value', '')}",
             value=st.session_state.get(f"control_target_ct_{i}", ""),
             key=f"control_target_ct_{i}"
         )
