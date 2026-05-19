@@ -193,14 +193,51 @@ def parse_rdes(file_bytes):
 
 
 
-st.set_page_config(page_title="GeneQuantify", layout="wide")
+st.set_page_config(
+    page_title="GeneQuantify",
+    page_icon="🧬",
+    layout="wide"
+)
 
 if 'language' not in st.session_state:
-    st.session_state.language = "English" 
+    st.session_state.language = "English"
 
+# ── Global CSS ─────────────────────────────────────────────────────────────────
+st.markdown("""
+<style>
+/* Ana içerik üst boşluğunu azalt */
+.block-container { padding-top: 0.5rem !important; padding-bottom: 1rem !important; }
 
-if 'language' not in st.session_state:
-    st.session_state.language = "English" 
+/* Başlık bandı */
+.gq-header {
+    background: linear-gradient(90deg, #1a237e 0%, #3949ab 100%);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.gq-header-title { font-size: 22px; font-weight: 800; letter-spacing: 0.5px; }
+.gq-header-sub   { font-size: 11px; opacity: 0.75; margin-top: 2px; }
+
+/* Sidebar sıkıştır */
+section[data-testid="stSidebar"] > div:first-child { padding-top: 0.5rem !important; }
+section[data-testid="stSidebar"] .block-container   { padding-top: 0 !important; }
+
+/* Sidebar'daki boşlukları azalt */
+section[data-testid="stSidebar"] hr { margin: 4px 0 !important; }
+section[data-testid="stSidebar"] .stButton > button { margin-top: 2px !important; }
+
+/* Alert kutularını küçült */
+div[data-testid="stAlert"] { padding: 5px 10px !important; font-size: 12px !important; }
+
+/* Widget margin azalt */
+div[data-testid="stNumberInput"] { margin-bottom: 0 !important; }
+div[data-testid="stRadio"]       { margin-bottom: 0 !important; }
+</style>
+""", unsafe_allow_html=True)
     
 
 flags = {
@@ -212,20 +249,28 @@ flags = {
     "العربية": "🇸🇦"
 }
 default_index = list(flags.keys()).index(st.session_state.language)
-st.sidebar.image("geneq.jpg", use_container_width=True)
 
+# Sidebar — kompakt
+st.sidebar.image("geneq.jpg", use_container_width=True)
 selected_language = st.sidebar.selectbox(
-    "Language / Dil / Sprache / Français / Español / العربية",
+    "🌐 Language",
     options=[f"{flags[lang]} {lang}" for lang in flags],
-    index=default_index
+    index=default_index,
+    label_visibility="collapsed"
 )
 
 try:
-    selected_language_name = selected_language.split(' ', 1)[1]  
+    selected_language_name = selected_language.split(' ', 1)[1]
     selected_flag = flags[selected_language_name]
 except KeyError:
-    selected_language_name = selected_language 
-    selected_flag = None  
+    selected_language_name = selected_language
+    selected_flag = None
+
+st.sidebar.markdown(
+    f"<div style='font-size:11px;color:#888;margin:-6px 0 4px 0;'>"
+    f"Language / Dil / Sprache / Langue / Idioma / لغة</div>",
+    unsafe_allow_html=True
+)
 
 st.markdown("""
 <style>
@@ -237,9 +282,8 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-
-st.sidebar.markdown("---")
-instruction_clicked = st.sidebar.button("📘 Instruction")
+st.sidebar.divider()
+instruction_clicked = st.sidebar.button("📘 User Guide", use_container_width=True)
 
 if instruction_clicked or selected_language_name == "Instruction":
 
@@ -2718,23 +2762,30 @@ SCENARIOS = {
     },
 }
 
+st.sidebar.markdown(
+    "<div style='font-size:12px;font-weight:600;color:#1a237e;margin-bottom:2px;'>"
+    f"📋 {_t.get('sidebar_scenarios_title','Validation Scenarios')}</div>",
+    unsafe_allow_html=True
+)
 selected_scenario = st.sidebar.selectbox(
     _t.get('sidebar_scenario_select', 'Select scenario'),
     options=["—"] + list(SCENARIOS.keys()),
-    key="scenario_selector"
+    key="scenario_selector",
+    label_visibility="collapsed"
 )
 
 if selected_scenario != "—":
     sc = SCENARIOS[selected_scenario]
     st.sidebar.caption(sc.get("description", ""))
-    if st.sidebar.button(_t.get('sidebar_load_scenario_btn', '▶ Load Scenario'), key="load_scenario_btn"):
+    if st.sidebar.button(_t.get('sidebar_load_scenario_btn', '▶ Load Scenario'), key="load_scenario_btn", use_container_width=True):
         for key, val in sc.items():
             if key == "description":
                 continue
             st.session_state[key] = val
-        st.sidebar.success(_t.get('sidebar_scenario_loaded', f'✅ {selected_scenario} loaded! Go to Data Entry tab.').format(s=selected_scenario))
-st.sidebar.markdown("---")
-with st.sidebar.expander(_t.get("rdml_expander", "📂 Import RDML / RDES File"), expanded=False):
+        st.sidebar.success(_t.get('sidebar_scenario_loaded', f'✅ {selected_scenario} loaded!').format(s=selected_scenario))
+
+st.sidebar.divider()
+with st.sidebar.expander(_t.get("rdml_expander", "📂 Import RDML / RDES"), expanded=False):
     st.markdown(_t.get("rdml_description", "Upload an RDML or RDES file to auto-fill Cq values."))
     imported_file = st.file_uploader(
         _t.get("rdml_uploader", "Choose file"),
@@ -2789,15 +2840,18 @@ with st.sidebar.expander(_t.get("rdml_expander", "📂 Import RDML / RDES File")
                     st.warning(_t.get("rdml_apply_warning", "⚠️ No values were mapped. Check your labels."))
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# ANA ALAN — Başlık + 3 sekme
+# ANA BAŞLIK
 # ═══════════════════════════════════════════════════════════════════════════════
-_title_txt = _t.get('title', 'GeneQuantify')
-_sub_txt   = _t.get('subtitle', '')
+_title_txt = _t.get('title', '🧬 GeneQuantify')
+_sub_txt   = _t.get('subtitle', 'Developed by B. Yalçınkaya')
 st.markdown(
-    f"<div style='display:flex;align-items:center;gap:10px;margin-bottom:2px;'>"
-    f"<span style='font-size:24px;font-weight:800;color:#1a237e;'>{_title_txt}</span>"
-    f"</div>"
-    f"<p style='margin:0 0 6px 0;color:#888;font-size:12px;'>{_sub_txt}</p>",
+    f"""
+    <div style="background:linear-gradient(90deg,#1a237e,#3949ab);
+                color:white;padding:10px 18px;border-radius:8px;margin-bottom:8px;">
+        <div style="font-size:20px;font-weight:800;">{_title_txt}</div>
+        <div style="font-size:11px;opacity:0.75;margin-top:2px;">{_sub_txt}</div>
+    </div>
+    """,
     unsafe_allow_html=True
 )
 
@@ -5141,20 +5195,18 @@ with tab_report:
 
 st.markdown(f"<h4 style='font-size: 12px; font-family: Arial, sans-serif; color: #555;'><a href='mailto:mailtoburhanettin@gmail.com' style='color: #555; text-decoration: none;'>{_t.get('subtitle', "")}</a></h4>", unsafe_allow_html=True)
 
-st.sidebar.markdown("---")
-st.sidebar.markdown(_t.get("sidebar_desktop_title", "### 💻 Desktop Application"))
-st.sidebar.link_button(
-    _t.get("sidebar_desktop_btn", "⬇️ Download Desktop App"),
-    "https://drive.google.com/file/d/1zxmAKWm-cV_W2dCMCtb-momEau75UpXg/view?usp=sharing",
-    use_container_width=True
-)
-
-# Open-source source code on GitHub ─────────
-st.sidebar.markdown("---")
-st.sidebar.markdown(_t.get("sidebar_opensource_title", "### 🔓 Open Source"))
-st.sidebar.markdown(_t.get("sidebar_opensource_body", "GeneQuantify is open source (GPL-3.0).  \nSource code available on GitHub:"))
-st.sidebar.link_button(
-    _t.get("sidebar_github_btn", "⭐ View Source on GitHub"),
-    "https://github.com/burhanettiny/GeneQuantify",
-    use_container_width=True
-)
+st.sidebar.divider()
+c1, c2 = st.sidebar.columns(2)
+with c1:
+    st.sidebar.link_button(
+        "⬇️ Desktop",
+        "https://drive.google.com/file/d/1zxmAKWm-cV_W2dCMCtb-momEau75UpXg/view?usp=sharing",
+        use_container_width=True
+    )
+with c2:
+    st.sidebar.link_button(
+        "⭐ GitHub",
+        "https://github.com/burhanettiny/GeneQuantify",
+        use_container_width=True
+    )
+st.sidebar.caption("GeneQuantify — GPL-3.0 | mailtoburhanettin@gmail.com")
