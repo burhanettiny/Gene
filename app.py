@@ -5128,6 +5128,6 @@ st.sidebar.markdown(_t.get("sidebar_opensource_title", "### 🔓 Open Source"))
 st.sidebar.markdown(_t.get("sidebar_opensource_body", "GeneQuantify is open source (GPL-3.0).  \nSource code available on GitHub:"))
 st.sidebar.link_button(
     _t.get("sidebar_github_btn", "⭐ View Source on GitHub"),
-    "https://github.com/byalcinkaya/GeneQuantify",
+    "https://github.com/burhanettiny/GeneQuantify",
     use_container_width=True
 )
