@@ -5118,7 +5118,7 @@ st.sidebar.markdown("---")
 st.sidebar.markdown(_t.get("sidebar_desktop_title", "### 💻 Desktop Application"))
 st.sidebar.link_button(
     _t.get("sidebar_desktop_btn", "⬇️ Download Desktop App"),
-    "https://drive.google.com/file/d/1oGBPqLeS6JxWBdVSs47qgEfl0wiMI3Z9/view?usp=sharing",
+    "https://drive.google.com/file/d/1zxmAKWm-cV_W2dCMCtb-momEau75UpXg/view?usp=sharing",
     use_container_width=True
 )
 
