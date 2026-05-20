@@ -3060,48 +3060,46 @@ with tab_data:
 
     # ── KART 1: Çalışma Tasarımı ──────────────────────────────────────────────
     with st.container(border=True):
-        st.markdown("**⚙️ Study Design**")
+        st.markdown(f"**⚙️ {_t.get('tab_data', 'Data Entry')} — Study Design**")
         sd_c1, sd_c2, sd_c3 = st.columns(3)
         with sd_c1:
             num_target_genes = st.number_input(
-                "🔹 Target Genes",
+                _t.get('num_target_genes', '🔹 Target Genes'),
                 min_value=1, step=1, key="gene_count",
-                help=_t.get('num_target_genes', '')
             )
         with sd_c2:
             num_patient_groups = st.number_input(
-                "🔹 Patient Groups",
+                _t.get('num_patient_groups', '🔹 Patient Groups'),
                 min_value=1, step=1, key="patient_count",
-                help=_t.get('num_patient_groups', '')
             )
         with sd_c3:
             num_ref_genes = st.number_input(
-                "🔹 Reference Genes",
+                _t.get('ref_gene_num_label', '🔹 Reference Genes'),
                 min_value=1, max_value=10, value=1, step=1,
                 key="num_ref_genes",
                 help=_t.get('ref_gene_num_help', 'MIQE: ≥2 reference genes recommended')
             )
         # Referans gen durumu — tek satır
         if num_ref_genes == 1:
-            st.caption("⚠️ Single reference gene — MIQE recommends ≥2. Normalization robustness limited.")
+            st.caption(_t.get('ref_gene_1_warning', '⚠️ Single reference gene — MIQE recommends ≥2.').replace("**Methodological note:** ", "").replace("**", ""))
         else:
-            st.caption(f"✅ {num_ref_genes} reference genes — geometric mean normalization + geNorm M-value will be calculated.")
+            st.caption(_t.get('ref_gene_multi_success', '✅ {n} reference genes selected.').format(n=num_ref_genes))
         if num_ref_genes > 1:
             with st.expander(_t.get('ref_gene_expander', 'ℹ️ About multi-reference normalization'), expanded=False):
                 st.markdown(_t.get('ref_multi_description', ''))
 
-    # ── KART 2: Aykırı Değer + Stage (2 sütun layout) ────────────────────────
+    # ── KART 2: Aykırı Değer + Stage ─────────────────────────────────────────
     with st.container(border=True):
-        st.markdown("**🔍 Outlier Detection**")
+        st.markdown(f"**🔍 {_t.get('outlier_section_title', 'Outlier Detection').replace('### ', '').replace('🔍 ', '')}**")
         out_c1, out_c2, out_c3 = st.columns([1, 2, 2])
         with out_c1:
             outlier_enabled = st.checkbox(
-                "Enable",
+                _t.get('outlier_enable', 'Enable'),
                 value=True, key="outlier_enabled",
                 help=_t.get('outlier_enable_help', '')
             )
             outlier_method = st.radio(
-                "Method",
+                _t.get('outlier_method_label', 'Method'),
                 options=["Grubbs", "IQR"], key="outlier_method",
                 help=_t.get('outlier_method_help', '')
             )
@@ -3113,7 +3111,7 @@ with tab_data:
                     key="grubbs_alpha", help=_t.get('outlier_alpha_help', '')
                 )
                 iqr_multiplier = 1.5
-                st.caption(f"ℹ️ min n ≥ 3, normality assumed, α = {grubbs_alpha:.2f}")
+                st.caption(_t.get('grubbs_info', 'ℹ️ min n ≥ 3, normality assumed').format(alpha=grubbs_alpha))
             else:
                 iqr_multiplier = st.number_input(
                     _t.get('outlier_iqr_label', 'IQR multiplier (k)'),
@@ -3121,13 +3119,13 @@ with tab_data:
                     key="iqr_mult", help=_t.get('outlier_iqr_help', '')
                 )
                 grubbs_alpha = 0.05
-                st.caption("ℹ️ Flags values outside Q1−k×IQR / Q3+k×IQR")
+                st.caption("ℹ️ Q1−k×IQR / Q3+k×IQR")
         with out_c3:
             outlier_stage = st.radio(
                 _t.get('outlier_stage_label', '🔬 Detection Stage'),
                 options=[
-                    "Raw Cq — before normalization (recommended)",
-                    "ΔCq — after normalization",
+                    _t.get('outlier_stage_raw', 'Raw Cq — before normalization (recommended)'),
+                    _t.get('outlier_stage_dct', 'ΔCq — after normalization'),
                 ],
                 index=0, key="outlier_stage",
                 help=_t.get('outlier_stage_help', '')
@@ -3135,11 +3133,11 @@ with tab_data:
         with st.expander(_t.get('outlier_expander', 'ℹ️ About outlier detection in qPCR'), expanded=False):
             st.markdown(_t.get('outlier_description', ''))
 
-    outlier_on_raw = st.session_state.get("outlier_stage", "Raw Cq — before normalization (recommended)") == "Raw Cq — before normalization (recommended)"
+    outlier_on_raw = st.session_state.get("outlier_stage", _t.get('outlier_stage_raw', 'Raw Cq — before normalization (recommended)')) == _t.get('outlier_stage_raw', 'Raw Cq — before normalization (recommended)')
 
     # ── KART 3: Amplifikasyon Verimliliği ─────────────────────────────────────
     with st.container(border=True):
-        st.markdown("**🔬 Amplification Efficiency**")
+        st.markdown(f"**🔬 {_t.get('efficiency_header', 'Amplification Efficiency').replace('🔬 ', '')}**")
         eff_c1, eff_c2, eff_c3 = st.columns([2, 2, 3])
         with eff_c1:
             efficiency_method = st.radio(
@@ -3151,18 +3149,15 @@ with tab_data:
             efficiency_threshold = st.number_input(
                 _t.get('efficiency_threshold', 'Max diff threshold (%)'),
                 min_value=1.0, max_value=50.0, value=10.0, step=0.5, key="eff_threshold",
-                help="Recommended: 10% (MIQE guidelines)."
+                help=_t.get('efficiency_note', 'Recommended: 10% (MIQE guidelines).')
             )
         with eff_c3:
-            st.caption("E = 2.0 → 100% efficiency (perfect).  Accepted range: **1.8 – 2.2** (90–110%).  If |E_target − E_ref| > threshold → use Pfaffl method.")
-        with st.expander("ℹ️ How to obtain Efficiency (E)", expanded=False):
-            st.markdown(
-                "**Method 1 — Standard Curve** *(recommended)*  \n"
-                "Run qPCR on 4-5 serial dilutions (e.g. 10x each) for each primer.  \n"
-                "`E = 10^(-1 / slope)`\n\n"
-                "**Method 2 — Software tools:** LinRegPCR, qBase+, Bio-Rad CFX Maestro, QuantStudio\n\n"
-                "**Method 3 — Primer/Kit datasheet**  \n"
-                "**Acceptable range:** E = 1.8-2.2 (90-110%)"
+            st.caption(_t.get('efficiency_note', 'E=2.0 = perfect (100%). Accepted: 1.8–2.2 (90–110%).'))
+        with st.expander(_t.get('ref_gene_expander', 'ℹ️ How to obtain Efficiency (E)').replace('📚 ', ''), expanded=False):
+            st.markdown(_t.get('ref_multi_description', '') or
+                "**Method 1 — Standard Curve:** `E = 10^(-1 / slope)`  \n"
+                "**Method 2 — Software:** LinRegPCR, qBase+, CFX Maestro  \n"
+                "**Accepted range:** E = 1.8–2.2 (90–110%)"
             )
 
     st.divider()
@@ -3373,7 +3368,7 @@ with tab_data:
             unstable_ctrl = [r for r, m in enumerate(m_values) if m >= 1.0]
             borderline_ctrl = [r for r, m in enumerate(m_values) if 0.5 <= m < 1.0]
 
-            st.markdown(f"##### 📊 Reference Gene Stability — Control Group {i+1}")
+            st.markdown(f"##### 📊 " + _t.get('genorm_title', 'Reference Gene Stability') + f" — " + _t.get('control_group', 'Control Group') + f" {i+1}")
             stab_cols = st.columns(num_ref_genes)
             for r, col in enumerate(stab_cols):
                 m_ok = m_values[r] < 1.0
@@ -3385,11 +3380,11 @@ with tab_data:
                         delta=f"CV = {cv_values[r]:.2f}%"
                     )
                     if m_ok and cv_ok:
-                        st.caption("✅ Stable")
+                        st.caption("✅ " + _t.get("stable", "Stable"))
                     elif m_ok or cv_ok:
-                        st.caption("⚠️ Borderline")
+                        st.caption("⚠️ " + _t.get("borderline", "Borderline"))
                     else:
-                        st.caption("❌ Unstable — M ≥ 1.0")
+                        st.caption("❌ " + _t.get("unstable", "Unstable") + " — M ≥ 1.0")
 
             # Stability bar chart
             fig_stab = go.Figure()
@@ -3406,37 +3401,32 @@ with tab_data:
             fig_stab.add_hline(y=1.0, line_dash="dash", line_color="orange",
                                annotation_text="M=1.0 (acceptable)", annotation_position="right")
             fig_stab.update_layout(
-                title=f"geNorm M-value — Control Group {i+1} Reference Genes",
-                yaxis_title="M-value (lower = more stable)",
+                title=f"geNorm M-value — {_t.get('control_group', 'Control Group').replace('🧬 ','')} {i+1}",
+                yaxis_title=_t.get('m_value', 'M-value') + " (lower = more stable)",
                 height=280
             )
             st.plotly_chart(fig_stab, use_container_width=True, key=f"stab_ctrl_{i}")
 
             # ── Stability warnings ────────────────────────────────────────────────
+            _ctrl_grp_lbl = f"{_t.get('control_group','Control Group').replace('🧬 ','')} {i+1}"
             if unstable_ctrl:
-                unstable_names = ", ".join([f"Ref Gene {r+1}" for r in unstable_ctrl])
+                unstable_names = ", ".join([f"{_t.get('ref_gene','Ref Gene')} {r+1}" for r in unstable_ctrl])
                 st.warning(
-                    f"⚠️ **Unstable reference gene(s) detected in Control Group {i+1}: {unstable_names}**\n\n"
-                    f"geNorm M-value ≥ 1.0 indicates that the expression of this gene varies "
-                    f"considerably across samples, which may distort normalization.\n\n"
-                    f"**Analysis will continue**, but results should be interpreted with caution.\n\n"
-                    f"**Recommendations:**\n"
-                    f"- Verify Ct values for {unstable_names} — check for pipetting errors or outliers\n"
-                    f"- Consider replacing {unstable_names} with a more stable reference gene\n"
-                    f"- If only 2 reference genes are used and one is unstable, results rely entirely "
-                    f"on the remaining gene — consider adding a third validated reference\n"
-                    f"- Consult: Vandesompele et al. *Genome Biology* 2002 for geNorm methodology"
+                    f"⚠️ **{_t.get('unstable','Unstable')} — {_ctrl_grp_lbl}: {unstable_names}**\n\n"
+                    f"geNorm M ≥ 1.0 — expression varies considerably. Normalization may be distorted.\n\n"
+                    f"- Verify Ct values for {unstable_names}\n"
+                    f"- Consider replacing with a more stable reference gene\n"
+                    f"- Ref: Vandesompele et al. *Genome Biology* 2002"
                 )
             elif borderline_ctrl:
-                borderline_names = ", ".join([f"Ref Gene {r+1}" for r in borderline_ctrl])
+                borderline_names = ", ".join([f"{_t.get('ref_gene','Ref Gene')} {r+1}" for r in borderline_ctrl])
                 st.info(
-                    f"ℹ️ **Borderline stability in Control Group {i+1}: {borderline_names}** (M = 0.5–1.0)\n\n"
-                    f"Expression stability is acceptable per MIQE guidelines, but not ideal. "
-                    f"Consider validating with an additional reference gene for greater confidence."
+                    f"ℹ️ **{_t.get('borderline','Borderline')} — {_ctrl_grp_lbl}: {borderline_names}** (M = 0.5–1.0)\n\n"
+                    f"{_t.get('stability','Stability')} acceptable per MIQE. Consider adding a third reference gene."
                 )
             else:
                 st.success(
-                    f"✅ All reference genes in Control Group {i+1} are stable (M < 0.5). "
+                    f"✅ {_t.get('stable','All stable')} — {_ctrl_grp_lbl} (M < 0.5). "
                     f"Normalization quality is excellent."
                 )
 
@@ -3611,11 +3601,11 @@ with tab_data:
                             delta=f"CV = {smp_cv_values[r]:.2f}%"
                         )
                         if m_ok and cv_ok:
-                            st.caption("✅ Stable")
+                            st.caption("✅ " + _t.get("stable", "Stable"))
                         elif m_ok or cv_ok:
-                            st.caption("⚠️ Borderline")
+                            st.caption("⚠️ " + _t.get("borderline", "Borderline"))
                         else:
-                            st.caption("❌ Unstable — M ≥ 1.0")
+                            st.caption("❌ " + _t.get("unstable", "Unstable") + " — M ≥ 1.0")
 
                 # Stability bar chart (patient)
                 fig_stab_smp = go.Figure()
@@ -3632,41 +3622,32 @@ with tab_data:
                 fig_stab_smp.add_hline(y=1.0, line_dash="dash", line_color="orange",
                                    annotation_text="M=1.0 (acceptable)", annotation_position="right")
                 fig_stab_smp.update_layout(
-                    title=f"geNorm M-value — {_t.get('patient_group', "")} {j+1} Reference Genes",
-                    yaxis_title="M-value (lower = more stable)",
+                    title=f"geNorm M-value — {_t.get('patient_group', '').replace('🩸 ','')} {j+1}",
+                    yaxis_title=_t.get('m_value', 'M-value') + " (lower = more stable)",
                     height=280
                 )
                 st.plotly_chart(fig_stab_smp, use_container_width=True, key=f"stab_smp_{i}_{j}")
 
                 # ── Stability warnings (patient) ──────────────────────────────────
+                _smp_grp_lbl = f"{_t.get('patient_group','').replace('🩸 ','')} {j+1}"
                 if unstable_smp:
-                    unstable_names = ", ".join([f"Ref Gene {r+1}" for r in unstable_smp])
+                    unstable_names = ", ".join([f"{_t.get('ref_gene','Ref Gene')} {r+1}" for r in unstable_smp])
                     st.warning(
-                        f"⚠️ **Unstable reference gene(s) detected in "
-                        f"{_t.get('patient_group', "")} {j+1}: {unstable_names}**\n\n"
-                        f"geNorm M-value ≥ 1.0 indicates considerable expression variability across "
-                        f"samples in this group, which may compromise normalization reliability.\n\n"
-                        f"**Analysis will continue**, but interpret results with caution.\n\n"
-                        f"**Recommendations:**\n"
-                        f"- Check for sample-to-sample variation, outliers, or data entry errors\n"
-                        f"- Validate {unstable_names} in this sample group before drawing conclusions\n"
-                        f"- A mismatch between control and patient group stability may itself indicate "
-                        f"a biological or technical difference worth investigating\n"
-                        f"- Consider replacing {unstable_names} with a validated, tissue-appropriate "
-                        f"reference gene (e.g. from literature or HouseKeeper database)"
+                        f"⚠️ **{_t.get('unstable','Unstable')} — {_smp_grp_lbl}: {unstable_names}**\n\n"
+                        f"geNorm M ≥ 1.0 — normalization reliability compromised. Interpret with caution.\n\n"
+                        f"- Check for outliers or data entry errors\n"
+                        f"- Validate {unstable_names} in this sample group\n"
+                        f"- Consider replacing with a validated reference gene"
                     )
                 elif borderline_smp:
-                    borderline_names = ", ".join([f"Ref Gene {r+1}" for r in borderline_smp])
+                    borderline_names = ", ".join([f"{_t.get('ref_gene','Ref Gene')} {r+1}" for r in borderline_smp])
                     st.info(
-                        f"ℹ️ **Borderline stability in "
-                        f"{_t.get('patient_group', "")} {j+1}: {borderline_names}** (M = 0.5–1.0)\n\n"
-                        f"Stability is within MIQE acceptable range. Consider adding a third reference "
-                        f"gene to confirm robustness of normalization."
+                        f"ℹ️ **{_t.get('borderline','Borderline')} — {_smp_grp_lbl}: {borderline_names}** (M = 0.5–1.0)\n\n"
+                        f"{_t.get('stability','Stability')} within MIQE range. Consider a third reference gene."
                     )
                 else:
                     st.success(
-                        f"✅ All reference genes in "
-                        f"{_t.get('patient_group', "")} {j+1} are stable (M < 0.5)."
+                        f"✅ {_t.get('stable','Stable')} — {_smp_grp_lbl} (M < 0.5)."
                     )
 
             # ── Normalization factor & ΔCq ────────────────────────────────────────
