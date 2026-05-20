@@ -3712,17 +3712,19 @@ with tab_data:
                 pfaffl_ratio = (E_target ** delta_ct_target_pfaffl) / (E_ref ** delta_ct_ref_pfaffl)
                 # ────────────────────────────────────────────────────────────────
             
-                if expression_change == 1:
-                    regulation_status = _t.get('no_change', '')
-                elif expression_change > 1:
+                # Regulation: literatür standardı FC > 1.5 = up, < 0.67 = down
+                # (bazı çalışmalar 1.2/0.83 kullanır — burada 1.5/0.67)
+                if expression_change >= 1.5:
                     regulation_status = _t.get('upregulated', '')
-                else:
+                elif expression_change <= 0.67:
                     regulation_status = _t.get('downregulated', '')
+                else:
+                    regulation_status = _t.get('no_change', '')
 
                 # Pfaffl regulation
-                if pfaffl_ratio > 1:
+                if pfaffl_ratio >= 1.5:
                     pfaffl_regulation = _t.get('upregulated', '')
-                elif pfaffl_ratio < 1:
+                elif pfaffl_ratio <= 0.67:
                     pfaffl_regulation = _t.get('downregulated', '')
                 else:
                     pfaffl_regulation = _t.get('no_change', '')
@@ -3755,43 +3757,60 @@ with tab_data:
                 n_ctrl = len(control_rq)
                 n_smp  = len(sample_rq)
 
-                # Shapiro-Wilk n<3 veya n>=3 ama n<8 için dejenere sonuç verebilir.
-                # n<8 ise testi atla ve parametrik varsay (MIQE önerisi: küçük n'de
-                # normallik varsayımı test edilemez, t-test daha güçlüdür).
-                # Scipy shapiro n=3'te p≈0.000 döndürerek yanlış karar vermesine yol açar.
-                _MIN_N_SHAPIRO = 8
-
-                if n_ctrl >= _MIN_N_SHAPIRO and n_smp >= _MIN_N_SHAPIRO:
-                    shapiro_control = stats.shapiro(control_rq)
-                    shapiro_sample  = stats.shapiro(sample_rq)
-                    control_normal  = shapiro_control.pvalue > 0.05
-                    sample_normal   = shapiro_sample.pvalue  > 0.05
-                else:
-                    # n küçük: Shapiro güvenilir değil — normallik varsay
+                # n < 2 ise istatistik hesaplanamaz
+                if n_ctrl < 2 or n_smp < 2:
+                    test_pvalue = float('nan')
+                    test_method = "N/A (n < 2)"
+                    test_type   = "—"
+                    significance = "—"
+                    equal_variance = True
+                    control_normal = True
+                    sample_normal  = True
                     shapiro_control = type('SW', (), {'statistic': float('nan'), 'pvalue': float('nan')})()
                     shapiro_sample  = type('SW', (), {'statistic': float('nan'), 'pvalue': float('nan')})()
-                    control_normal  = True
-                    sample_normal   = True
-
-                levene_test    = stats.levene(control_rq, sample_rq)
-                equal_variance = levene_test.pvalue > 0.05
-
-                if control_normal and sample_normal:
-                    if equal_variance:
-                        test_pvalue = stats.ttest_ind(control_rq, sample_rq).pvalue
-                        test_method = _t.get('t_test', '')
-                    else:
-                        test_pvalue = stats.ttest_ind(control_rq, sample_rq, equal_var=False).pvalue
-                        test_method = _t.get('welch_t_test', '')
-                    test_type = _t.get('parametric', '')
+                    levene_test     = type('LV', (), {'statistic': float('nan'), 'pvalue': float('nan')})()
                 else:
-                    test_pvalue = stats.mannwhitneyu(control_rq, sample_rq,
-                                                      alternative='two-sided').pvalue
-                    test_method = _t.get('mann_whitney_u_test', '')
-                    test_type   = _t.get('non_parametric', '')
+                    _MIN_N_SHAPIRO = 8
 
-                significance = _t.get('significant', '') if test_pvalue < 0.05 \
-                               else _t.get('insignificant', '')
+                    if n_ctrl >= _MIN_N_SHAPIRO and n_smp >= _MIN_N_SHAPIRO:
+                        shapiro_control = stats.shapiro(control_rq)
+                        shapiro_sample  = stats.shapiro(sample_rq)
+                        control_normal  = shapiro_control.pvalue > 0.05
+                        sample_normal   = shapiro_sample.pvalue  > 0.05
+                    else:
+                        shapiro_control = type('SW', (), {'statistic': float('nan'), 'pvalue': float('nan')})()
+                        shapiro_sample  = type('SW', (), {'statistic': float('nan'), 'pvalue': float('nan')})()
+                        control_normal  = True
+                        sample_normal   = True
+
+                    try:
+                        levene_test    = stats.levene(control_rq, sample_rq)
+                        equal_variance = (levene_test.pvalue > 0.05) if not np.isnan(levene_test.pvalue) else True
+                    except Exception:
+                        levene_test    = type('LV', (), {'statistic': float('nan'), 'pvalue': float('nan')})()
+                        equal_variance = True
+
+                    try:
+                        if control_normal and sample_normal:
+                            if equal_variance:
+                                test_pvalue = stats.ttest_ind(control_rq, sample_rq).pvalue
+                                test_method = _t.get('t_test', '')
+                            else:
+                                test_pvalue = stats.ttest_ind(control_rq, sample_rq, equal_var=False).pvalue
+                                test_method = _t.get('welch_t_test', '')
+                            test_type = _t.get('parametric', '')
+                        else:
+                            test_pvalue = stats.mannwhitneyu(control_rq, sample_rq,
+                                                              alternative='two-sided').pvalue
+                            test_method = _t.get('mann_whitney_u_test', '')
+                            test_type   = _t.get('non_parametric', '')
+                    except Exception:
+                        test_pvalue = float('nan')
+                        test_method = "Error"
+                        test_type   = "—"
+
+                    significance = _t.get('significant', '') if (not np.isnan(test_pvalue) and test_pvalue < 0.05) \
+                                   else (_t.get('insignificant', '') if not np.isnan(test_pvalue) else "—")
 
                 # ── Decision pathway display ──────────────────────────────────
                 with st.expander(
