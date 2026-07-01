@@ -432,6 +432,9 @@ The developers are **not liable** for any decisions, losses, or damages arising 
 All clinical decisions must be made by qualified professionals.
 """)
             st.markdown("""
+**How to cite GeneQuantify:**
+Yalçınkaya B (2026). GeneQuantify: a web-based tool for qPCR gene expression and copy number variation analysis. *Molecular and Cellular Biochemistry*. https://doi.org/10.1007/s11010-026-05621-y
+
 **References:**
 - Livak KJ & Schmittgen TD. *Methods* 2001;25:402–408. (ΔΔCq method)
 - Pfaffl MW. *Nucleic Acids Res* 2001;29(9):e45. (Pfaffl method)
@@ -4713,6 +4716,10 @@ def create_pdf(results, stat_rows, input_df, language_code, multigroup_results=N
     elements.append(Paragraph(s('pdf_cover_subtitle'), sub_style))
     elements.append(Spacer(1, 6))
     elements.append(Paragraph(s('pdf_generated', now=now), sub_style))
+    elements.append(Paragraph(
+        safe_str("Cite: Yalçınkaya B (2026). GeneQuantify. Mol Cell Biochem. https://doi.org/10.1007/s11010-026-05621-y"),
+        sub_style
+    ))
     elements.append(Spacer(1, 20))
     elements.append(hr())
     elements.append(Spacer(1, 10))
@@ -5149,6 +5156,7 @@ def create_pdf(results, stat_rows, input_df, language_code, multigroup_results=N
     elements.append(Paragraph(s('pdf_s7_title'), h1_style))
     elements.append(hr())
     refs = [
+        "Yalçınkaya B (2026). GeneQuantify: a web-based tool for qPCR gene expression and copy number variation analysis. Molecular and Cellular Biochemistry. https://doi.org/10.1007/s11010-026-05621-y",
         "Livak KJ & Schmittgen TD (2001). Methods, 25(4), 402-408. (ΔΔCq)",
         "Pfaffl MW (2001). Nucleic Acids Research, 29(9), e45. (Pfaffl)",
         "Vandesompele J et al. (2002). Genome Biology, 3(7). (geNorm)",
@@ -5207,3 +5215,10 @@ with c2:
         use_container_width=True
     )
 st.sidebar.caption("GeneQuantify — GPL-3.0 | mailtoburhanettin@gmail.com")
+
+st.sidebar.link_button(
+    "📄 Cite this paper (Mol Cell Biochem)",
+    "https://link.springer.com/article/10.1007/s11010-026-05621-y",
+    use_container_width=True
+)
+st.sidebar.caption("Yalçınkaya B (2026). Mol Cell Biochem. doi:10.1007/s11010-026-05621-y")
