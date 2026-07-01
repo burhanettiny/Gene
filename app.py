@@ -2847,9 +2847,10 @@ _sub_txt   = _t.get('subtitle', 'Developed by B. Yalçınkaya')
 st.markdown(
     f"""
     <div style="background:linear-gradient(90deg,#1a237e,#3949ab);
-                color:white;padding:10px 18px;border-radius:8px;margin-bottom:8px;">
-        <div style="font-size:20px;font-weight:800;">{_title_txt}</div>
-        <div style="font-size:11px;opacity:0.75;margin-top:2px;">{_sub_txt}</div>
+                color:white;padding:14px 18px 12px 18px;border-radius:8px;margin-bottom:8px;
+                overflow:visible;">
+        <div style="font-size:20px;font-weight:800;line-height:1.4;">{_title_txt}</div>
+        <div style="font-size:11px;opacity:0.75;margin-top:4px;line-height:1.4;">{_sub_txt}</div>
     </div>
     """,
     unsafe_allow_html=True
