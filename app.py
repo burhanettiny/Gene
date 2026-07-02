@@ -206,7 +206,7 @@ if 'language' not in st.session_state:
 st.markdown("""
 <style>
 /* Başlığın üstten kesilmesini önle */
-.block-container { padding-top: 1.2rem !important; padding-bottom: 1rem !important; }
+.block-container { padding-top: 3rem !important; padding-bottom: 1rem !important; }
 
 /* Alert kutularını küçült */
 div[data-testid="stAlert"] { padding: 5px 10px !important; font-size: 12px !important; }
@@ -2844,13 +2844,19 @@ with st.sidebar.expander(_t.get("rdml_expander", "📂 Import RDML / RDES"), exp
 # ═══════════════════════════════════════════════════════════════════════════════
 _title_txt = _t.get('title', '🧬 GeneQuantify')
 _sub_txt   = _t.get('subtitle', 'Developed by B. Yalçınkaya')
+_title_parts = _title_txt.split(' ', 1)
+_header_emoji = _title_parts[0]
+_header_title_text = _title_parts[1] if len(_title_parts) > 1 else _title_txt
 st.markdown(
     f"""
     <div style="background:linear-gradient(90deg,#1a237e,#3949ab);
-                color:white;padding:14px 18px 12px 18px;border-radius:8px;margin-bottom:8px;
-                overflow:visible;">
-        <div style="font-size:20px;font-weight:800;line-height:1.4;">{_title_txt}</div>
-        <div style="font-size:11px;opacity:0.75;margin-top:4px;line-height:1.4;">{_sub_txt}</div>
+                color:white;padding:16px 18px;border-radius:8px;margin-bottom:8px;
+                display:flex;align-items:center;gap:12px;">
+        <span style="font-size:28px;line-height:1;flex-shrink:0;">{_header_emoji}</span>
+        <div style="display:flex;flex-direction:column;justify-content:center;">
+            <span style="font-size:20px;font-weight:800;line-height:1.3;">{_header_title_text}</span>
+            <span style="font-size:11px;opacity:0.75;margin-top:3px;line-height:1.3;">{_sub_txt}</span>
+        </div>
     </div>
     """,
     unsafe_allow_html=True
@@ -3050,7 +3056,7 @@ patient_group = _t.get('patient_group', '')
 st.markdown("""
 <style>
 /* Bölümler arası boşluğu azalt */
-.block-container { padding-top: 1rem !important; }
+/* padding-top ayarı yukarıda (satır ~209) merkezi olarak tanımlı — burada tekrar ezilmiyor */
 div[data-testid="stVerticalBlock"] > div { gap: 0.4rem; }
 /* st.info kutusunu küçült */
 div[data-testid="stAlert"] { padding: 6px 12px !important; font-size: 12px !important; }
