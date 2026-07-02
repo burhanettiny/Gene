@@ -5205,8 +5205,6 @@ with tab_report:
                 key="pdf_dl"
             )
 
-st.markdown(f"<h4 style='font-size: 12px; font-family: Arial, sans-serif; color: #555;'><a href='mailto:mailtoburhanettin@gmail.com' style='color: #555; text-decoration: none;'>{_t.get('subtitle', "")}</a></h4>", unsafe_allow_html=True)
-
 st.sidebar.divider()
 c1, c2 = st.sidebar.columns(2)
 with c1:
