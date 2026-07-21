@@ -5222,8 +5222,25 @@ with c2:
 st.sidebar.caption("GeneQuantify — GPL-3.0 | mailtoburhanettin@gmail.com")
 
 st.sidebar.link_button(
-    "📄 Cite this paper (Mol Cell Biochem)",
+    "📄 How to Cite (Mol Cell Biochem)",
     "https://link.springer.com/article/10.1007/s11010-026-05621-y",
     use_container_width=True
 )
 st.sidebar.caption("Yalçınkaya B (2026). Mol Cell Biochem. doi:10.1007/s11010-026-05621-y")
+
+st.sidebar.divider()
+st.sidebar.markdown(
+    f"<div style='font-size:12px;font-weight:600;color:#004d40;margin-bottom:2px;'>"
+    f"{_t.get('sidebar_absolutegene_title', '🧪 Need absolute quantification?')}</div>",
+    unsafe_allow_html=True
+)
+st.sidebar.caption(_t.get(
+    'sidebar_absolutegene_caption',
+    "For digital PCR (dPCR/ddPCR) — Poisson-based absolute quantification, "
+    "CNV, VAF/mutation fraction — try AbsoluteGene, GeneQuantify's companion tool."
+))
+st.sidebar.link_button(
+    _t.get('sidebar_absolutegene_btn', "🧪 Open AbsoluteGene (dPCR)"),
+    "https://absolutegene.streamlit.app/",
+    use_container_width=True
+)
